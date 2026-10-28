@@ -256,6 +256,13 @@ def _build_testris():  # noqa: C901, PLR0915
     grid_x_offset = border_x_offset + block_size
     grid_y_offset = border_y_offset + block_size
 
+    # The touch targets sit on the board's border, so the touch zones cover
+    # the board, not the whole screen. A wide display that couldn't turn
+    # leaves empty space either side of the board.
+    keypad.x = border_x_offset
+    keypad.w = border_width
+    keypad.key_width = border_width / keypad.cols
+
     # Calculate the banner dimensions in pixels
     banner_width = border_width - (
         block_size * 4
