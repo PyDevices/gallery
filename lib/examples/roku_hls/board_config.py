@@ -1,0 +1,49 @@
+"""Run a PyDevices app as live video on a Roku TV (or in VLC), from an
+ESP32-P4 with no screen of its own, or from a desktop's CPython with ffmpeg.
+
+Put this folder first on the path and run the app: its display is HlsDisplay
+(hls_display.py beside this), which encodes what the app draws as H.264 and
+serves it as HLS, and tells the TV's PyDevices Companion channel to play it.
+Set TV to your Roku's address, or to None and open the printed URL in VLC
+(Media > Open Network Stream).
+
+HLS runs about 10 s behind, so this suits apps you watch, not ones you drive:
+there is no input here. For an interactive app, use ../miracast/board_config.py.
+"""
+
+import sys
+
+_here = __file__.replace("\\", "/")
+_here = _here.rsplit("/", 1)[0] if "/" in _here else "."
+if _here not in sys.path:
+    sys.path.append(_here)
+
+from hls_display import HlsDisplay  # noqa: E402
+from utils import cast_target  # noqa: E402
+
+# PyDevices 0.7.7 and later: tell AutoDisplay this display is wanted, so an app
+# that calls AutoDisplay(...) under this config gets it. Earlier releases have
+# no registry, and the display built below is all there is.
+try:
+    import backends
+except ImportError:
+    pass
+else:
+    backends.require("display", "hls", module="hls_display")
+
+TV = cast_target.get("192.168.1.129")      # your Roku's IP address, or None
+WIDTH = 1280
+HEIGHT = 720
+
+if sys.implementation.name != "cpython":     # a board joins Wi-Fi; a desktop is on the LAN
+    import wifi
+
+    wifi.connect_from_secrets()
+display_drv = HlsDisplay(TV, WIDTH, HEIGHT)
+
+# what appdev.App and the examples read from a board_config
+fb = display_drv._buf
+has_touch = False
+touch_drv = None
+audio_drv = None
+is_rotated = False

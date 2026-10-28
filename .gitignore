@@ -1,0 +1,87 @@
+# Shared minimum (PyDevices package / cmod repos)
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+*.so
+*.pyd
+
+# Cursor IDE throwaways (do not ignore the whole .cursor/ tree)
+.cursor/debug*
+.cursor/plans/
+
+# Repo-specific — Cursor rules stay trackable; ignore kit/agent scratch
+!.cursor/rules/
+!.cursor/rules/**
+.cursor/*.json
+.cursor/*.log
+.cursor/*.rc
+.cursor/*.out
+.cursor/*.err
+.cursor/*.stdout
+.cursor/*.txt
+.cursor/*_report.md
+.cursor/*_plan.md
+.cursor/*-plan.md
+.cursor/*-migration.md
+.cursor/hinch_pkg_discovery/
+.cursor/skills/
+
+lib/utils/gui
+web/pyscript/wheels
+
+*.code-workspace
+Untitled-*
+
+# Local examples (symlinks to sibling repos — see scripts/personal_examples.py)
+
+# jupyter.py output. It names the notebook run-<slug>.ipynb for `-m <module>`
+# but <script-stem>.ipynb for a file path, and writes it to the cwd -- which is
+# lib/ for the documented flow and the repo root otherwise.
+run-*.ipynb
+run-*.nbconvert.ipynb
+lib/run-*.ipynb
+lib/run-*.nbconvert.ipynb
+/*.ipynb
+lib/*.ipynb
+gallery/lib/.ipynb_checkpoints
+
+# Stray uv artifact; this repo does not use uv
+uv.lock
+
+# CI / local sibling checkouts inside this workspace
+graphics/
+pydevices/
+
+# Extra Python / docs tooling
+*$py.class
+.Python
+wheels/
+*.egg
+*.manifest
+*.spec
+.venv-docs
+**/.venv
+**/.venv-*
+.env
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.ipynb_checkpoints
+docs/_build/
+/site
+.cache/
+
+lib/lib/gui
+
+# Local PyScript MIP overrides (not deployed)
+web/pyscript/dev/
+
+# Session worktrees (git worktree add .worktrees/<name>): never content.
+/.worktrees/

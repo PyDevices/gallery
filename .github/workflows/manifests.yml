@@ -1,0 +1,66 @@
+name: Manifest freshness
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'lib/**'
+      - 'packages/**'
+      - '.site/pyscript/**'
+      - '.site/gallery/**'
+      - 'gallery.toml'
+      - 'scripts/install_*'
+      - 'scripts/gallery_generator.py'
+      - 'scripts/audit_board_config_pairs.py'
+      - '.github/workflows/manifests.yml'
+  pull_request:
+    paths:
+      - 'lib/**'
+      - 'packages/**'
+      - '.site/pyscript/**'
+      - '.site/gallery/**'
+      - 'gallery.toml'
+      - 'scripts/install_*'
+      - 'scripts/gallery_generator.py'
+      - 'scripts/audit_board_config_pairs.py'
+      - '.github/workflows/manifests.yml'
+  workflow_dispatch:
+
+jobs:
+  validate-pyscript-filesystem-toml:
+    uses: PyDevices/.github/.github/workflows/reusable-validate-pyscript-filesystem-toml.yml@publishing-v6
+    with:
+      config-path: gallery.toml
+      source-mappings: |
+        lib/utils=/utils
+        lib/examples=/examples
+
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Checkout shared browser URL policy
+        uses: actions/checkout@v7
+        with:
+          repository: PyDevices/pydevices
+          path: pydevices
+          sparse-checkout: tools/_browser_url.py
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Audit install manifests
+        run: ./scripts/install_refresh_manifests.sh --audit
+
+      - name: Check WebAssembly gallery and example JSON
+        run: python scripts/gallery_generator.py --check
+
+      - name: Audit CP/MP board_config pairs
+        run: python scripts/audit_board_config_pairs.py

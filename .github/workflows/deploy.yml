@@ -1,0 +1,85 @@
+name: Deploy PyScript site to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.site/**'
+      - '.github/workflows/deploy.yml'
+      - 'lib/**'
+      - 'packages/**'
+      - 'gallery.toml'
+      - 'scripts/install_gen_manifests.py'
+      - 'scripts/install_refresh_manifests.sh'
+      - 'scripts/gallery_generator.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Checkout shared browser URL policy
+        uses: actions/checkout@v7
+        with:
+          repository: PyDevices/pydevices
+          path: pydevices
+          sparse-checkout: tools/_browser_url.py
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Verify install manifest freshness
+        run: ./scripts/install_refresh_manifests.sh --audit
+
+      - name: Verify PyScript gallery manifests
+        run: python scripts/gallery_generator.py --check
+
+      - name: Assemble GitHub Pages site
+        run: |
+          mkdir -p _site
+          cp -r .site/* _site/
+          # Replace symlinks inside _site/pyscript with real trees for GitHub Pages.
+          rm -rf _site/pyscript/lib _site/pyscript/packages _site/pyscript/gallery.toml
+          mkdir -p _site/pyscript/lib _site/pyscript/packages
+          cp -r lib/utils _site/pyscript/lib/
+          python scripts/gallery_generator.py --copy-examples _site/pyscript/lib/examples
+          cp -r packages/* _site/pyscript/packages/
+          cp gallery.toml _site/pyscript/gallery.toml
+          # Direct MicroPython stages only generated Python paths. Additional
+          # assets are fetched through the declared package manifests.
+          # Replace symlinks inside _site/gallery with real trees for GitHub Pages.
+          rm -rf _site/gallery/lib _site/gallery/packages
+          mkdir -p _site/gallery/lib _site/gallery/packages
+          cp -r lib/utils _site/gallery/lib/
+          python scripts/gallery_generator.py --copy-examples _site/gallery/lib/examples
+          cp -r packages/* _site/gallery/packages/
+          cp gallery.toml _site/gallery.toml
+          touch _site/.nojekyll
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _site
+          publish_branch: gh-pages
+
+      - name: Wait for GitHub Pages to publish
+        run: sleep 60
+
+      - name: Post-deploy live site check
+        # Non-fatal: the site is already published at this point, and GitHub
+        # Pages / CDN propagation delay can make this flaky right after a
+        # push. Treat failures as a warning to investigate, not a broken build.
+        continue-on-error: true
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+          python tools/test_live_site.py
