@@ -166,17 +166,14 @@ did. The registry itself is described in the
 
 ## Run a cast example
 
-To run any of these from `lib/`, with the TV's address:
+To run any of these, set `CAST_TARGET` to the TV's address, put the method's
+folder (`roku`, `miracast` or `roku_hls`) first on the path and run the example
+from `lib/examples/`. The same goes for `micropython`, `python.exe` and
+`micropython.exe`. A board runs the same script through mpftp, with its
+settings at the top of the file.
 
-```bash
-python tools/run_cast_example.py roku testris TV_ADDRESS
-```
-
-The first argument is the method's folder (`roku`, `miracast` or `roku_hls`),
-and `micropython`, `python.exe` and `micropython.exe` run it the same way.
-Without the runner, set `CAST_TARGET` to the address, put the method's folder
-first on the path and run the example. A board runs the same script through
-mpftp, with its settings at the top of the file.
+The runner script that used to do this, `tools/run_cast_example.py`, stayed in
+the [archived pydevices-examples repo](https://github.com/PyDevices/pydevices-examples/blob/main/tools/run_cast_example.py).
 
 [How casting works](../how-it-works/casting.md) describes the Miracast session and the encoder pipeline.
 
