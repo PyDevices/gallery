@@ -123,6 +123,11 @@ class CastDisplay(FBDisplay):
         return (x, y, w, h)
 
     def blit_rect(self, buf, x, y, w, h):
+        if x == 0 and w == self.width and 0 <= y and y + h <= self.height and len(buf) == w * h * 2:
+            # whole rows are one run of the buffer: a copy, where framebuf's
+            # blit goes pixel by pixel (60 ms for 640x480 on the P4, 11 ms this way)
+            memoryview(self._buf)[y * w * 2:(y + h) * w * 2] = buf
+            return (x, y, w, h)
         try:
             src = framebuf.FrameBuffer(buf, w, h, framebuf.RGB565)
         except (TypeError, ValueError):       # a read-only buffer: FBDisplay's copy
@@ -145,13 +150,20 @@ class CastDisplay(FBDisplay):
                 out[k] = st[k]
         return out
 
-    def pcm_out(self, format=None, **kwargs):
-        """A desktop's speaker on the cast: an audiodev PCMOutput (any 16-bit
-        rate, mono or stereo) whose sound goes out with the picture. Needs
-        audio=True. On the P4 the board's own speaker is already on the cast."""
-        if pycast is None or self.audio is None:
-            raise RuntimeError("pcm_out needs CastDisplay(..., audio=True) on a desktop")
-        return pycast.CastAudioOut(self.audio, format)
+    def pcm_out(self, format=None, speaker_volume=85, **kwargs):
+        """A speaker on the cast: an audiodev PCMOutput whose sound goes out
+        with the picture. Needs audio=True. On a desktop it takes any 16-bit
+        rate, mono or stereo. On the P4 it is the board's own speaker through
+        the audio pump (at ``speaker_volume``, 0 to 100; the cast's level is
+        the TV's), at the rate ``audio_format`` names, mono or stereo:
+        boarddev.pcm_out() there is plain I2S, which the cast never hears."""
+        if self.audio is None:
+            raise RuntimeError("pcm_out needs CastDisplay(..., audio=True)")
+        if pycast is not None:
+            return pycast.CastAudioOut(self.audio, format)
+        if format is None or format.rate != self.audio.rate:
+            raise ValueError("the P4's cast speaker runs at audio_format's rate, %d Hz" % self.audio.rate)
+        return castfast.pump_out(format, volume=speaker_volume, log=self.log)
 
     # touch_read / keypad_read for a board_config: the laptop's mouse (left
     # button held), fingers on its touchscreen, and its keys and remote

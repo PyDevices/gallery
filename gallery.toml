@@ -37,6 +37,7 @@
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/cast/drum_cast.py" = "/examples/cast/drum_cast.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/cast/headless_cast.py" = "/examples/cast/headless_cast.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/cast/laptop_input.py" = "/examples/cast/laptop_input.py"
+"https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/cast/medialink_tv.py" = "/examples/cast/medialink_tv.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/cast/melody.py" = "/examples/cast/melody.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/cast/micecast.py" = "/examples/cast/micecast.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/cast/pc/rtp_capture.py" = "/examples/cast/pc/rtp_capture.py"

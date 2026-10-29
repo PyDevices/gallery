@@ -50,6 +50,45 @@ def pump_stream(fmt=None, volume=85, capacity=32, log=print):
     return stream
 
 
+def pump_out(fmt, volume=85, log=print):
+    """An audiodev PCMOutput on the board's speaker through the audio pump,
+    so what it plays is on the cast too (TapFeed reads the pump's output).
+    boarddev.pcm_out() is machine.I2S, which the tap never sees."""
+    from audiodev import PCMOutput
+
+    class PumpOut(PCMOutput):
+        def __init__(self):
+            super().__init__(fmt)
+            self.stream = pump_stream(fmt, volume=volume, log=log)
+            self.capacity = self.stream.space()     # empty: the whole ring
+            self.frame = fmt.channels * 2
+
+        def _write(self, buf):
+            # A sound card's pace: wait (briefly) for room, take what fits.
+            for _ in range(50):
+                room = self.stream.space()
+                if room >= self.frame:
+                    break
+                time.sleep_ms(2)
+            n = min(len(buf), room)
+            n -= n % self.frame
+            if n:
+                self.stream.write(buf[:n])
+            return n
+
+        def queued_size(self):
+            return max(0, self.capacity - self.stream.space())
+
+        def is_active(self):
+            return self.queued_size() > 0
+
+        def deinit(self):
+            self.close()
+            self.stream.deinit()
+
+    return PumpOut()
+
+
 class PumpFeed:
     """The one producer for both listeners: the P4's speaker (the pump) and the cast.
 

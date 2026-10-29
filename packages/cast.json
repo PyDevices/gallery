@@ -29,6 +29,10 @@
       "../lib/examples/cast/laptop_input.py"
     ],
     [
+      "cast/medialink_tv.py",
+      "../lib/examples/cast/medialink_tv.py"
+    ],
+    [
       "cast/melody.py",
       "../lib/examples/cast/melody.py"
     ],

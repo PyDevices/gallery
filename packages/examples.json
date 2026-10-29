@@ -209,6 +209,10 @@
       "github:PyDevices/gallery/lib/examples/cast/laptop_input.py"
     ],
     [
+      "cast/medialink_tv.py",
+      "github:PyDevices/gallery/lib/examples/cast/medialink_tv.py"
+    ],
+    [
       "cast/melody.py",
       "github:PyDevices/gallery/lib/examples/cast/melody.py"
     ],
