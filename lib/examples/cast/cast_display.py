@@ -149,7 +149,7 @@ class CastDisplay(FBDisplay):
         return pycast.CastAudioOut(self.audio, format)
 
     # touch_read / keypad_read for a board_config: the laptop's mouse (left
-    # button held) and keys
+    # button held), fingers on its touchscreen, and its keys and remote
     def touch_read(self):
         return self.uibc.read_points()
 
@@ -181,7 +181,9 @@ class CastDisplay(FBDisplay):
                         self.log("roku power-on:", repr(e))
                 s = Session(self.sink, name=self.name, log=self.log, on_input=self.uibc.feed)
                 s.session_request = 0 if self.kind == "roku" else None
-                s.hidc_caps = "Keyboard/USB, Mouse/USB"
+                # Windows forwards input only when offered its whole list, and
+                # touch arrives as MultiTouch
+                s.hidc_caps = "Keyboard/USB, Mouse/USB, MultiTouch/USB, Gesture/USB, RemoteControl/USB"
                 self.sessions += 1
                 self._session = s
 
