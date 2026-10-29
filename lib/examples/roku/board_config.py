@@ -32,9 +32,16 @@ touch_drv = None
 audio_drv = None
 is_rotated = False
 
-# Monkeypatch desktop audio to stream to Roku TV
-import audiodev.auto
-def roku_pcm_out(format=None, **kwargs):
-    return RokuAudioSink(tv, format=format)
-audiodev.auto.pcm_out = roku_pcm_out
+# An app's sound on the TV's speakers too. Off by default: the Companion
+# channel shows sound or the picture, not both, so the picture gives way to
+# "Streaming Audio...", and the sound runs 3.5 to 5.5 seconds behind the app.
+# For sound with the picture, use ../miracast/board_config.py.
+SOUND_ON_TV = False
 
+if SOUND_ON_TV:
+    import audiodev.auto
+
+    def roku_pcm_out(format=None, **kwargs):
+        return RokuAudioSink(tv, format=format)
+
+    audiodev.auto.pcm_out = roku_pcm_out

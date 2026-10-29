@@ -24,6 +24,23 @@ on the PATH, or name it in the `FFMPEG` environment variable (Windows
 `python.exe` started from WSL needs that). The Miracast stream from CPython is
 the same MPEG-TS over RTP that the P4 sends, byte for byte.
 
+**Sound** was measured with a TV's speakers recorded by a microphone, with
+speech the recording was transcribed back from and beeps it was timed by.
+
+| Runtime | Miracast to a Roku, app sound | Companion channel (`RokuAudioSink`) |
+|---|---|---|
+| `python` (Linux) | plays, no drift, no gaps | plays, 4.2 s behind |
+| `python.exe` (Windows) | plays, no drift, no gaps | plays, 5.4 s behind |
+| `micropython` (unix) | no H.264 | plays, 3.5 s behind |
+| `micropython.exe` (Windows) | no H.264 | plays, 4.8 to 5.2 s behind |
+
+Over Miracast the sound rides the picture's clock, so it is in step with the
+picture. Over the Companion channel the TV plays sound or frames, not both,
+and holds a few seconds of buffer: steady while the app keeps writing, but
+the last seconds stay in the TV until the stream closes. Those figures include
+the 2 s the sink writes ahead, and leave out the microphone's own start-up,
+which makes them a little long.
+
 **Miracast to Windows** is testris only, with glitches from Wi-Fi loss (see
 [Miracast to a Windows laptop](../guides/cast-to-a-tv.md#miracast-to-a-windows-laptop)). From CPython
 it needs a second PC as the receiver: Windows won't take a cast from itself.
