@@ -116,5 +116,74 @@ class RemoteTest(unittest.TestCase):
         self.assertEqual(self.press(0x42), {97, K_UP})
 
 
+def _windows():
+    with open(os.path.join(HERE, "data", "windows_uibc_descriptors.txt")) as f:
+        return {k: bytes.fromhex(v) for k, v in (line.split() for line in f if line.strip())}
+
+
+class WindowsTest(unittest.TestCase):
+    """The descriptors Windows 11's Wireless Display sent a P4 on 2026-10-29,
+    from a PC with a touchscreen: five fingers per 0x13 report, X and Y 0..32767,
+    and a remote of one 16-bit consumer usage 0..0xFF."""
+
+    def setUp(self):
+        self.d = _windows()
+        self.u = uibcinput.UibcInput(720, 720)
+        for kind in ("hid_mouse_descriptor", "hid_keyboard_descriptor", "hid_remote_descriptor",
+                     "hid_multi_touch_descriptor", "hid_gesture_descriptor"):
+            self.u.feed(kind, self.d[kind])
+        self.fields = uibcinput.parse_descriptor(self.d["hid_multi_touch_descriptor"])[0][0x13]
+
+    def report(self, fingers):
+        """A 0x13 report built from the descriptor's own fields: fingers are
+        (id, x, y) or (id, x, y, tip); a lifted finger is reported once with
+        tip 0, and counted."""
+        bits = max(f.bit + f.size for f in self.fields)
+        value = 0x13
+        slots = sorted({f.coll for f in self.fields if (f.page, f.usage) == (0x0D, 0x42)})
+        for f in self.fields:
+            v = 0
+            if (f.page, f.usage) == (0x0D, 0x54):
+                v = len(fingers)
+            elif f.coll in slots and slots.index(f.coll) < len(fingers):
+                cid, x, y, tip = (tuple(fingers[slots.index(f.coll)]) + (1,))[:4]
+                v = {(0x0D, 0x42): tip, (0x0D, 0x47): 1, (0x0D, 0x51): cid,
+                     (0x01, 0x30): x, (0x01, 0x31): y}.get((f.page, f.usage), 0)
+            value |= v << f.bit
+        return value.to_bytes(bits // 8, "little")
+
+    def test_five_fingers_a_report(self):
+        slots = {f.coll for f in self.fields if (f.page, f.usage) == (0x0D, 0x42)}
+        self.assertEqual(len(slots), 5)
+        self.assertEqual(max(f.bit + f.size for f in self.fields), 512)
+
+    def test_a_finger_lands_where_it_touched(self):
+        self.u.feed("hid_multi_touch", self.report([(3, 16384, 8192)]))
+        self.assertEqual(self.u.read_points(), ((360, 180),))
+        self.u.feed("hid_multi_touch", self.report([(3, 16384, 8192, 0)]))
+        self.assertEqual(self.u.read_points(), ())
+
+    def test_two_fingers(self):
+        self.u.feed("hid_multi_touch", self.report([(0, 0, 0), (1, 32767, 32767)]))
+        self.assertEqual(sorted(self.u.read_points()), [(0, 0), (719, 719)])
+
+    def test_the_short_report_it_sends_first(self):
+        # Windows sent 12 0a 00 right after the descriptors: an ID this
+        # descriptor doesn't declare, so it changes nothing
+        self.u.feed("hid_multi_touch", self.d["hid_multi_touch"])
+        self.assertEqual(self.u.read_points(), ())
+
+    def test_remote(self):
+        reports = uibcinput.parse_descriptor(self.d["hid_remote_descriptor"])[0]
+        f = reports[0x2A][0]
+        self.assertEqual((f.page, f.usage, f.usage_max, f.size, f.array), (0x0C, 0, 0xFF, 16, True))
+        self.u.feed("hid_remote", bytes([0x2A, 0x42, 0]))
+        self.assertEqual(self.u.read_keys(), {K_UP})
+        self.u.feed("hid_remote", bytes([0x2A, 0xCD, 0]))
+        self.assertEqual(self.u.read_keys(), {K_AUDIOPLAY})
+        self.u.feed("hid_remote", bytes([0x2A, 0, 0]))
+        self.assertEqual(self.u.read_keys(), set())
+
+
 if __name__ == "__main__":
     unittest.main()
