@@ -16,7 +16,7 @@ the [runtime table](../reference/cast-runtimes.md) says which methods work where
 
 | Method | The screen | What the screen needs | Sound | Input back | Boards | From a desktop |
 |---|---|---|---|---|---|---|
-| [Miracast to a Roku](#miracast-to-a-roku-tv) | Roku TV | Screen mirroring on, nothing installed | yes, 48 kHz, in sync | no ([#168](https://github.com/PyDevices/pydevices-examples/issues/168)) | ESP32-P4 | CPython with ffmpeg |
+| [Miracast to a Roku](#miracast-to-a-roku-tv) | Roku TV | Screen mirroring on, nothing installed | yes, 48 kHz, in sync | no: use the Companion channel for the remote | ESP32-P4 | CPython with ffmpeg |
 | [Miracast to Windows](#miracast-to-a-windows-laptop) | Windows laptop | the Wireless Display app open | yes | the laptop's mouse and keyboard | ESP32-P4 | CPython with ffmpeg, from another PC; glitches on a busy network |
 | [The Companion channel](#the-pydevices-companion-channel) | Roku TV | the Companion channel, sideloaded once | sound or the picture, not both; seconds behind | the TV's remote | any board with Wi-Fi and `pngio` | CPython and MicroPython |
 | [HLS video](#hls-video-to-a-roku-or-vlc) | Roku TV, or VLC anywhere | the Companion channel, or any HLS player | no (needs AAC) | none | ESP32-P4 | CPython with ffmpeg |
@@ -194,4 +194,8 @@ The Roku's remote doesn't reach the app over Miracast. The Roku offers no
 input back channel (its reply leaves out `wfd_uibc_capability`), and its
 network API has no way to report a button press; while it mirrors, the
 remote's arrows, OK, Back and the rest reach neither the source nor any
-other channel. For the remote, use the Companion channel. It is tracked in [#168](https://github.com/PyDevices/pydevices-examples/issues/168) and listed on the [roadmap](https://github.com/PyDevices/gallery/blob/main/ROADMAP.md).
+other channel. While the TV mirrors, Screen Mirroring is the app in front and
+gets every press, so the Companion channel can't pick them up either. The
+remote works only while your app's display is the Companion channel
+(`RokuDisplay`), and that is how it stays: use Miracast for a live picture
+with sound, and the Companion channel when the app needs the remote.
