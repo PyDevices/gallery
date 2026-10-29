@@ -48,6 +48,9 @@ running from WSL, pass the Roku's IP address directly.
 """
 
 import socket
+# once, here: on a board, an import inside a function searches the filesystem
+# each call (65 ms on the P4), which slowed every sound write by a factor of ten
+import time
 
 # Frames go to the TV as PNG through pngio: MicroPython's built-in module, or
 # pydevices-desktop's pngio.py over Pillow on CPython. Compressed, a typical
@@ -281,8 +284,6 @@ def _ecp_post(host, path, timeout=5.0):
 
 def _now():
     """Seconds on a clock that never steps backwards (WSL resyncs its wall clock)."""
-    import time
-
     try:
         return time.monotonic()
     except AttributeError:
@@ -355,8 +356,6 @@ def _session_url(url):
     Roku caches images by URL: without the token a new session's
     ``frame.png?t=1`` is the old session's cached picture, and the TV replays
     earlier runs instead of fetching new frames."""
-    import time
-
     try:
         token = time.ticks_ms()
     except AttributeError:
@@ -493,8 +492,6 @@ class RokuCompanion:
         """Wake the TV (ECP PowerOn; harmless when it is already on) and wait
         up to *wait* seconds for it to say it is on. A channel launched before
         then lands on the Home screen instead. Returns whether it is on."""
-        import time
-
         _ecp_post(self.host, "/keypress/PowerOn", self.timeout)
         for _ in range(wait * 2):
             if "<power-mode>PowerOn</power-mode>" in _ecp_get(
@@ -727,8 +724,6 @@ class _FrameServer:
         exists. After `limit` seconds the current frame goes anyway, so a still
         screen keeps its connection alive.
         """
-        import time
-
         deadline = _now() + limit
         while self._running and self._version == sent_version and _now() < deadline:
             time.sleep(0.002)
@@ -1129,7 +1124,16 @@ class RokuDisplayWrapper:
 
 
 class RokuAudioSink:
-    """PCM sink for Roku TV audio streaming."""
+    """PCM sink for Roku TV audio streaming: the Companion channel plays it as
+    a WAV over HTTP. The channel shows sound or frames, not both, and the TV's
+    player buffers the stream as it would a file, so the sound starts seconds
+    late and can stall; for an app's sound with its picture, cast it over
+    Miracast (examples/miracast) instead."""
+
+    # seconds of sound written ahead of the clock: the TV fills its buffer
+    # before it plays, so a longer lead starts the sound sooner (measured: 2 s
+    # of lead, 4.2 s behind the app; 0.5 s, 5.2 s)
+    LEAD = 2.0
 
     def __init__(self, tv, port=8091, format=None, my_ip=None, **kwargs):
         if isinstance(tv, str):
@@ -1155,16 +1159,16 @@ class RokuAudioSink:
 
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        try:
-            addr = socket.getaddrinfo("", self.port, socket.AF_INET)[0][-1]
-        except Exception:
-            addr = ("", self.port)
-        self._sock.bind(addr)
+        # all interfaces: MicroPython's getaddrinfo() refuses "", and its
+        # bind() takes only what getaddrinfo() returns
+        self._sock.bind(socket.getaddrinfo("0.0.0.0", self.port)[0][-1])
         self._sock.listen(2)
 
         self._running = True
         self._client = None
         self._launched = False
+        self._t0 = None             # when the first byte sent is due at the TV
+        self._sent = 0
 
         try:
             import threading
@@ -1181,9 +1185,9 @@ class RokuAudioSink:
             except ImportError:
                 self._threaded = False
 
-    def poll(self):
+    def poll(self, timeout=0.0):
         try:
-            self._sock.settimeout(0.0)
+            self._sock.settimeout(timeout)
             conn, addr = self._sock.accept()
         except OSError:
             return
@@ -1196,7 +1200,8 @@ class RokuAudioSink:
             except OSError:
                 pass
 
-            resp = b"HTTP/1.0 200 OK\r\nContent-Type: audio/wav\r\nConnection: close\r\n\r\n"
+            hour = self.format.rate * self.format.channels * (self.format.bits // 8) * 3600
+            resp = b"HTTP/1.0 200 OK\r\nContent-Type: audio/wav\r\nContent-Length: %d\r\nConnection: close\r\n\r\n" % (hour + 44)
 
             import struct
 
@@ -1204,7 +1209,7 @@ class RokuAudioSink:
             channels = self.format.channels
             bits = self.format.bits
 
-            header = b"RIFF\xff\xff\xff\xffWAVEfmt \x10\x00\x00\x00\x01\x00"
+            header = b"RIFF" + struct.pack("<I", hour + 36) + b"WAVEfmt \x10\x00\x00\x00\x01\x00"
             header += struct.pack("<H", channels)
             header += struct.pack("<I", rate)
             byte_rate = rate * channels * (bits // 8)
@@ -1212,7 +1217,7 @@ class RokuAudioSink:
             header += struct.pack("<I", byte_rate)
             header += struct.pack("<H", block_align)
             header += struct.pack("<H", bits)
-            header += b"data\xff\xff\xff\xff"
+            header += b"data" + struct.pack("<I", hour)
 
             conn.setblocking(True)
             conn.sendall(resp + header)
@@ -1232,12 +1237,11 @@ class RokuAudioSink:
                 pass
 
     def _server_loop(self):
-        try:
-            self._sock.settimeout(0.5)
-        except OSError:
-            pass
+        # wait in accept: a loop of non-blocking accepts spins, and on a board
+        # (one interpreter lock) it starved the writer to a fifth of the
+        # sound's rate
         while self._running:
-            self.poll()
+            self.poll(0.5)
 
     def open(self):
         pass
@@ -1260,11 +1264,18 @@ class RokuAudioSink:
             except OSError:
                 self._client.close()
                 self._client = None
-        else:
-            import time
-
-            bytes_per_sec = self.format.rate * self.format.channels * (self.format.bits // 8)
-            time.sleep(len(buf) / bytes_per_sec)
+        # Paced by the clock, as a sound card would pace it: the TV reads as
+        # fast as it is sent, so without this an app's sound loop runs many
+        # times faster than its sound plays.
+        bytes_per_sec = self.format.rate * self.format.channels * (self.format.bits // 8)
+        now = _now()
+        if self._t0 is None or self._t0 + self._sent / bytes_per_sec < now - 0.2:
+            self._t0, self._sent = now, 0       # the start, or the writer fell behind
+        mv = memoryview(buf)
+        self._sent += len(mv) * getattr(mv, "itemsize", 1)     # bytes, for an array too
+        ahead = self._t0 + self._sent / bytes_per_sec - now - self.LEAD
+        if ahead > 0:
+            time.sleep(ahead)
 
     def close(self):
         self._running = False
