@@ -17,6 +17,13 @@
 # Display session runs on a thread and rejoins by itself if the sink goes
 # away, and drawing costs what drawing into RAM costs. Desktop MicroPython has
 # no H.264 encoder, by decision, so there it raises.
+#
+# Sound (audio=True): on the P4, castif reads the audio pump's output in C, so
+# whatever the board plays is on the cast. On a desktop, the app's speaker is
+# the cast: display.pcm_out(format) is an audiodev PCMOutput whose sound goes
+# out with the picture (../miracast/board_config.py hands it to audiodev, so
+# board_peripherals.audio_out() plays there). A desktop can also cast any
+# sound ffmpeg reads: audio="song.mp3", or ffmpeg input arguments as a list.
 import sys
 import time
 
@@ -50,10 +57,21 @@ class CastDisplay(FBDisplay):
         fps, bitrate: the stream's.
         name: what the sink lists the cast as.
         log: where session messages go (default: nowhere).
+        audio: None for a silent cast. True carries the app's sound: on the
+            P4 what the audio pump plays (24 kHz, unless ``audio_format`` says
+            otherwise), on a desktop what
+            the app writes to ``pcm_out()``. On a desktop, a file, URL or list
+            of ffmpeg input arguments casts that instead.
+        audio_format: (rate, channels) of what the P4's pump drives, for
+            audio=True. The pump drives the I2S wire in stereo even when the
+            app opened a mono stream, so a 24 kHz mono app is (24000, 2).
+        audio_loop: play a desktop's audio file over and over. A file starts
+            from its beginning with each session, once the sink is listening.
     """
 
     def __init__(self, sink, width=720, height=720, kind="windows", canvas=None,
-                 fps=30, bitrate=3_000_000, name="PyDevices P4", log=None):
+                 fps=30, bitrate=3_000_000, name="PyDevices P4", log=None,
+                 audio=None, audio_format=(24000, 2), audio_loop=False):
         if kind not in ("windows", "roku"):
             raise ValueError("kind is 'windows' or 'roku'")
         self._buf = bytearray(width * height * 2)
@@ -65,11 +83,22 @@ class CastDisplay(FBDisplay):
         self.kind = kind
         self.name = name
         self.log = log or (lambda *a: None)
+        self.audio = None           # the P4's TapFeed, or the desktop's pycast.CastAudio
         if castfast is not None:
+            if audio:
+                try:
+                    self.audio = castfast.TapFeed(rate=audio_format[0], channels=audio_format[1], log=self.log)
+                except Exception as e:      # firmware without the audio pump: a silent cast
+                    self.log("cast sound off:", repr(e))
             self.cast = castfast.make_caster(width, height, canvas=canvas or (width, height),
-                                             fps=fps, bitrate=bitrate)
+                                             fps=fps, bitrate=bitrate, audio=self.audio is not None)
         else:
-            self.cast = pycast.FfmpegCaster(width, height, canvas=canvas, fps=fps, bitrate=bitrate)
+            if audio:
+                self.audio = pycast.CastAudio()
+            self.cast = pycast.FfmpegCaster(width, height, canvas=canvas, fps=fps, bitrate=bitrate,
+                                            audio=self.audio,
+                                            audio_source=None if audio in (None, False, True) else audio,
+                                            audio_loop=audio_loop)
         self.uibc = UibcInput(width, height)
         self.sessions = 0
         self._session = None
@@ -109,11 +138,23 @@ class CastDisplay(FBDisplay):
         st = self.cast.stats()
         s = self._session
         idr = self._idr_before + (s.idr_requests if s is not None else 0)
-        return {"frames": st.get("frames", 0), "fps": st.get("fps", 0) / 1000.0,
-                "sent": st.get("sent", 0), "sessions": self.sessions, "idr_requests": idr}
+        out = {"frames": st.get("frames", 0), "fps": st.get("fps", 0) / 1000.0,
+               "sent": st.get("sent", 0), "sessions": self.sessions, "idr_requests": idr}
+        for k in st:
+            if k.startswith("audio_"):      # the sound track's counters (castif's names)
+                out[k] = st[k]
+        return out
+
+    def pcm_out(self, format=None, **kwargs):
+        """A desktop's speaker on the cast: an audiodev PCMOutput (any 16-bit
+        rate, mono or stereo) whose sound goes out with the picture. Needs
+        audio=True. On the P4 the board's own speaker is already on the cast."""
+        if pycast is None or self.audio is None:
+            raise RuntimeError("pcm_out needs CastDisplay(..., audio=True) on a desktop")
+        return pycast.CastAudioOut(self.audio, format)
 
     # touch_read / keypad_read for a board_config: the laptop's mouse (left
-    # button held) and keys
+    # button held), fingers on its touchscreen, and its keys and remote
     def touch_read(self):
         return self.uibc.read_points()
 
@@ -145,7 +186,9 @@ class CastDisplay(FBDisplay):
                         self.log("roku power-on:", repr(e))
                 s = Session(self.sink, name=self.name, log=self.log, on_input=self.uibc.feed)
                 s.session_request = 0 if self.kind == "roku" else None
-                s.hidc_caps = "Keyboard/USB, Mouse/USB"
+                # Windows forwards input only when offered its whole list, and
+                # touch arrives as MultiTouch
+                s.hidc_caps = "Keyboard/USB, Mouse/USB, MultiTouch/USB, Gesture/USB, RemoteControl/USB"
                 self.sessions += 1
                 self._session = s
 
@@ -154,7 +197,7 @@ class CastDisplay(FBDisplay):
                         return pycast.FfmpegStreamer(self.cast, self._buf, dst_ip, dst_port,
                                                      server_port, 24 * 3600, self.log)
                     return castfast.CastifStreamer(self.cast, self._buf, dst_ip, dst_port,
-                                                   server_port, 24 * 3600, self.log)
+                                                   server_port, 24 * 3600, self.log, audio=self.audio)
 
                 try:
                     result = s.run(make, seconds=24 * 3600, idle_after_done=2, stop=lambda: self._stop)
@@ -178,6 +221,8 @@ class CastDisplay(FBDisplay):
             if not self._running:
                 break
             time.sleep(0.1)
+        if castfast is not None and self.audio is not None:
+            self.audio.close()
         self.cast.close()
 
     def deinit(self):

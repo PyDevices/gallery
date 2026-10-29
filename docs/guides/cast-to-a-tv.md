@@ -18,7 +18,7 @@ the [runtime table](../reference/cast-runtimes.md) says which methods work where
 |---|---|---|---|---|---|---|
 | [Miracast to a Roku](#miracast-to-a-roku-tv) | Roku TV | Screen mirroring on, nothing installed | yes, 48 kHz, in sync | no ([#168](https://github.com/PyDevices/pydevices-examples/issues/168)) | ESP32-P4 | CPython with ffmpeg |
 | [Miracast to Windows](#miracast-to-a-windows-laptop) | Windows laptop | the Wireless Display app open | yes | the laptop's mouse and keyboard | ESP32-P4 | CPython with ffmpeg, from another PC; glitches on a busy network |
-| [The Companion channel](#the-pydevices-companion-channel) | Roku TV | the Companion channel, sideloaded once | through the TV | the TV's remote | any board with Wi-Fi and `pngio` | CPython and MicroPython |
+| [The Companion channel](#the-pydevices-companion-channel) | Roku TV | the Companion channel, sideloaded once | sound or the picture, not both; seconds behind | the TV's remote | any board with Wi-Fi and `pngio` | CPython and MicroPython |
 | [HLS video](#hls-video-to-a-roku-or-vlc) | Roku TV, or VLC anywhere | the Companion channel, or any HLS player | no (needs AAC) | none | ESP32-P4 | CPython with ffmpeg |
 
 In short: **Miracast** for a live picture with sound, on a TV or a laptop, with
@@ -47,6 +47,12 @@ about 24 fps. A P4 with no screen of its own casts the full 1280x720 at 18 fps
 ([`cast/headless_cast.py`](https://github.com/PyDevices/gallery/blob/main/lib/examples/cast/headless_cast.py)). Sound the
 P4 plays goes with it as 48 kHz audio on the picture's clock, so a drum
 machine's hits land with its step light.
+
+From a desktop, `CastDisplay(..., audio=True)` puts the app's sound on the
+cast: [`miracast/board_config.py`](https://github.com/PyDevices/gallery/blob/main/lib/examples/miracast/board_config.py)
+does that, so whatever an app plays through `audiodev` comes out of the TV.
+`audio="song.mp3"` casts a file instead, or any input ffmpeg can open, a
+microphone included, given as a list of ffmpeg arguments.
 
 The P4 also controls the TV over its own network API (ECP, built into every
 Roku, with **Control by mobile apps** on). It can power the TV on, change the
@@ -106,6 +112,11 @@ on it.
   One example each in [`lib/examples/roku/`](https://github.com/PyDevices/gallery/tree/main/lib/examples/roku/).
 - **Video**: `video(url)` plays HLS, which is how the next method reaches a
   TV.
+- **Sound**: `RokuAudioSink` streams an app's sound to the TV. The channel
+  plays sound or shows frames, not both, and the TV buffers it, so it runs 3.5
+  to 5.5 seconds behind. That suits music, not a game; for an app's sound with
+  its picture, use Miracast. `SOUND_ON_TV` in
+  [`roku/board_config.py`](https://github.com/PyDevices/gallery/blob/main/lib/examples/roku/board_config.py) turns it on.
 
 The library is plain sockets plus
 [`pngio`](https://github.com/PyDevices/micropython-pydevices/tree/main/modules/pngio)
@@ -179,4 +190,8 @@ the [archived pydevices-examples repo](https://github.com/PyDevices/pydevices-ex
 
 ## The Roku remote over Miracast
 
-The Roku's remote doesn't reach the app over Miracast. It is tracked in [#168](https://github.com/PyDevices/pydevices-examples/issues/168) and listed on the [roadmap](https://github.com/PyDevices/gallery/blob/main/ROADMAP.md).
+The Roku's remote doesn't reach the app over Miracast. The Roku offers no
+input back channel (its reply leaves out `wfd_uibc_capability`), and its
+network API has no way to report a button press; while it mirrors, the
+remote's arrows, OK, Back and the rest reach neither the source nor any
+other channel. For the remote, use the Companion channel. It is tracked in [#168](https://github.com/PyDevices/pydevices-examples/issues/168) and listed on the [roadmap](https://github.com/PyDevices/gallery/blob/main/ROADMAP.md).

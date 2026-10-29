@@ -25,8 +25,9 @@ SECONDS = 150 if MODE == "tv" else 630
 
 w = wifi_up()
 # The drum machine opens board_peripherals.audio_out(latency="low"), which on
-# the P4 is 24 kHz mono; the cast carries 48 kHz stereo and converts.
-feed = castfast.TapFeed(rate=24000, channels=1, log=log)
+# the P4 is 24 kHz mono, and the pump drives the I2S wire with it in stereo:
+# that is what the tap holds. The cast carries 48 kHz stereo and converts.
+feed = castfast.TapFeed(rate=24000, channels=2, log=log)
 
 if MODE == "tv":
     from roku_cast import RokuScreen

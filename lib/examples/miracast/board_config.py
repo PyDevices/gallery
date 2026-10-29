@@ -40,13 +40,26 @@ if SINK.startswith("roku:") or SINK.startswith("windows:"):
     KIND, SINK = SINK.split(":", 1)
 WIDTH = 720
 HEIGHT = 720
+# the app's sound on the cast: on a P4 what its speaker plays, on a desktop
+# what it plays through audiodev. False for a silent cast.
+AUDIO = True
 
 if sys.implementation.name != "cpython":     # a board joins Wi-Fi; a desktop is on the LAN
     from _common import wifi_up
 
     wifi_up()
 # the session's progress on the console: joining, the sink's answers, frame rates
-display_drv = CastDisplay(SINK, WIDTH, HEIGHT, kind=KIND, log=print)
+display_drv = CastDisplay(SINK, WIDTH, HEIGHT, kind=KIND, log=print, audio=AUDIO)
+
+if AUDIO and sys.implementation.name == "cpython":
+    # a desktop app's speaker is the cast: board_peripherals.audio_out() and
+    # audiodev's own pcm_out/audio_out open display_drv.pcm_out from here on
+    try:
+        import audiodev.auto
+    except ImportError:
+        pass
+    else:
+        audiodev.auto.pcm_out = display_drv.pcm_out
 
 # what appdev.App and the examples read from a board_config
 fb = display_drv._buf
