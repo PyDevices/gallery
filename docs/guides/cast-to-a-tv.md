@@ -190,4 +190,8 @@ the [archived pydevices-examples repo](https://github.com/PyDevices/pydevices-ex
 
 ## The Roku remote over Miracast
 
-The Roku's remote doesn't reach the app over Miracast. It is tracked in [#168](https://github.com/PyDevices/pydevices-examples/issues/168) and listed on the [roadmap](https://github.com/PyDevices/gallery/blob/main/ROADMAP.md).
+The Roku's remote doesn't reach the app over Miracast. The Roku offers no
+input back channel (its reply leaves out `wfd_uibc_capability`), and its
+network API has no way to report a button press; while it mirrors, the
+remote's arrows, OK, Back and the rest reach neither the source nor any
+other channel. For the remote, use the Companion channel. It is tracked in [#168](https://github.com/PyDevices/pydevices-examples/issues/168) and listed on the [roadmap](https://github.com/PyDevices/gallery/blob/main/ROADMAP.md).
