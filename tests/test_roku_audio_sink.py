@@ -62,6 +62,23 @@ class RokuAudioSinkTest(unittest.TestCase):
         self.assertGreater(took, 0.25)                    # an array counts in bytes, not items
         self.assertLess(took, 0.6)
 
+    def test_the_server_thread_waits_instead_of_spinning(self):
+        accepts = []
+        real = self.sink._sock
+
+        class Counting:
+            def __getattr__(self, name):
+                return getattr(real, name)
+
+            def accept(self):
+                accepts.append(1)
+                return real.accept()
+
+        self.sink._sock = Counting()
+        time.sleep(1.2)
+        self.sink._sock = real
+        self.assertLess(len(accepts), 10)                 # one per 0.5 s wait, not thousands
+
 
 if __name__ == "__main__":
     unittest.main()

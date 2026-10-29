@@ -33,6 +33,7 @@ speech the recording was transcribed back from and beeps it was timed by.
 | `python.exe` (Windows) | plays, no drift, no gaps | plays, 5.4 s behind |
 | `micropython` (unix) | no H.264 | plays, 3.5 s behind |
 | `micropython.exe` (Windows) | no H.264 | plays, 4.8 to 5.2 s behind |
+| ESP32-P4 (the panel) | plays, no drift, no gaps | plays, 4.3 s behind |
 
 Over Miracast the sound rides the picture's clock, so it is in step with the
 picture. Over the Companion channel the TV plays sound or frames, not both,
@@ -40,6 +41,13 @@ and holds a few seconds of buffer: steady while the app keeps writing, but
 the last seconds stay in the TV until the stream closes. Those figures include
 the 2 s the sink writes ahead, and leave out the microphone's own start-up,
 which makes them a little long.
+
+On the P4, the cast takes its sound from the audio pump's output, which is
+stereo on the I2S wire even when the app opened a mono stream: a 24 kHz mono
+app is `audio_format=(24000, 2)`, the default. Read as mono, the same sound
+played an octave low. The ESP32-P4 Wi-Fi 6 dev kit can't cast sound: its
+Wi-Fi barely sends while its speaker runs, and the TV gives up on the
+session.
 
 **Miracast to Windows** is testris only, with glitches from Wi-Fi loss (see
 [Miracast to a Windows laptop](../guides/cast-to-a-tv.md#miracast-to-a-windows-laptop)). From CPython

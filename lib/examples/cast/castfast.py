@@ -178,10 +178,11 @@ class TapFeed:
     here; each block is stamped when read (at most one poll late).
 
     The cast carries 48 kHz stereo (the only LPCM a sink takes), and the
-    pump runs at whatever the app opened: the drum machine's low-latency
-    output on the P4 is 24 kHz MONO. Pass the pump's ``rate`` and
-    ``channels``; mono is spread to both sides and 24 kHz is doubled with a
-    midpoint between samples. ``in_bytes`` counts what the tap produced, so
+    pump runs at the rate the app opened: the drum machine's low-latency
+    output on the P4 is 24 kHz. The tap holds what goes to the I2S wire,
+    which is stereo even for a mono app (measured on the P4: each sample
+    twice). Pass the tap's ``rate`` and ``channels``; mono is spread to both
+    sides and 24 kHz is doubled with a midpoint between samples. ``in_bytes`` counts what the tap produced, so
     a wrong format shows in the log as a byte rate that is not rate*ch*2.
     """
 

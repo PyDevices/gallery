@@ -48,6 +48,9 @@ running from WSL, pass the Roku's IP address directly.
 """
 
 import socket
+# once, here: on a board, an import inside a function searches the filesystem
+# each call (65 ms on the P4), which slowed every sound write by a factor of ten
+import time
 
 # Frames go to the TV as PNG through pngio: MicroPython's built-in module, or
 # pydevices-desktop's pngio.py over Pillow on CPython. Compressed, a typical
@@ -281,8 +284,6 @@ def _ecp_post(host, path, timeout=5.0):
 
 def _now():
     """Seconds on a clock that never steps backwards (WSL resyncs its wall clock)."""
-    import time
-
     try:
         return time.monotonic()
     except AttributeError:
@@ -355,8 +356,6 @@ def _session_url(url):
     Roku caches images by URL: without the token a new session's
     ``frame.png?t=1`` is the old session's cached picture, and the TV replays
     earlier runs instead of fetching new frames."""
-    import time
-
     try:
         token = time.ticks_ms()
     except AttributeError:
@@ -493,8 +492,6 @@ class RokuCompanion:
         """Wake the TV (ECP PowerOn; harmless when it is already on) and wait
         up to *wait* seconds for it to say it is on. A channel launched before
         then lands on the Home screen instead. Returns whether it is on."""
-        import time
-
         _ecp_post(self.host, "/keypress/PowerOn", self.timeout)
         for _ in range(wait * 2):
             if "<power-mode>PowerOn</power-mode>" in _ecp_get(
@@ -727,8 +724,6 @@ class _FrameServer:
         exists. After `limit` seconds the current frame goes anyway, so a still
         screen keeps its connection alive.
         """
-        import time
-
         deadline = _now() + limit
         while self._running and self._version == sent_version and _now() < deadline:
             time.sleep(0.002)
@@ -1190,9 +1185,9 @@ class RokuAudioSink:
             except ImportError:
                 self._threaded = False
 
-    def poll(self):
+    def poll(self, timeout=0.0):
         try:
-            self._sock.settimeout(0.0)
+            self._sock.settimeout(timeout)
             conn, addr = self._sock.accept()
         except OSError:
             return
@@ -1242,12 +1237,11 @@ class RokuAudioSink:
                 pass
 
     def _server_loop(self):
-        try:
-            self._sock.settimeout(0.5)
-        except OSError:
-            pass
+        # wait in accept: a loop of non-blocking accepts spins, and on a board
+        # (one interpreter lock) it starved the writer to a fifth of the
+        # sound's rate
         while self._running:
-            self.poll()
+            self.poll(0.5)
 
     def open(self):
         pass
@@ -1273,8 +1267,6 @@ class RokuAudioSink:
         # Paced by the clock, as a sound card would pace it: the TV reads as
         # fast as it is sent, so without this an app's sound loop runs many
         # times faster than its sound plays.
-        import time
-
         bytes_per_sec = self.format.rate * self.format.channels * (self.format.bits // 8)
         now = _now()
         if self._t0 is None or self._t0 + self._sent / bytes_per_sec < now - 0.2:

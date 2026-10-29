@@ -58,18 +58,20 @@ class CastDisplay(FBDisplay):
         name: what the sink lists the cast as.
         log: where session messages go (default: nowhere).
         audio: None for a silent cast. True carries the app's sound: on the
-            P4 what the audio pump plays (24 kHz mono, the panel's own
-            format, unless ``audio_format`` says otherwise), on a desktop what
+            P4 what the audio pump plays (24 kHz, unless ``audio_format`` says
+            otherwise), on a desktop what
             the app writes to ``pcm_out()``. On a desktop, a file, URL or list
             of ffmpeg input arguments casts that instead.
-        audio_format: (rate, channels) of the P4's pump, for audio=True.
+        audio_format: (rate, channels) of what the P4's pump drives, for
+            audio=True. The pump drives the I2S wire in stereo even when the
+            app opened a mono stream, so a 24 kHz mono app is (24000, 2).
         audio_loop: play a desktop's audio file over and over. A file starts
             from its beginning with each session, once the sink is listening.
     """
 
     def __init__(self, sink, width=720, height=720, kind="windows", canvas=None,
                  fps=30, bitrate=3_000_000, name="PyDevices P4", log=None,
-                 audio=None, audio_format=(24000, 1), audio_loop=False):
+                 audio=None, audio_format=(24000, 2), audio_loop=False):
         if kind not in ("windows", "roku"):
             raise ValueError("kind is 'windows' or 'roku'")
         self._buf = bytearray(width * height * 2)
