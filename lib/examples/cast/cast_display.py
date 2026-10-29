@@ -83,10 +83,13 @@ class CastDisplay(FBDisplay):
         self.log = log or (lambda *a: None)
         self.audio = None           # the P4's TapFeed, or the desktop's pycast.CastAudio
         if castfast is not None:
-            self.cast = castfast.make_caster(width, height, canvas=canvas or (width, height),
-                                             fps=fps, bitrate=bitrate, audio=bool(audio))
             if audio:
-                self.audio = castfast.TapFeed(rate=audio_format[0], channels=audio_format[1], log=self.log)
+                try:
+                    self.audio = castfast.TapFeed(rate=audio_format[0], channels=audio_format[1], log=self.log)
+                except Exception as e:      # firmware without the audio pump: a silent cast
+                    self.log("cast sound off:", repr(e))
+            self.cast = castfast.make_caster(width, height, canvas=canvas or (width, height),
+                                             fps=fps, bitrate=bitrate, audio=self.audio is not None)
         else:
             if audio:
                 self.audio = pycast.CastAudio()
