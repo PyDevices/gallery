@@ -35,6 +35,7 @@ address at the top; set it first.
 | `import cast.tv_cast` | The panel on the TV for 60 s with a melody from the P4's speaker and the TV together. The TV is turned on first. |
 | `import cast.laptop_input` | The panel in the laptop's Wireless Display app. Move the mouse, click, type: the P4 draws the cursor, a dot per click and the keys. |
 | `import cast.drum_cast` | The drum machine, cast with its sound. Press PLAY on the panel. |
+| `import cast.medialink_tv` | A medialink camera's pictures and sound on the TV or the laptop: the board finds the camera by name and casts what it sends. Run pydevices' surveillance camera example on the camera side. |
 
 A Roku needs **Screen mirroring** on in its settings. A Windows laptop needs
 the Wireless Display app open (Settings > System > Projecting to this PC).
