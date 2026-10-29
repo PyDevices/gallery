@@ -5,8 +5,6 @@ go to [issues](https://github.com/PyDevices/gallery/issues).
 
 ## Apps
 
-- CastDisplay: the Roku remote as input on a Miracast cast, so arrows, OK and
-  Back reach the app as keys, the way they already do with RokuDisplay.
 - google_photos: playlists. Keep several saved picks (Wedding, Christmas,
   Grandkids) and choose which one the frame shows.
 - A live-audio example built on one object that owns the codec, the audio
