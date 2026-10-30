@@ -126,8 +126,8 @@ Google serves JPEG (PNG for PNG originals). LVGL decodes:
 | Runtime | JPEG | PNG |
 |---|---|---|
 | CPython (`pydevices-lvgl`) | LVGL's built-in TJPGD | LODEPNG |
-| MicroPython LVGL firmware (lvgl-micropython + jpegio) | the `jpegio` module (micropython-pydevices; displayif's until 2026-10-06), registered as an LVGL image decoder ([`modules/jpegio`](https://github.com/PyDevices/micropython-pydevices/tree/main/modules/jpegio)) | LODEPNG |
-| CircuitPython LVGL firmware | CircuitPython's `jpegio` via lvgl-circuitpython | LODEPNG |
+| MicroPython LVGL firmware ([omnipython-lvgl](https://github.com/PyDevices/omnipython-lvgl) + jpegio) | the `jpegio` module (micropython-pydevices; displayif's until 2026-10-06), registered as an LVGL image decoder ([`modules/jpegio`](https://github.com/PyDevices/micropython-pydevices/tree/main/modules/jpegio)) | LODEPNG |
+| CircuitPython LVGL firmware | CircuitPython's `jpegio` via omnipython-lvgl | LODEPNG |
 
 Without a JPEG decoder the list still works: tiles keep a placeholder and
 the viewer explains why. Both decoders hold the decoded image
