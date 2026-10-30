@@ -18,7 +18,7 @@ climbers. Early work focused on:
 - Landing/collision physics stable enough for repeated jumps up procedurally
   placed branches
 - The shared periodic timer via ``appdev.App`` for display refresh
-  (see [app-and-board-config.md](https://github.com/PyDevices/pydevices/blob/main/docs/app-and-board-config.md) for the timer/display split)
+  (see [write-an-application.md](https://github.com/PyDevices/pydevices/blob/main/docs/guides/write-an-application.md) for the timer/display split)
 
 Gameplay bugs (flicker, respawn deaths, camera clamp at the crown, bot pathing)
 were fixed iteratively using the trace stream and bot playtests below rather than
@@ -26,7 +26,7 @@ manual play alone.
 
 Levels are randomized each round (`_build_level()`). Pass `--seed N` for
 a reproducible RNG state when bisecting a layout. Developer hazard pacing is
-controlled by the `DIFFICULTY` constant at the top of `tower_climb.py`.
+controlled by the `DIFFICULTY` constant at the top of [`tower_climb.py`](tower_climb.py).
 
 ## Package layout
 

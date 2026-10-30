@@ -13,7 +13,7 @@ take over as the hub later.
 ## Run it on a board
 
 The board needs MicroPython with Wi-Fi, a `secrets.py`, and pydevices'
-`wifi.py`: frozen into the firmware, or copied to `/lib` when it isn't ([board bring-up](https://github.com/PyDevices/pydevices/blob/main/docs/board-bringup.md)),
+`wifi.py`: frozen into the firmware, or copied to `/lib` when it isn't ([board bring-up](https://github.com/PyDevices/pydevices/blob/main/docs/guides/bring-up-a-board.md)),
 and for the Bluetooth door, `bledev` and `aioble` (`mpftp mip -d COM5 aioble`).
 
 ```bash
@@ -87,7 +87,7 @@ pressure, light and motion to a hub every 2 s, and shows them on its screen.
 Its five DotStars are switched off at start.
 
 It runs stock MicroPython (`ESP32_GENERIC_S2`), brought up as in
-[board bring-up](https://github.com/PyDevices/pydevices/blob/main/docs/board-bringup.md)
+[board bring-up](https://github.com/PyDevices/pydevices/blob/main/docs/guides/bring-up-a-board.md)
 with the [`board_configs/busdisplay/spi/funhouse`](https://github.com/PyDevices/pydevices/tree/main/board_configs/busdisplay/spi/funhouse) package. Then:
 
 ```bash

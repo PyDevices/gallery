@@ -2,7 +2,7 @@
 
 Browser project for [wokwi.com](https://wokwi.com): PyDevices core + `pygraphics` + Wokwi board config + [`testris`](../../lib/examples/testris.py) (a touch + joystick Tetris demo).
 
-**Wokwi reference:** [pydevices/docs/wokwi.md](https://github.com/PyDevices/pydevices/blob/main/docs/wokwi.md)
+**Wokwi reference:** [pydevices/docs/boards/wokwi.md](https://github.com/PyDevices/pydevices/blob/main/docs/boards/wokwi.md)
 
 Board config: [`wokwi_ili9341_ft6x36_esp32s3`](https://github.com/PyDevices/pydevices/tree/main/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3)
 
@@ -21,7 +21,7 @@ Board config: [`wokwi_ili9341_ft6x36_esp32s3`](https://github.com/PyDevices/pyde
 
 ## Quick try (default)
 
-Use `main.py` as committed. On first boot, `mip` downloads PyDevices core + `pygraphics` from the
+Use [`main.py`](main.py) as committed. On first boot, `mip` downloads PyDevices core + `pygraphics` from the
 PyDevices MIP index (network required), then runs **testris** — a touch + joystick Tetris demo. You
 should see the game running — drive it with the on-screen touch keypad.
 
