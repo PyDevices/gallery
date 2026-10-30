@@ -2,14 +2,14 @@
 
 Playing card classes for the PyDevices display stack, and a blackjack game built on them.
 
-Run either one from `lib/` (see [the examples README](../README.md)):
+Run either one from `lib/` (see [the examples README](../../../README.md#run-one-on-your-computer)):
 
 ```bash
 PYTHONPATH=.:lib:utils ../.venv/bin/python examples/blackjack/blackjack.py
 PYTHONPATH=.:lib:utils ../.venv/bin/python examples/blackjack/playing_cards_simpletest.py
 ```
 
-`playing_cards.py` draws with [pygraphics](https://github.com/PyDevices/pygraphics) onto a `displaybuf.DisplayBuffer`, and the examples read taps and clicks through `appdev`.  The classes are an example of what may be done with those pieces.  It is a work in-progress and is likely to change significantly.
+[`playing_cards.py`](playing_cards.py) draws with [pygraphics](https://github.com/PyDevices/pygraphics) onto a `displaybuf.DisplayBuffer`, and the examples read taps and clicks through `appdev`.  The classes are an example of what may be done with those pieces.  It is a work in-progress and is likely to change significantly.
 
 The ultimate goal is to have a set of classes for a [Standard 52-card deck](https://en.wikipedia.org/wiki/Standard_52-card_deck) that may be used to implement any card game that uses such a deck or portion thereof.  Games can use the full deck, or multiple decks, such as the example [blackjack](blackjack.py), or use a portion of a deck, such as Euchre, or a mutiple portions of decks, such as Pinochle.  Using dunder methods, it will be possible to compare one card to another, with each game having its own rules for comparison.  The logic of the game may say `if card1 > card2:`, and the rules of the game would automatically be applied.
 

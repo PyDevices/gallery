@@ -44,12 +44,12 @@ import lv_test_timer                  # or any app
 
 The picture is the panel's 720x720 in the middle of the TV's 1280x720, at
 about 24 fps. A P4 with no screen of its own casts the full 1280x720 at 18 fps
-([`cast/headless_cast.py`](https://github.com/PyDevices/gallery/blob/main/lib/examples/cast/headless_cast.py)). Sound the
+([`cast/headless_cast.py`](../../lib/examples/cast/headless_cast.py)). Sound the
 P4 plays goes with it as 48 kHz audio on the picture's clock, so a drum
 machine's hits land with its step light.
 
 From a desktop, `CastDisplay(..., audio=True)` puts the app's sound on the
-cast: [`miracast/board_config.py`](https://github.com/PyDevices/gallery/blob/main/lib/examples/miracast/board_config.py)
+cast: [`miracast/board_config.py`](../../lib/examples/miracast/board_config.py)
 does that, so whatever an app plays through `audiodev` comes out of the TV.
 `audio="song.mp3"` casts a file instead, or any input ffmpeg can open, a
 microphone included, given as a list of ffmpeg arguments.
@@ -57,12 +57,12 @@ microphone included, given as a list of ffmpeg arguments.
 The P4 also controls the TV over its own network API (ECP, built into every
 Roku, with **Control by mobile apps** on). It can power the TV on, change the
 input or the volume, and press any key.
-[`cast/tv_cast.py`](https://github.com/PyDevices/gallery/blob/main/lib/examples/cast/tv_cast.py) turns the TV on and
-casts a melody. The [house panel](https://github.com/PyDevices/gallery/tree/main/lib/examples/house/) has a button that
+[`cast/tv_cast.py`](../../lib/examples/cast/tv_cast.py) turns the TV on and
+casts a melody. The [house panel](../../lib/examples/house) has a button that
 puts the whole panel on the TV.
 
-Examples: [`cast/`](https://github.com/PyDevices/gallery/blob/main/lib/examples/cast/README.md),
-[`miracast/board_config.py`](https://github.com/PyDevices/gallery/blob/main/lib/examples/miracast/board_config.py) for any
+Examples: [`cast/`](../../lib/examples/cast/README.md),
+[`miracast/board_config.py`](../../lib/examples/miracast/board_config.py) for any
 app.
 
 ## Miracast to a Windows laptop
@@ -77,7 +77,7 @@ This one talks back. Windows sends the laptop's mouse and keyboard to the
 board (Miracast's UIBC), and `CastDisplay` turns them into touch and key
 events. An app on the P4 can't tell them from its own touch screen: testris
 plays from the laptop's keyboard, and
-[`cast/laptop_input.py`](https://github.com/PyDevices/gallery/blob/main/lib/examples/cast/laptop_input.py) draws the
+[`cast/laptop_input.py`](../../lib/examples/cast/laptop_input.py) draws the
 cursor and a dot per click. The Wireless Display window has to have focus:
 it then takes the mouse pointer and the keys, and the Windows key gives them
 back.
@@ -106,17 +106,17 @@ on it.
   270 to 290 ms each PNG takes to encode.
 - **The remote as input.** All eleven buttons a channel can see arrive as key
   presses and releases, and a held button repeats. testris plays from the
-  couch through [`roku/board_config.py`](https://github.com/PyDevices/gallery/blob/main/lib/examples/roku/board_config.py).
+  couch through [`roku/board_config.py`](../../lib/examples/roku/board_config.py).
 - **Speech, a dashboard, and frames from any URL**: `say()`, `dashboard()`
   and `frames(url)`, which shows the PNG or JPEG a URL serves, over and over.
-  One example each in [`lib/examples/roku/`](https://github.com/PyDevices/gallery/tree/main/lib/examples/roku/).
+  One example each in [`lib/examples/roku/`](../../lib/examples/roku).
 - **Video**: `video(url)` plays HLS, which is how the next method reaches a
   TV.
 - **Sound**: `RokuAudioSink` streams an app's sound to the TV. The channel
   plays sound or shows frames, not both, and the TV buffers it, so it runs 3.5
   to 5.5 seconds behind. That suits music, not a game; for an app's sound with
   its picture, use Miracast. `SOUND_ON_TV` in
-  [`roku/board_config.py`](https://github.com/PyDevices/gallery/blob/main/lib/examples/roku/board_config.py) turns it on.
+  [`roku/board_config.py`](../../lib/examples/roku/board_config.py) turns it on.
 
 The library is plain sockets plus
 [`pngio`](https://github.com/PyDevices/micropython-pydevices/tree/main/modules/pngio)
@@ -149,7 +149,7 @@ portal's non-LVGL hero apps, polyhedron and radar_scope.
 HLS is video only. A Roku plays HLS audio only as AAC, and the firmware has no AAC
 encoder.
 
-On a desktop, the same `roku_hls/board_config.py` runs under CPython and
+On a desktop, the same [`roku_hls/board_config.py`](../../lib/examples/roku_hls/board_config.py) runs under CPython and
 ffmpeg makes the stream.
 
 ## Let AutoDisplay pick a cast display
@@ -173,7 +173,7 @@ display is never picked unless something asks for it, so nothing streams to a
 TV by surprise. `PYDEVICES_DISPLAY=hls` names one for a single run. On an
 earlier PyDevices there is no registry and the configs work as they always
 did. The registry itself is described in the
-[displaydev guide](https://github.com/PyDevices/pydevices/blob/main/docs/displaydev.md#experimental-your-own-backend).
+[displaydev guide](https://github.com/PyDevices/pydevices/blob/main/docs/guides/displays.md#experimental-your-own-backend).
 
 ## Run a cast example
 

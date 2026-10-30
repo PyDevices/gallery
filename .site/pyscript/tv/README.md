@@ -11,7 +11,7 @@ use `PSDisplay`, not native `SDLDisplay` / `usdl2`.
 
 From the [PyScript gallery](../index.html) or:
 
-- [tv_remote_menu](../micropython.html?modules=tv_remote_menu) — large-row menu, D-pad / Enter / Back
+- [tv_remote_menu](../../gallery/micropython.html?modules=tv_remote_menu) — large-row menu, D-pad / Enter / Back
 
 Desktop arrow keys stand in for the remote during development.
 
@@ -30,5 +30,5 @@ Mappings live in `displaydev._domkeys._DOM_NAMED_KEYS`. Unknown TV keys arrive a
 
 ## Related
 
-- [Where PWAs run — Smart TVs](https://github.com/PyDevices/pyscript-template/blob/main/docs/pwa-guide.md#where-pwas-run)
-- [PSDisplay](https://github.com/PyDevices/pydevices/blob/main/docs/displaydev.md#psdisplay)
+- [Where PWAs run — Smart TVs](https://github.com/PyDevices/pyscript-template/blob/main/docs/guides/make-it-installable.md#where-pwas-install)
+- [PSDisplay](https://github.com/PyDevices/pydevices/blob/main/docs/guides/displays.md#psdisplay)
