@@ -29,7 +29,7 @@ index="https://PyDevices.github.io/mip")`` on a board, pip on a computer).
 
 Run it: ``import drum_machine``, then press PLAY.
 
-Tested on: unix MicroPython 1.29 and desktop CPython 3.12, with
+Tested on: unix MicroPython 1.30 (preview) and desktop CPython 3.12, with
 audioinstruments 0.5.0 and SDL's dummy audio driver.
 """
 
