@@ -358,7 +358,7 @@ class AllAtOnce:
     def _set_source(self, with_synth):
         """Re-make the source: microphone or riff, plus the instrument."""
         first = "input" if self.mic else "riff"
-        names = (first, "karplus") if with_synth else (first,)
+        names = (first, "poly106") if with_synth else (first,)
         self.live.source(names if len(names) > 1 else first)
         self.source_label.set_text("MIC" if self.mic else "RIFF")
 

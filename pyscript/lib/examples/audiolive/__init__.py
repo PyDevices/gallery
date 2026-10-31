@@ -26,10 +26,15 @@ every control path holds around its own final swap. You do not lock
 anything; you just call the setter.
 
 Three sources, one surface: ``play()`` (a looped riff), ``instrument()``
-(a synthio instrument you press notes on) and ``input()`` (the board's
+(an instrument you press notes on) and ``input()`` (the board's
 microphone). All three feed the same chain of effects, so an example can
 change its mind about where the sound comes from without rebuilding
 anything downstream.
+
+An instrument only sounds while it gets its turns: ``inst.fill()`` is where
+notes, knobs and voices reach the sound. ``LiveAudio`` gives them every
+``TURN_MS`` from a ``machine.Timer``. On a port with no Timer (the desktop),
+call ``live.service()`` from your own loop every 10 to 20 ms.
 
 Boards
 ------
@@ -260,6 +265,14 @@ except ImportError:
 #: nothing to speak of; set it False on a board that is short of RAM.
 KEEP_CHAINS = True
 
+#: How often an instrument gets its turn, in milliseconds. A new instrument
+#: sounds only when its ``fill()`` is called: notes, knobs and voices parking
+#: reach the sound there, and with no turns every block the pump pulls is
+#: silence. Ten to twenty is the range that keeps a note's attack tight.
+#: ``None`` starts no timer, for an app that calls ``LiveAudio.service()``
+#: from its own loop.
+TURN_MS = 10
+
 #: The builder thread's stack. Building a Rack goes a few classes deep, and a
 #: port's default thread stack is sized for much less.
 BUILDER_STACK = 32 * 1024
@@ -365,6 +378,10 @@ class LiveAudio:
         self._voices = 0
         self._built = {}           # name -> (audiosample, loop), cached
         self._insts = {}           # name -> the instrument object itself
+        self._playing = ()         # instrument names feeding the chain now
+        self._turn_timer = None
+        self._turning = False      # True while a turn is under way
+        self._turn_errors = 0
         self._riff = None
         self._instrument = None
         self._input = None
@@ -578,6 +595,7 @@ class LiveAudio:
                 sample, loop = self._make(name)
                 _safely(_play_voice, mixer, sample, voice, loop)
             self.source_name = what
+            self._follow(names)
             return what
         mixer = audiomixer.Mixer(
             voice_count=len(names), sample_rate=self.rate,
@@ -596,12 +614,77 @@ class LiveAudio:
         self._source = mixer
         # Every kept chain was built on the Mixer this one replaces.
         self._forget()
+        self._follow(names)
         if self.effects or audiopump.running():
             self._rebuild()
         return what
 
-    def instrument(self, name="karplus"):
-        """Play a synthio instrument from audiocomponents through the chain."""
+    # --- the instruments' turns -------------------------------------------
+
+    def _follow(self, names):
+        """Keep turns going for the instruments among ``names``, if any."""
+        self._playing = tuple(n for n in names if n in self._insts)
+        if self._playing:
+            self._start_turns()
+        else:
+            self._stop_turns()
+
+    def service(self):
+        """Give each playing instrument its turn; returns the blocks moved.
+
+        Where there is a ``machine.Timer`` this is called for you every
+        ``TURN_MS``; an app whose loop owns the time (or a port with no
+        Timer, like the desktop's) calls it itself every 10 to 20 ms. Calling
+        it too is harmless. A turn that arrives while another is still under
+        way is dropped, because the Timer's tick runs between the bytecodes
+        of the app's own thread and can land inside a turn.
+        """
+        if self._turning:
+            return 0
+        self._turning = True
+        moved = 0
+        try:
+            for name in self._playing:
+                inst = self._insts.get(name)
+                if inst is None:
+                    continue
+                try:
+                    moved += inst.fill() or 0
+                except Exception as exc:
+                    # An instrument closed under us, say. Count it and carry
+                    # on rather than raise into whatever the app was doing.
+                    if not self._turn_errors:
+                        print("audiolive: a turn failed:", exc)
+                    self._turn_errors += 1
+        finally:
+            self._turning = False
+        return moved
+
+    def _start_turns(self):
+        if self._turn_timer is not None or TURN_MS is None:
+            return
+        try:
+            from machine import Timer
+            timer = Timer(-1)
+            timer.init(period=TURN_MS, mode=Timer.PERIODIC,
+                       callback=self._tick)
+        except Exception:
+            # No Timer on this port: the app calls service() itself.
+            return
+        self._turn_timer = timer
+
+    def _tick(self, _timer=None):
+        self.service()
+
+    def _stop_turns(self):
+        self._playing = ()
+        timer, self._turn_timer = self._turn_timer, None
+        if timer is not None:
+            # A tick already scheduled finds nothing to play and returns.
+            timer.deinit()
+
+    def instrument(self, name="poly106"):
+        """Play an instrument from audioinstruments through the chain."""
         self.source(name)
         return self._instrument
 
@@ -768,6 +851,7 @@ class LiveAudio:
         if why is None:
             return None
         print("audiolive: the audio stopped -", why, "- restarting")
+        self._stop_turns()
         self._gen += 1
         self._forget()
         audiopump.shutdown()
@@ -1118,6 +1202,7 @@ class LiveAudio:
         finaliser, and a soft reset runs finalisers on everything - so
         Ctrl-D or a fresh `mpftp run` always leaves the board quiet.
         """
+        self._stop_turns()
         self._gen += 1
         self._forget()
         audiopump.shutdown()
