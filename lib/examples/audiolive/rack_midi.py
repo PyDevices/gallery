@@ -74,7 +74,7 @@ from midiports import usb_device
 import audiolive
 from audiolive import PATCHES
 
-INSTRUMENT = "karplus"
+INSTRUMENT = "poly106"
 MOUNT_TIMEOUT_MS = 10000
 REPORT_MS = 10000
 
