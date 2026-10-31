@@ -27,7 +27,7 @@ Anything else lacks the H.264 encoder.
 ## Try it
 
 Install this example on the P4 beside `roku_remote` (for the TV control) and,
-for the drum demo, `drum_machine` and `drum_seq`. Each demo has its sink's
+for the drum demo, `drum_machine` and the `controlpanel` package. Each demo has its sink's
 address at the top; set it first.
 
 | Demo | What you see |

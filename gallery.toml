@@ -57,8 +57,6 @@
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/dino.py" = "/examples/dino.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/drum_machine/__init__.py" = "/examples/drum_machine/__init__.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/drum_machine/drum_machine.py" = "/examples/drum_machine/drum_machine.py"
-"https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/drum_seq/__init__.py" = "/examples/drum_seq/__init__.py"
-"https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/drum_seq/panel.py" = "/examples/drum_seq/panel.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/feathers.py" = "/examples/feathers.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/fleet_page/check_fleet.py" = "/examples/fleet_page/check_fleet.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/fleet_page/fleet.py" = "/examples/fleet_page/fleet.py"
