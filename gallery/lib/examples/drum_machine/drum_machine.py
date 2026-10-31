@@ -1,50 +1,36 @@
 # deps: audioinstruments, lvgl, multimer
 # gallery: featured, newwindow
 """
-drum_machine.py — 16-step drum sequencer with ten classic drum machines.
+drum_machine.py -- a 16-step drum sequencer with five drum machines.
 
-Four instrument rows (kick, snare, closed hat, open hat — pitches 36/38/42/46,
-shared by every machine in ``audioinstruments``) on an LVGL buttonmatrix, a
-step-position indicator, transport with BPM and volume controls, and a
-dropdown that switches between the ten drum machines while the pattern keeps
-playing. The PANEL button opens the generic Tier-0 instrument panel
-(``drum_seq.panel``) over the current machine for macro and patch editing.
+Four instrument rows on an LVGL buttonmatrix, a step-position indicator,
+transport with BPM and volume controls, and a dropdown that switches between
+the drum machines in ``audioinstruments`` while the pattern keeps playing.
+The PANEL button opens the generic instrument panel (``drum_seq.panel``) over
+the current machine for macro and patch editing.
 
-Where the firmware carries the audio pump, the groove is kept on the **audio
-clock**: each step is handed to ``audiodev.pump``'s queue with the frame it
-is to sound at, and the pump applies it on its own thread. A screen redraw
-or a garbage collection then cannot move a hit. Where it does not, the same
-pattern is fired from the wall-clock timer at the bottom of
-``_on_step_timer`` and nothing about the example changes.
+The rows are the machine's own pads: kick, snare, closed hat and open hat on
+the rhythm machines, kick, snare and two toms on ``electronic_drums5``, which
+has no hats. Their names come from the machine's ``NOTE_MAP``.
 
-**The corner of the screen says which clock you are on.** ``CLK AUDIO`` is
-the queue; ``CLK TIMER!`` means the pump is in this firmware and did not take
-this graph, and the reason is printed once. ``TIMER`` in grey is a firmware
-with no pump at all -- every desktop, Android and browser build today -- and
-``CLK LIVE`` in grey is a kit that plays live by design (``acoustickit``);
-neither is a warning. That label is worth having on
-your own app: it caught two real bugs on its first runs, both of them a kit
-change quietly dropping the groove back onto the timer.
+Each step is fired from a timer against a wall-clock deadline, so lateness
+never accumulates and a stalled screen drops the steps it missed rather than
+firing them all at once. A second timer gives the instrument its turns: on
+MicroPython a note, a knob or a new voice only reaches the sound when
+``inst.fill()`` runs, so it runs every ``TURN_MS``.
 
-It schedules ``AHEAD_MS`` of steps in advance -- 300 ms, three steps at
-120 BPM and four at 200. The number is in milliseconds rather than steps
-because what it has to cover is the longest the interpreter can be away, and
-that has nothing to do with the tempo: with the matrix repainting and a
-collector storm running, the worst gap between two calls of the 15 ms step
-timer was 100 ms, and 300 is three times that. The other end of the trade is
-the player -- a step is read when it is scheduled, so toggling a cell inside
-the window would be heard a bar late. ``Sequencer.relay()`` takes the
-unsounded ones back and reads the pattern again, which is why the window can
-be set by the stall and not by the editing.
+Designed on a 720x720 touch panel and laid out for 720x480 here, which fits a
+browser window; other resolutions lay out proportionally.
 
-On the Waveshare ESP32-P4 panel, full pattern at 200 BPM with the screen
-redrawing: 0 late, 0 dropped, 0 refused, with the worst gap between top-ups
-at 54 ms against that 300 ms window.
+Needs: a board or computer with LVGL, ``board_config`` and
+``board_peripherals`` (a speaker or other audio output), and the
+``audioinstruments`` package (``mip.install("audioinstruments",
+index="https://PyDevices.github.io/mip")`` on a board, pip on a computer).
 
-Designed on a 720×720 touch panel and laid out for 720×480 here, which fits
-a browser window; other resolutions lay out proportionally.
-Requires the ``audioinstruments`` package (``mip.install("audioinstruments",
-index="https://PyDevices.github.io/mip")`` on a board; pip on desktop).
+Run it: ``import drum_machine``, then press PLAY.
+
+Tested on: unix MicroPython 1.30 (preview) and desktop CPython 3.12, with
+audioinstruments 0.5.0 and SDL's dummy audio driver.
 """
 
 # Desktop resolution override, before board_config is imported: the desktop
@@ -76,39 +62,22 @@ import lvgl as lv
 import audioinstruments
 import board_peripherals
 
-# The audio clock. On a firmware that carries the audio pump, a note can be
-# handed to `audiodev` stamped with the frame it is to sound at, and the pump
-# applies it on its own thread at the top of that frame's block -- so the
-# groove does not move when the screen redraws or the collector runs. On a
-# firmware without one, `events()` is None and every line below falls back to
-# the wall-clock timer this example has always used.
-try:
-    from audiodev import pump as audio_pump
-except ImportError:
-    audio_pump = None
-
-try:
-    from audioinstruments.sequencer import Sequencer
-except ImportError:
-    Sequencer = None
-
 try:
     from drum_seq.panel import Panel
 except ImportError:
     Panel = None
 
-MACHINES = (
-    "tr808", "tr909", "tr606", "tr707", "cr78",
-    "dmx", "linndrum", "drumtraks", "sp1200", "simmons_sdsv",
-)
-DEFAULT_MACHINE = "tr808"
-
-# Every machine maps these pitches; only the display names differ.
-ROW_PITCHES = (36, 38, 42, 46)
-N_ROWS = len(ROW_PITCHES)
+# The drum machines, in dropdown order, and the four pads each one's rows play
+# (MIDI notes). Every machine maps these, with its own names. The electronic
+# kit has no hats, so its last two rows are toms.
+MACHINES = audioinstruments.DRUM_MACHINES
+DEFAULT_MACHINE = "rhythm808"
+ROW_PITCHES = {"electronic_drums5": (36, 38, 48, 45)}
+DEFAULT_PITCHES = (36, 38, 42, 46)
+N_ROWS = 4
 N_STEPS = 16
 
-# The spike's two-bar 808 groove, folded to one bar: kick, backbeat snare,
+# A two-bar 808 groove, folded to one bar: kick, backbeat snare,
 # 8th-note closed hats, open hat on the and-of-4 choked by the next downbeat.
 DEFAULT_PATTERN = (
     {0, 6, 8, 14},           # kick
@@ -119,39 +88,14 @@ DEFAULT_PATTERN = (
 
 BPM_MIN, BPM_MAX, BPM_STEP = 60, 200, 5
 
-# How far in front of the audio the sequencer keeps the queue.
-#
-# In MILLISECONDS, converted to steps per tempo, because what it has to
-# cover is the longest the interpreter can be away and that has nothing to
-# do with the tempo. A step scheduled after its frame has gone past is a
-# late note again. Measured on this desktop with the matrix repainting and
-# a collector storm running: the worst gap between two calls of the 15 ms
-# step timer was 100 ms. 300 ms is three times that, and it is 3 steps at
-# 120 BPM and 4 at 200.
-#
-# The other end of the trade is the player. A step is read when it is
-# scheduled, so anything inside this window is already committed: toggling
-# a cell that close to the playhead would be heard next bar.
-# `Sequencer.relay()` takes those back and reads the pattern again, which
-# leaves only the step that is sounding right now -- which is why this can
-# be set by the stall and not by the editing. Wider still would put more
-# hits of one drum in the queue at once, and two hits of one drum in the
-# queue retrigger imperfectly (see live-audio-path-sequenced.md).
-AHEAD_MS = 300
-
-# One bar of the fullest pattern is 64 hits; two steps of it is 8, and each
-# scheduled hit is a press plus the release that chokes the one before it.
-QUEUE_CAPACITY = 96
+# How often the instrument gets its turn, in milliseconds. Ten to twenty keeps
+# a note's attack tight.
+TURN_MS = 10
 
 BG = lv.color_hex(0x101418)
 FG = lv.color_hex(0xE0E0E0)
 ACCENT = lv.color_hex(0xB00020)
 STEP_OFF = lv.color_hex(0x2A2F36)
-# The clock indicator. Green when the sequencer keeps time off the audio
-# clock, amber when it has fallen back to the old step timer on a firmware
-# that HAS a pump -- that is a different app and the screen has to say so.
-CLOCK_OK = lv.color_hex(0x35C46A)
-CLOCK_BAD = lv.color_hex(0xE8A317)
 
 
 def _guarded(fn):
@@ -241,8 +185,7 @@ class _InstrumentAdapter:
 class DrumMachine:
     def __init__(self):
         # The default profile is buffered for throughput; a sequencer firing
-        # notes in real time pays that as note-to-sound delay (same reasoning
-        # as piano.py).
+        # notes in real time pays that as note-to-sound delay.
         self.audio_out = board_peripherals.audio_out(latency="low")
         self.audio_out.attach(app)
         self.audio_out.set_volume(85)
@@ -250,16 +193,8 @@ class DrumMachine:
 
         self.machine = DEFAULT_MACHINE
         self.inst = None
+        self.row_pitches = DEFAULT_PITCHES
         self.pattern = [set(s) for s in DEFAULT_PATTERN]
-        # The same pattern in the shape a sequencer reads, {step: (pitch, ...)}.
-        # Kept beside the four sets rather than replacing them: the sets are
-        # what the buttonmatrix is written against, and rebuilding sixteen
-        # cells costs nothing.
-        self.grid = {}
-        self._rebuild_grid()
-        # None on a build with no pump, and then nothing below happens.
-        self.queue = audio_pump.events(QUEUE_CAPACITY) if audio_pump else None
-        self.seq = None
         self.bpm = 120
         self.playing = False
         self.audio_started = False
@@ -269,21 +204,25 @@ class DrumMachine:
         self.panel_scr = None
         self.seq_scr = None
         self._indicator_active = -1
+        self._turning = False   # True while an instrument turn is under way
+        self._turn_errors = 0
+        self._turn_timer = None
 
         self._build_ui()
         self._load_machine(DEFAULT_MACHINE, start_audio=True)
         self._sync_matrix_from_pattern()
 
-        # One fast timer, two ways of keeping time behind it.
-        #
-        # With the pump: the timer tops up a queue of notes that already
-        # carry the frame they sound at, so being late costs nothing at all.
-        # Without: it fires each step itself against a wall-clock deadline,
-        # so lv timer lateness never accumulates and after a UI stall the
-        # groove resyncs instead of shifting. A stall longer than one step
-        # drops the missed steps rather than machine-gunning them.
+        # Each step is fired against a wall-clock deadline, so lv timer
+        # lateness never accumulates and after a UI stall the groove resyncs
+        # instead of shifting. A stall longer than one step drops the missed
+        # steps rather than machine-gunning them.
         self._next_step_ms = None
         self.timer = lv.timer_create(_guarded(self._on_step_timer), 15, None)
+
+        # The instrument's turns come from a machine.Timer where the port has
+        # one, so a long repaint cannot starve them. Elsewhere the step timer
+        # gives them, which is enough where nothing renders on a turn.
+        self._start_turns()
 
         # Collect little and often: left to itself the heap fills in tens of
         # seconds of audio and pays one long automatic mark-sweep pause;
@@ -295,48 +234,7 @@ class DrumMachine:
     def _step_ms(self):
         return 60_000 // self.bpm // 4  # 16th notes
 
-    def _ahead_steps(self):
-        """AHEAD_MS as a whole number of steps at the current tempo."""
-        step_ms = self._step_ms()
-        return max(2, (AHEAD_MS + step_ms - 1) // step_ms)
-
-    def _rebuild_grid(self):
-        """Refresh {step: (pitch, ...)} from the four row sets, in place.
-
-        In place because the sequencer holds this dict and reads a cell out
-        of it when it schedules that step; handing it a new dict would leave
-        it playing the old pattern.
-        """
-        self.grid.clear()
-        for step in range(N_STEPS):
-            hits = tuple(ROW_PITCHES[row] for row in range(N_ROWS)
-                         if step in self.pattern[row])
-            if hits:
-                self.grid[step] = hits
-
-    def _arm_sequencer(self, step=0):
-        """Put the current kit on the audio clock, from ``step``.
-
-        Called again after every kit change, and this is the reason: the kit
-        change stops the player, which shuts the pump down and sets its frame
-        clock back to zero. A sequencer still holding frames from before that
-        is holding numbers a day in the future, and would play nothing ever
-        again -- in silence, with no error anywhere.
-        """
-        self.seq = None
-        if self.queue is None or Sequencer is None or self.inst is None:
-            return
-        if not self.inst.schedulable:
-            return  # acoustickit: a strike is more than a press. Play it live.
-        self.seq = Sequencer(
-            self.queue, sample_rate=self.fmt.rate, bpm=self.bpm,
-            steps=N_STEPS, ahead=self._ahead_steps(), now=audio_pump.now,
-        )
-        self.seq.track(self.inst, self.grid)
-        if self.playing:
-            self.seq.start(step=step)
-
-    def _start_audio(self, step=0):
+    def _start_audio(self):
         """Connect the current kit to the speaker; report whether it took.
 
         A browser will not open audio until the page has had a user gesture --
@@ -355,122 +253,91 @@ class DrumMachine:
                 print("drum_machine: audio is not open yet -", err)
             self.audio_started = False
             self._audio_retry_ms = ticks_ms()
-            self._refresh_clock()
             return False
         self.audio_started = True
-        self._arm_sequencer(step)
-        self._refresh_clock()
         return True
 
-    def _refresh_clock(self):
-        """Say on the SCREEN which clock the pattern is keeping time on.
+    # ---------- the instrument's turns ----------
 
-        A firmware with a pump and an example that is not using it is the
-        failure this exists for: the sequencer falls back to the old step
-        timer, the console gets one line, and every number after that is
-        about a different app. It was missed exactly that way once.
+    def service(self):
+        """Give the instrument its turn; returns the blocks it moved.
+
+        Called every ``TURN_MS`` from a machine.Timer where there is one. A
+        turn that arrives while another is under way is dropped, because the
+        Timer's tick runs between the bytecodes of the app's own thread and
+        can land inside a turn (or inside a kit change, which replaces the
+        instrument).
         """
-        label = getattr(self, "clock_label", None)
-        if label is None:
-            return
-        if self.queue is None:
-            # No pump in this firmware: `audiodev.pump` imports everywhere,
-            # but without the C engine it has no event queue. That is every
-            # desktop, Android and browser build today. The timer IS the
-            # clock here and saying so quietly is the honest answer, not a
-            # warning.
-            self._show_clock(label, "TIMER", STEP_OFF)
-            return
-        on_pump = bool(getattr(self.audio_out, "pumped", False))
-        if on_pump and self.seq is not None:
-            self._show_clock(label, "CLK AUDIO", CLOCK_OK)
-            return
-        if self.inst is not None and not self.inst.schedulable:
-            # acoustickit: a strike is more than a press, so it plays live
-            # off the timer by design. Nothing is wrong.
-            self._show_clock(label, "CLK LIVE", STEP_OFF)
-            return
-        if not self.audio_started:
-            # A browser before its first gesture: nothing is sounding yet,
-            # and _start_audio() calls this again once it is.
-            self._show_clock(label, "TIMER", STEP_OFF)
-            return
-        why = getattr(self.audio_out, "pump_refused", None)
-        if why is None and Sequencer is None:
-            why = "this audioinstruments has no sequencer"
-        if self._show_clock(label, "CLK TIMER!", CLOCK_BAD):
-            print("drum_machine: keeping time on the OLD step timer -",
-                  why or "the pump did not take this graph")
+        inst = self.inst
+        if self._turning or inst is None or not self.audio_started:
+            return 0
+        self._turning = True
+        try:
+            return inst.fill() or 0
+        except Exception as exc:  # noqa: BLE001
+            # An instrument closed under us, say. Count it and carry on
+            # rather than raise into whatever the app was doing.
+            if not self._turn_errors:
+                print("drum_machine: a turn failed:", exc)
+            self._turn_errors += 1
+            return 0
+        finally:
+            self._turning = False
 
-    def _show_clock(self, label, text, color):
-        """Set the clock label; True when that changed what it says."""
-        label.set_style_text_color(color, 0)
-        if text == getattr(self, "_clock_text", None):
-            return False
-        self._clock_text = text
-        label.set_text(text)
-        return True
+    def _start_turns(self):
+        try:
+            from machine import Timer
 
-    def _playhead(self):
-        """The cell the audio is in, or -1 when nothing is playing.
+            timer = Timer(-1)
+            timer.init(period=TURN_MS, mode=Timer.PERIODIC,
+                       callback=lambda _t: self.service())
+        except Exception:  # noqa: BLE001
+            return  # no Timer on this port: _on_step_timer gives the turns
+        self._turn_timer = timer
 
-        Derived from the clock rather than counted, so a repaint that is
-        forty milliseconds late still lights the step that is sounding.
-        """
-        if self.seq is None:
-            return self.step if self.playing else -1
-        pos = self.seq.position
-        return pos % N_STEPS if pos >= 0 else -1
+    def _stop_turns(self):
+        timer, self._turn_timer = self._turn_timer, None
+        if timer is not None:
+            timer.deinit()
 
     def _load_machine(self, name, start_audio=False):
-        # THE STEP TIMER IS PAUSED FOR THE WHOLE OF THIS. Building a kit
-        # takes a while -- `audioinstruments.create` plus a pre-warm of every
-        # drum -- and LVGL's tick arrives on `micropython.schedule`, between
-        # this function's own bytecodes. So `_on_step_timer` ran INSIDE the
-        # load, saw `audio_started` False after the stop, and called
-        # `_start_audio()` itself; the one at the bottom of this function
-        # then asked for an I2S peripheral its own re-entrant copy was
-        # already holding and got "Peripheral in use". The groove came off
-        # the audio clock on every kit change, and before this sitting put
-        # `CLK TIMER!` on the screen it did so in silence.
+        # THE TIMERS ARE PAUSED FOR THE WHOLE OF THIS. Building a kit takes
+        # a while, and a timer's tick arrives on `micropython.schedule`,
+        # between this function's own bytecodes. A step timer that landed
+        # inside it saw `audio_started` False after the stop and opened the
+        # output itself; the one at the bottom then asked for a peripheral
+        # its own re-entrant copy already held. `_turning` does the same for
+        # the instrument's turns.
         timer = getattr(self, "timer", None)
         if timer is not None:
             timer.pause()
+        self._turning = True
         try:
             self._load_machine_locked(name)
         finally:
+            self._turning = False
             if timer is not None:
                 timer.resume()
 
     def _load_machine_locked(self, name):
-        # Where the groove is, before the pump's clock is reset under it.
-        step = max(self._playhead(), 0)
         if self.inst is not None:
             self.inst.all_notes_off()
             if self.audio_started:
-                if self.seq is not None:
-                    self.seq.stop()   # take the outgoing kit's bar back
                 self.audio_out.stop()
+            self.audio_started = False
         self.inst = audioinstruments.create(
             name, self.fmt.rate, channel_count=self.fmt.channels
         )
-        # Pre-warm before the output is attached: each drum builds its
-        # wavetables lazily on first note_on, and paying that inside the
-        # low-latency audio window makes a new kit stutter for its first
-        # bar or two (dmx, with its 13 voices, was the worst). These hits
-        # are inaudible - play() hasn't connected the output yet.
-        for pitch in ROW_PITCHES:
-            self.inst.note_on(pitch, velocity=1)
-        self.inst.all_notes_off()
         self.machine = name
-        names = dict(self.inst.note_map)
-        for i, pitch in enumerate(ROW_PITCHES):
+        self.row_pitches = ROW_PITCHES.get(name, DEFAULT_PITCHES)
+        names = dict(audioinstruments.load(name).NOTE_MAP)
+        for i, pitch in enumerate(self.row_pitches):
             self.row_labels[i].set_text(names.get(pitch, str(pitch)))
-        self._start_audio(step)
+        self._start_audio()
 
     def _fire_step(self, step):
-        """Play a step NOW. The wall-clock path only; the queue schedules."""
-        for row, pitch in enumerate(ROW_PITCHES):
+        """Play a step NOW."""
+        for row, pitch in enumerate(self.row_pitches):
             if step in self.pattern[row]:
                 self.inst.note_on(pitch, velocity=127)
 
@@ -509,7 +376,7 @@ class DrumMachine:
         self.play_btn.set_style_bg_color(ACCENT, lv.STATE.CHECKED)
 
         self.dropdown = lv.dropdown(bar)
-        self.dropdown.set_options("\n".join(m.upper() for m in MACHINES))
+        self.dropdown.set_options("\n".join(MACHINES))
         self.dropdown.set_selected(MACHINES.index(DEFAULT_MACHINE))
         self.dropdown.set_width(unit * 2)
         self.dropdown.add_event_cb(_guarded(self._on_machine), lv.EVENT.VALUE_CHANGED, None)
@@ -534,10 +401,6 @@ class DrumMachine:
         self.bpm_label = lv.label(bar)
         self.bpm_label.set_text("120 BPM")
         self.bpm_label.set_style_text_color(FG, 0)
-        # Which clock this is keeping time on. See `_refresh_clock`.
-        self.clock_label = lv.label(bar)
-        self.clock_label.set_text("")
-        self.clock_label.set_style_text_color(FG, 0)
         _toolbar_button(
             bar, "+", unit * 3 // 5,
             lambda e: self._change_bpm(BPM_STEP), lv.EVENT.CLICKED,
@@ -663,21 +526,10 @@ class DrumMachine:
             self.btnm.set_button_ctrl(idx, lv.buttonmatrix.CTRL.CHECKED)
             # Immediate feedback while stopped: audition the hit.
             if not self.playing:
-                self.inst.note_on(ROW_PITCHES[row], velocity=127)
+                self.inst.note_on(self.row_pitches[row], velocity=127)
         else:
             self.pattern[row].discard(step)
             self.btnm.clear_button_ctrl(idx, lv.buttonmatrix.CTRL.CHECKED)
-        self._edited()
-
-    def _edited(self):
-        """The pattern changed under a bar that may already be scheduled."""
-        self._rebuild_grid()
-        if self.seq is not None:
-            # Take back every step that has not sounded and read it again,
-            # at the frame it already had. Without this an edit inside the
-            # look-ahead window is not heard until the next bar, which reads
-            # as a button that did not work.
-            self.seq.relay()
 
     def _on_play(self, e):
         self.playing = self.play_btn.has_state(lv.STATE.CHECKED)
@@ -687,24 +539,26 @@ class DrumMachine:
                 self._start_audio()
             self.step = 0
             self._next_step_ms = None
-            if self.seq is not None:
-                self.seq.start()
         else:
-            if self.seq is not None:
-                self.seq.stop()      # and take back what has not sounded
             self.inst.all_notes_off()
             self._paint_indicator(-1)
 
     def _on_machine(self, e):
         name = MACHINES[self.dropdown.get_selected()]
         if name != self.machine:
-            self._load_machine(name)
+            try:
+                self._load_machine(name)
+            except Exception as exc:  # noqa: BLE001
+                # A machine that will not build at this sample rate: say so
+                # and go back to the one that was playing.
+                print("drum_machine:", name, "did not load -", exc)
+                self.dropdown.set_selected(MACHINES.index(self.machine))
+                self._load_machine(self.machine)
 
     def _on_clear(self, e):
         for s in self.pattern:
             s.clear()
         self._sync_matrix_from_pattern()
-        self._edited()
 
     def _on_volume(self, e):
         value = self.vol_slider.get_value()
@@ -714,15 +568,6 @@ class DrumMachine:
     def _change_bpm(self, delta):
         self.bpm = min(BPM_MAX, max(BPM_MIN, self.bpm + delta))
         self.bpm_label.set_text("%d BPM" % self.bpm)
-        if self.seq is not None:
-            # The window is a number of milliseconds, so the number of STEPS
-            # in it moves with the tempo. Set it before the bpm, or the
-            # re-laid grid is laid with the old one.
-            self.seq.ahead = self._ahead_steps()
-            # Cancels what has not sounded and re-lays it on the new grid,
-            # phase-locked to the next step -- so the tempo changes where the
-            # player pressed the button, with no burst and no gap.
-            self.seq.bpm = self.bpm
 
     def _on_step_timer(self, t):
         if self.playing and not self.audio_started:
@@ -732,25 +577,11 @@ class DrumMachine:
             # the visitor press PLAY twice.
             if ticks_diff(ticks_ms(), self._audio_retry_ms) > 1000:
                 self._start_audio()
+        if self._turn_timer is None:
+            self.service()
         if not self.playing:
             self._next_step_ms = None
             return
-        if self.seq is not None:
-            if not self.audio_out.pumped:
-                # The pump stopped under us and audiodev went back to pulling
-                # on this thread. So does the groove, mid-bar, rather than
-                # scheduling into a queue nothing applies any more.
-                self.seq.stop()
-                self.seq = None
-                self._next_step_ms = None
-                self._refresh_clock()
-            else:
-                # The queue keeps the time. This tick only tops it up and
-                # moves the light, and it may be as late as it likes at both.
-                self.seq.tick()
-                self.step = max(self._playhead(), 0)
-                self._paint_indicator(self._playhead())
-                return
         now = ticks_ms()
         if self._next_step_ms is None:
             self._next_step_ms = now
@@ -773,7 +604,7 @@ class DrumMachine:
     def _paint_indicator(self, active):
         # Restyle only the two cells that change: every style write
         # invalidates its cell, and 16 invalidations per step is render
-        # work the audio pump pays for on the board.
+        # work the audio thread pays for on the board.
         prev = self._indicator_active
         if active == prev:
             return
@@ -816,8 +647,7 @@ machine = DrumMachine()
 def _on_quit(_e=None):
     try:
         machine.timer.pause()
-        if machine.seq is not None:
-            machine.seq.stop()
+        machine._stop_turns()
         if machine.audio_started:
             machine.audio_out.close()
     except Exception:
