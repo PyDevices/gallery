@@ -1,4 +1,4 @@
-# deps: audioinstruments, lvgl, multimer
+# deps: audioinstruments, controlpanel, lvgl, multimer
 # gallery: featured, newwindow
 """
 drum_machine.py — 16-step drum sequencer with ten classic drum machines.
@@ -7,8 +7,9 @@ Four instrument rows (kick, snare, closed hat, open hat — pitches 36/38/42/46,
 shared by every machine in ``audioinstruments``) on an LVGL buttonmatrix, a
 step-position indicator, transport with BPM and volume controls, and a
 dropdown that switches between the ten drum machines while the pattern keeps
-playing. The PANEL button opens the generic Tier-0 instrument panel
-(``drum_seq.panel``) over the current machine for macro and patch editing.
+playing. The PANEL button opens ``controlpanel`` over the current machine: its
+kits on backlit pads and its macros on sixteen encoders with LED rings, the
+same panel an mpvst plug-in shows. EXIT on the panel comes back here.
 
 Where the firmware carries the audio pump, the groove is kept on the **audio
 clock**: each step is handed to ``audiodev.pump``'s queue with the frame it
@@ -93,7 +94,7 @@ except ImportError:
     Sequencer = None
 
 try:
-    from drum_seq.panel import Panel
+    from controlpanel import Panel
 except ImportError:
     Panel = None
 
@@ -195,7 +196,7 @@ def _toolbar_button(parent, text, width, cb=None, event=None, checkable=False):
 
 
 class _InstrumentAdapter:
-    """The Tier-0 panel's adapter contract over an audioinstruments machine."""
+    """controlpanel's adapter contract over an audioinstruments machine."""
 
     def __init__(self, dm):
         self._dm = dm
@@ -230,7 +231,7 @@ class _InstrumentAdapter:
         self._dm.inst.program_change(self._patch_keys[index])
 
     def set_bypass(self, bypass):
-        pass  # a drum machine has no bypass; the panel still draws the switch
+        pass  # a drum machine has no bypass; the panel still draws the button
 
     def request_reload(self):
         inst = self._dm.inst
@@ -789,23 +790,18 @@ class DrumMachine:
         if Panel is None or self.panel is not None:
             return
         scr = lv.obj(None)
-        self.panel = Panel(_InstrumentAdapter(self), screen=scr)
-        back = lv.button(scr)
-        back.add_flag(lv.obj.FLAG.FLOATING)
-        back.set_size(96, 40)
-        back.align(lv.ALIGN.BOTTOM_RIGHT, -8, -8)
-        back.set_style_bg_color(ACCENT, 0)
-        label = lv.label(back)
-        label.set_text("BACK")
-        label.center()
-        back.add_event_cb(_guarded(self._close_panel), lv.EVENT.CLICKED, None)
+        self.panel = Panel(
+            _InstrumentAdapter(self), screen=scr, subtitle="Drum machine",
+            on_close=_guarded(self._close_panel),
+        )
         self.panel_scr = scr
         lv.screen_load(scr)
 
     def _close_panel(self, e=None):
         lv.screen_load(self.seq_scr)
         if self.panel_scr is not None:
-            self.panel_scr.delete()
+            # EXIT's own click is still running: delete once it has returned.
+            self.panel_scr.delete_async()
         self.panel = None
         self.panel_scr = None
 
