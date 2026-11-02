@@ -115,7 +115,7 @@ GENERIC_ICON = (
 HEADER_SCAN_LINES = 10
 GALLERY_VALUES = frozenset({"featured", "skip", "binaries", "nochrome", "newwindow"})
 INSTALLABLE_DEPS = frozenset(
-    {"palettes", "pygraphics", "pdwidgets", "audioinstruments", "audioeffects", "controlpanel"}
+    {"palettes", "pygraphics", "pdwidgets", "audioinstruments", "audioeffects", "controlkit"}
 )
 
 LOCAL_IMPORT_RE = re.compile(

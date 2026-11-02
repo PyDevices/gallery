@@ -1,4 +1,4 @@
-# deps: audioinstruments, controlpanel, lvgl, multimer
+# deps: audioinstruments, controlkit, lvgl, multimer
 # gallery: featured, newwindow
 """
 drum_machine.py -- a 16-step drum sequencer with five drum machines.
@@ -6,7 +6,7 @@ drum_machine.py -- a 16-step drum sequencer with five drum machines.
 Four instrument rows on an LVGL buttonmatrix, a step-position indicator,
 transport with BPM and volume controls, and a dropdown that switches between
 the drum machines in ``audioinstruments`` while the pattern keeps playing.
-The PANEL button opens ``controlpanel`` over the current machine: its kits on
+The PANEL button opens the instrument panel (audioinstruments' panel_view) over the current machine: its kits on
 backlit pads and its macros on sixteen encoders with LED rings, the same panel
 an mpvst plug-in shows. EXIT on the panel comes back here.
 
@@ -64,7 +64,7 @@ import audioinstruments
 import board_peripherals
 
 try:
-    from controlpanel import Panel
+    from audioinstruments.panel_view import Panel
 except ImportError:
     Panel = None
 
@@ -140,7 +140,7 @@ def _toolbar_button(parent, text, width, cb=None, event=None, checkable=False):
 
 
 class _InstrumentAdapter:
-    """controlpanel's adapter contract over an audioinstruments machine."""
+    """The panel's adapter contract over an audioinstruments machine."""
 
     def __init__(self, dm):
         self._dm = dm
