@@ -6,8 +6,8 @@
 Consolidates loader install logic for ``micropython.html``, ``pyodide.html``,
 ``mp.html``, and ``py.html``. Gallery pages call ``_ps_loader()`` on
 Run only (``import utils.path`` then ``import ps_loader``). MicroPython WASM uses
-firmware ``mip`` after ``utils.path``; Pyodide uses portable ``mip.py``
-(from pydevices ``utils/``, mounted at ``/utils/``).
+firmware ``mip`` after ``utils.path``; Pyodide installs every library with
+micropip, and its portable ``mip.py`` comes in the ``pydevices-desktop`` wheel.
 """
 
 MIP_LIB_INDEX = "https://PyDevices.github.io/mip"
@@ -20,6 +20,16 @@ WHEEL_INDEX_URLS = (
 )
 # Browser default board package (display + board_peripherals + audio drivers).
 DESKTOP_BOARD_CONFIG_PACKAGE = "github:PyDevices/pydevices/board_configs/desktop/package.json"
+# Every page's PyDevices libraries, mip and the browser's board_config. The
+# desktop package's zeroconf has no browser build and pages don't use it, so
+# these two install without their dependencies.
+DESKTOP_WHEELS = ("pydevices", "pydevices-desktop")
+# PyPI has no browser build of numpy; Pyodide's own release is the one that exists.
+NUMPY_WHEEL = (
+    "https://cdn.jsdelivr.net/pyodide/v314.0.0/full/"
+    "numpy-2.4.3-cp314-cp314-pyemscripten_2026_0_wasm32.whl"
+)
+WHEELS_NEEDING_NUMPY = frozenset({"omnipython-audioinstruments"})
 # JSON API (not simple) — used to pin pyemscripten wasm wheels by direct URL.
 WHEEL_JSON_URL = "https://test.pypi.org/pypi/{package_name}/json"
 BOARD_WIDTH = 320
@@ -373,6 +383,7 @@ async def _ensure_micropip(status):
     await loadPackage("micropip")
     import micropip
 
+    micropip.set_index_urls(WHEEL_INDEX_URLS)
     return micropip
 
 
@@ -437,13 +448,12 @@ async def _install_wheels_pyodide(names, status):
         if status:
             status("Installing " + spec + "…")
         if spec.startswith("http://") or spec.startswith("https://"):
-            await micropip.install(spec)
+            await micropip.install(spec, pre=True)
             continue
+        if spec in WHEELS_NEEDING_NUMPY:
+            await micropip.install(NUMPY_WHEEL)
         wheel_url = await _pyemscripten_wheel_url(spec)
-        if wheel_url:
-            await micropip.install(wheel_url)
-        else:
-            await micropip.install(spec, index_urls=WHEEL_INDEX_URLS)
+        await micropip.install(wheel_url or spec, pre=True)
 
 
 async def install_pyodide(modules, manifests, wheel_deps, status=None):
@@ -452,6 +462,10 @@ async def install_pyodide(modules, manifests, wheel_deps, status=None):
 
     # Let the gallery paint "Running…" before sync mip fetches block the thread.
     await asyncio.sleep(0)
+    micropip = await _ensure_micropip(status)
+    if status:
+        status("Installing PyDevices…")
+    await micropip.install(list(DESKTOP_WHEELS), deps=False, pre=True)
     mip = _import_portable_mip()
     _ensure_board_config(mip, status, url_base=_page_base())
 
