@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """framebuf API via pygraphics when frozen ``framebuf`` is unavailable.
 
 On MicroPython unix, the C ``framebuf`` module in ``.frozen`` still wins

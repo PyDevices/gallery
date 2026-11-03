@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """NeoPixel / DotStar matrix simulator board config.
 
 Renders an addressable-LED grid to a scaled desktop window via ``pixel_sim``.

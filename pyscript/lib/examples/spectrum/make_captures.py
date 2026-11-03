@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 make_captures.py -- regenerate the analyzer's screenshots (CPython + Pillow).
 

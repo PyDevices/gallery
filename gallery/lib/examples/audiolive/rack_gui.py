@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # deps: audioeffects, lvgl
 # gallery: skip
 """rack_gui.py - an effect rack you play with your fingers.

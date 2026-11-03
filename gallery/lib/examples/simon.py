@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # deps: pygraphics
 """
 Simon — classic memory game for round (and rectangular) displays.

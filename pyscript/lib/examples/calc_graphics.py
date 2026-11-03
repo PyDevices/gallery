@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # deps: palettes, pygraphics
 # modules: calc_engine
 """
@@ -5,7 +9,7 @@ calc_graphics
 ====================================================
 Dark-theme pocket calculator drawn with ``pygraphics.FrameBuffer``.
 
-Shares :class:`calc_engine.CalcEngine` with the pdwidgets and LVGL front ends.
+Shares `calc_engine.CalcEngine` with the pdwidgets and LVGL front ends.
 All geometry (padding, button size, font scale, display band) is derived from
 ``display_drv.width`` / ``height`` so the UI scales from 320x480 up through
 640x960 and similar desktop sizes.

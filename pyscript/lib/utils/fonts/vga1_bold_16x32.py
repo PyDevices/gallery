@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 WIDTH = 16
 HEIGHT = 32
 FIRST = 0x20

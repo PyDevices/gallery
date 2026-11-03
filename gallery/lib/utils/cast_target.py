@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """cast_target -- where a cast board_config sends its picture.
 
 The cast board configs (examples/roku, roku_hls, miracast) ask here for the TV's

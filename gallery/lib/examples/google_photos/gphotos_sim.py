@@ -7,7 +7,7 @@ gphotos_sim
 ====================================================
 Duck-typed Picker API simulator for gallery / offline demos.
 
-``make_engine()`` returns :class:`GPhotosSimEngine` when:
+``make_engine()`` returns `GPhotosSimEngine` when:
 
 * ``GPHOTOS_SIM`` is truthy (explicit), or
 * PyScript (``emscripten`` / ``webassembly`` / ``import pyscript``), or
@@ -15,7 +15,7 @@ Duck-typed Picker API simulator for gallery / offline demos.
   ``tools/gphotos_auth.py``), or
 * no usable network is detected.
 
-``GPHOTOS_SIM=0`` forces the real :class:`gphotos_engine.GPhotosEngine`.
+``GPHOTOS_SIM=0`` forces the real `gphotos_engine.GPhotosEngine`.
 
 The sim pretends the user already picked a handful of photos, so the launcher
 opens on the list. PICK shows a fake QR code and "picks" again by itself after
@@ -115,7 +115,7 @@ def want_sim():
 
 
 def make_engine(**kwargs):
-    """Return :class:`GPhotosSimEngine` or :class:`GPhotosEngine` per :func:`sim_reason`."""
+    """Return `GPhotosSimEngine` or `GPhotosEngine` per `sim_reason`."""
     reason = sim_reason(kwargs.get("tokens"))
     if reason:
         return GPhotosSimEngine(reason=reason, **kwargs)
@@ -145,7 +145,7 @@ def _sim_items(rotate=0):
 
 
 class GPhotosSimEngine(GPhotosEngine):
-    """In-memory Picker stand-in — same surface as :class:`GPhotosEngine`."""
+    """In-memory Picker stand-in — same surface as `GPhotosEngine`."""
 
     sim = True
 

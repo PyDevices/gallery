@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # deps: audioeffects, audioinstruments, pygraphics
 # manifests: audiolive
 """A guitar pedalboard playing in a browser tab, on the same pump a board uses.

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # gallery: featured
 # deps: audiodsp, pygraphics
 """Two-octave landscape piano (480x320) with polyphonic touch and chords.

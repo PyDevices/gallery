@@ -9,10 +9,10 @@ Portrait Roku remote drawn with ``pygraphics.FrameBuffer``.
 
 One of three interchangeable Roku front ends (``roku_graphics``,
 ``roku_widgets``, ``roku_lvgl``) that all drive the same
-:class:`roku_engine.RokuEngine`; the flagship LVGL UI ships as ``roku_lvgl``
+`roku_engine.RokuEngine`; the flagship LVGL UI ships as ``roku_lvgl``
 and is what ``roku_remote`` launches.
 
-Shares :class:`roku_engine.RokuEngine` for ECP over the LAN (SSDP discover +
+Shares `roku_engine.RokuEngine` for ECP over the LAN (SSDP discover +
 HTTP keypress / apps / queries). Uses only three core PyDevices packages
 (``pygraphics``, ``displaydev`` via ``board_config``, ``appdev``, ``multimer``).
 
@@ -1129,7 +1129,7 @@ class _Remote:
         """Queue ``fn`` for the status soft-pump (no ``_thread``).
 
         ESP32-P4 ``_thread`` stacks are ~5KiB; network/ECP there overflowed
-        ``mp_thread``. Jobs run on the main tick via :meth:`_status_pump`.
+        ``mp_thread``. Jobs run on the main tick via `_status_pump`.
         """
         q = self._bg_q
         if len(q) >= 8:
@@ -1278,7 +1278,7 @@ class _Remote:
         """Progressive discovery callback (runs on the scan worker thread).
 
         Worker threads must not draw; append to the mailbox and let
-        :meth:`_status_pump` add the device on the main tick.
+        `_status_pump` add the device on the main tick.
         """
         if self._scan_cancel:
             return

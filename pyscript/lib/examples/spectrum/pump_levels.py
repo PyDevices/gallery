@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 pump_levels.py -- band levels from audiodsp's audiometer, fed in C.
 

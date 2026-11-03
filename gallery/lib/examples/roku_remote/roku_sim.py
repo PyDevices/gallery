@@ -7,13 +7,13 @@ roku_sim
 ====================================================
 Duck-typed Roku ECP simulator for gallery / offline demos.
 
-``make_engine()`` returns :class:`RokuSimEngine` when:
+``make_engine()`` returns `RokuSimEngine` when:
 
 * ``ROKU_SIM`` is truthy (explicit), or
 * PyScript (``emscripten`` / ``webassembly`` / ``import pyscript``), or
 * no usable network is detected (no ``socket`` module, or no station IPv4 / Wi‑Fi).
 
-``ROKU_SIM=0`` forces the real :class:`roku_engine.RokuEngine``.
+``ROKU_SIM=0`` forces the real `roku_engine.RokuEngine``.
 
 When the sim is chosen because the network is down (including missing
 ``socket``, e.g. CircuitPython unix), the plaque status line shows
@@ -110,7 +110,7 @@ def want_sim():
 
 
 def make_engine(host=None, port=None, timeout=5.0):
-    """Return :class:`RokuSimEngine` or :class:`RokuEngine` per :func:`sim_reason`."""
+    """Return `RokuSimEngine` or `RokuEngine` per `sim_reason`."""
     reason = sim_reason()
     if reason:
         return RokuSimEngine(
@@ -120,7 +120,7 @@ def make_engine(host=None, port=None, timeout=5.0):
 
 
 class RokuSimEngine(RokuEngine):
-    """In-memory ECP stand-in — same UI surface as :class:`RokuEngine`."""
+    """In-memory ECP stand-in — same UI surface as `RokuEngine`."""
 
     def __init__(self, host=None, port=None, timeout=5.0, reason="env"):
         # Avoid importing ROKU_PORT as default host path; keep empty until select.
