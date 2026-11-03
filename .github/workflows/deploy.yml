@@ -62,6 +62,7 @@ jobs:
           python scripts/gallery_generator.py --copy-examples _site/gallery/lib/examples
           cp -r packages/* _site/gallery/packages/
           cp gallery.toml _site/gallery.toml
+          python scripts/build_synthstation.py _site/synthstation
           touch _site/.nojekyll
 
       - name: Deploy to gh-pages
