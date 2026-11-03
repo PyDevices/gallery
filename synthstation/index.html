@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Synth Station</title>
+<meta name="description" content="Instruments you play from a MIDI keyboard, written in Python and running in your browser.">
+<meta name="theme-color" content="#111111">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<style>
+  html, body { height: 100%; margin: 0; background: #111; color: #ddd; font: 16px system-ui, sans-serif; }
+  body { display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  canvas { display: block; width: min(100vw, calc(100vh * 800 / 480)); aspect-ratio: 800 / 480; touch-action: none; }
+  #cover { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+           gap: 16px; padding: 16px; box-sizing: border-box; background: rgba(17, 17, 17, .92); text-align: center; }
+  #cover[hidden] { display: none; }
+  h1 { margin: 0; font-size: 28px; font-weight: 600; }
+  p { margin: 0; max-width: 32em; line-height: 1.5; }
+  button { font: inherit; padding: 12px 28px; border: 0; border-radius: 8px; background: #6a2c8c; color: #fff; cursor: pointer; }
+  button:disabled { background: #333; color: #999; cursor: default; }
+  button[hidden] { display: none; }
+  #install { background: transparent; border: 1px solid #666; }
+  a { color: #bbb; }
+</style>
+</head>
+<body>
+<canvas id="display_canvas" width="800" height="480" tabindex="0"></canvas>
+<div id="cover">
+  <h1>Synth Station</h1>
+  <p id="status">Loading...</p>
+  <button id="start" disabled>Start</button>
+  <button id="install" hidden>Install</button>
+  <p id="midi-note" hidden>This browser has no Web MIDI, so a keyboard won't be heard. The pads on bank A still play notes.</p>
+  <p><a href="https://pydevices.github.io/">Made with PyDevices</a></p>
+</div>
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const failed = (error) => {
+  $('cover').hidden = false;
+  $('status').textContent = 'Synth Station stopped: ' + error;
+  $('start').hidden = true;
+};
+
+// A browser offers to install only while the page holds on to this event.
+addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  $('install').hidden = false;
+  $('install').onclick = () => {
+    $('install').hidden = true;
+    event.prompt();
+  };
+});
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch((error) => console.warn('no offline copy:', error));
+}
+$('midi-note').hidden = 'requestMIDIAccess' in navigator;
+
+// The bundle is a length, a JSON list of [path, offset, size], then the files.
+function unpack(mp, buffer) {
+  const size = new DataView(buffer).getUint32(0, true);
+  const list = JSON.parse(new TextDecoder().decode(new Uint8Array(buffer, 4, size)));
+  for (const [path, offset, length] of list) {
+    let folder = '';
+    for (const part of path.split('/').slice(0, -1)) {
+      folder += '/' + part;
+      try { mp.FS.mkdir(folder); } catch { /* already there */ }
+    }
+    mp.FS.writeFile('/' + path, new Uint8Array(buffer, 4 + size + offset, length));
+  }
+}
+
+const log = (line) => (window.__log ||= []).push(line);
+
+try {
+  const {loadMicroPython} = await import('./micropython.mjs');
+  const [mp, bundle] = await Promise.all([
+    loadMicroPython({heapsize: 96 * 1024 * 1024, pystack: 16 * 1024, stdout: log, stderr: console.warn, linebuffer: true}),
+    fetch('./synthstation.bundle').then((response) => {
+      if (!response.ok) throw new Error(response.status + ' fetching the app');
+      return response.arrayBuffer();
+    }),
+  ]);
+  window.mp = mp;
+  unpack(mp, bundle);
+  await mp.runPythonAsync(`
+import os, sys
+os.chdir("/")
+sys.path[:] = ["/lib", "/", ".frozen"]
+from boarddev import env_set
+env_set("PYDEVICES_WIDTH", 800)
+env_set("PYDEVICES_HEIGHT", 480)
+env_set("PYDEVICES_SCALE", 1)
+import appkit
+from display_driver import app
+from touchkit import shell
+shell.quiet_app_timers(app)
+launcher = shell.TouchLauncher(app, home=None)
+launcher.scan("apps")
+launcher.shell = shell.TouchShell(launcher)
+shell.launcher = launcher
+`);
+  $('status').textContent = 'Ready. If the browser asks about MIDI, allow it, then play.';
+  $('start').disabled = false;
+  await new Promise((resolve) => { $('start').onclick = resolve; });
+
+  // Sound needs a touch or a key on this page, and a browser may take it back.
+  const bridge = globalThis.Module.pydevicesBridge;
+  const enable = () => bridge.enableAudio(false).catch(() => {});
+  await enable();
+  document.addEventListener('pointerdown', enable);
+  document.addEventListener('keydown', enable);
+
+  $('cover').hidden = true;
+  await mp.runPythonAsync(`
+launcher.boot("synthstation")
+appkit.serve()
+`);
+} catch (error) {
+  failed(error);
+}
+</script>
+</body>
+</html>
