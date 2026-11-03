@@ -7,6 +7,8 @@ on:
     paths:
       - '.site/**'
       - '.github/workflows/deploy.yml'
+      - 'synthstation.lock'
+      - 'scripts/build_synthstation.py'
       - 'lib/**'
       - 'packages/**'
       - 'gallery.toml'
