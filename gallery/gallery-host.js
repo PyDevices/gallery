@@ -278,14 +278,21 @@ document.getElementById("reset-runtime")?.addEventListener("click", () => state.
 // The bare interpreter-page layout has no visible "Enable Audio" control, so
 // unlock the AudioContext on the page's first gesture instead — matching
 // web_audio.py's _arm_resume_on_gesture behavior for the PSDisplay backend.
-// Output-only: never requests the microphone without an explicit button.
+// Output-only: never requests the microphone without an explicit button. A
+// gesture while the page is still loading finds no runtime to unlock, so the
+// listeners stay until one works.
 let audioGestureArmed = false;
 function armAudioGesture() {
     if (audioGestureArmed) return;
     audioGestureArmed = true;
-    const tryEnable = () => { state.enableAudio(false).catch(() => {}); };
-    document.addEventListener("pointerdown", tryEnable, {once: true});
-    document.addEventListener("keydown", tryEnable, {once: true});
+    const tryEnable = () => {
+        state.enableAudio(false).then(() => {
+            document.removeEventListener("pointerdown", tryEnable);
+            document.removeEventListener("keydown", tryEnable);
+        }).catch(() => {});
+    };
+    document.addEventListener("pointerdown", tryEnable);
+    document.addEventListener("keydown", tryEnable);
 }
 armAudioGesture();
 
