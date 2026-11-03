@@ -54,7 +54,7 @@ Usage::
 
 Blocking network calls only; the LVGL front end queues them on its main-tick
 pump (no ``_thread``). Errors never raise out of the public methods: they
-return ``None`` / ``False`` / ``""`` and set :attr:`GPhotosEngine.last_error`.
+return ``None`` / ``False`` / ``""`` and set `GPhotosEngine.last_error`.
 """
 
 import sys
@@ -236,7 +236,7 @@ def _write_text(path, text):
 
 
 def _mono_ms():
-    """Monotonic milliseconds; compare only via :func:`_elapsed_ms`."""
+    """Monotonic milliseconds; compare only via `_elapsed_ms`."""
     if time is None:
         return 0
     f = getattr(time, "ticks_ms", None)
@@ -636,7 +636,7 @@ def _transport(method, url, headers, body, timeout, sink=None):
 def http_request(method, url, headers=None, data=None, timeout=20.0):
     """Portable HTTPS request → ``(status, body_bytes)``.
 
-    Raises :class:`GPhotosError` only when no response arrived at all.
+    Raises `GPhotosError` only when no response arrived at all.
     """
     if isinstance(data, str):
         data = data.encode("utf-8")
@@ -862,7 +862,7 @@ class GPhotosEngine:
         return False
 
     def snapshot(self):
-        """The current session + picked list, for :meth:`put_back`.
+        """The current session + picked list, for `put_back`.
 
         A new session clears the list (its picks replace it). Take a snapshot
         first when the user may back out of picking and want the old list.
@@ -870,7 +870,7 @@ class GPhotosEngine:
         return (self.session, list(self.items), self._urls_at)
 
     def put_back(self, snap):
-        """Restore a :meth:`snapshot`; returns the session it replaced."""
+        """Restore a `snapshot`; returns the session it replaced."""
         replaced = self.session
         self.session, items, self._urls_at = snap
         self.items = list(items)
@@ -881,7 +881,7 @@ class GPhotosEngine:
         """Drop the picker session (Google forgets the picks); keeps the list.
 
         With ``session``, delete that one at Google and leave ``self.session``
-        alone (an abandoned session after :meth:`put_back`).
+        alone (an abandoned session after `put_back`).
         """
         if session is not None:
             s = session
@@ -994,7 +994,7 @@ class GPhotosEngine:
 
         ``crop=True`` asks Google for an exact w×h center crop (list tiles);
         ``crop=False`` fits the photo inside w×h (full-screen view). Returns
-        ``""`` on failure (see :attr:`last_error`).
+        ``""`` on failure (see `last_error`).
         """
         if not item or not item.get("id"):
             self.last_error = "no item"

@@ -291,5 +291,5 @@ async def main(port=80, udp_port=5005, ble=True, name="sensor-hub", plant=None, 
 
 
 def run(**kwargs):
-    """Start the hub and serve forever. Keyword arguments go to :func:`main`."""
+    """Start the hub and serve forever. Keyword arguments go to `main`."""
     asyncio.run(main(**kwargs))

@@ -26,7 +26,7 @@ Usage::
     print(calc.display)     # "16"
     print(calc.expression)  # "8 * 2 ="
 
-Supported keys (passed to :meth:`CalcEngine.press`):
+Supported keys (passed to `CalcEngine.press`):
     ``"0"``-``"9"``, ``"."``       -- build the current number
     ``"+"``, ``"-"``, ``"*"``, ``"/"`` -- binary operators
     ``"="``                        -- evaluate (repeatable: repeats last op)
@@ -60,7 +60,7 @@ def _compute(a, op, b):
 def format_number(value):
     """
     Render a float for the display: strip trailing zeros, cap at
-    :data:`MAX_DIGITS` significant digits, and fall back to scientific
+    `MAX_DIGITS` significant digits, and fall back to scientific
     notation when the value is too large, too small, or would not fit.
     """
     if value != value:  # NaN
@@ -103,9 +103,9 @@ def _to_scientific(mag):
 
 class CalcEngine:
     """
-    Pocket-calculator state machine. No UI dependencies — call :meth:`press`
-    with key names and read :attr:`display` / :attr:`expression` /
-    :attr:`is_error` to render.
+    Pocket-calculator state machine. No UI dependencies — call `press`
+    with key names and read `display` / `expression` /
+    `is_error` to render.
     """
 
     def __init__(self):

@@ -1,7 +1,7 @@
 """Entry for ``-m examples.roku_remote`` (MicroPython / CPython).
 
 MicroPython requires this file when using ``-m`` on a package. The launcher
-side effect lives in :mod:`roku_remote` (also imported by ``__init__`` for
+side effect lives in `roku_remote` (also imported by ``__init__`` for
 plain ``import roku_remote`` / gallery). Re-import here is a no-op if
 ``__init__`` already ran the app to completion.
 

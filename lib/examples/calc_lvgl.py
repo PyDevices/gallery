@@ -5,7 +5,7 @@ calc_lvgl
 ====================================================
 Dark-theme pocket calculator built with LVGL.
 
-Shares :class:`calc_engine.CalcEngine` with the graphics and pdwidgets front
+Shares `calc_engine.CalcEngine` with the graphics and pdwidgets front
 ends. Button sizes, gaps, radii, and font choice are derived from
 ``display_drv.width`` / ``height`` so the UI scales from 320x480 through
 640x960 and similar desktop sizes.

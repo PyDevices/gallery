@@ -10,7 +10,7 @@ Museum-quality Roku remote built with LVGL.
 
 The flagship of three interchangeable Roku front ends (``roku_graphics``,
 ``roku_widgets``, ``roku_lvgl``); ``roku_remote`` launches this one. All three
-drive the same :class:`roku_engine.RokuEngine`, so the display layer is fully
+drive the same `roku_engine.RokuEngine`, so the display layer is fully
 replaceable.
 
 Design: a deep charcoal chassis with a single violet accent, a brushed status
@@ -1624,7 +1624,7 @@ class _RokuLvgl:
         """Queue ``fn`` for the LVGL soft-pump (no ``_thread``).
 
         ESP32-P4 ``_thread`` stacks are ~5KiB; network/ECP there overflowed
-        ``mp_thread``. Jobs run on the main tick via :meth:`_pump` instead.
+        ``mp_thread``. Jobs run on the main tick via `_pump` instead.
         """
         q = self._bg_q
         if len(q) >= 8:

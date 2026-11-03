@@ -10,14 +10,14 @@ Launcher for the Roku remote stack.
 Loads prefs (``frontend``, MRU host/serial, saved TVs), resumes the last TV
 when its serial still matches, then starts the chosen front end:
 
-* :mod:`roku_engine`   -- ECP client + discovery + prefs (no UI)
-* :mod:`roku_sim`      -- offline / PyScript stand-in (``make_engine``)
-* :mod:`roku_lvgl`     -- LVGL front end (default)
-* :mod:`roku_widgets`  -- ``pdwidgets`` front end
-* :mod:`roku_graphics` -- ``pygraphics.FrameBuffer`` front end
+* `roku_engine`   -- ECP client + discovery + prefs (no UI)
+* `roku_sim`      -- offline / PyScript stand-in (``make_engine``)
+* `roku_lvgl`     -- LVGL front end (default)
+* `roku_widgets`  -- ``pdwidgets`` front end
+* `roku_graphics` -- ``pygraphics.FrameBuffer`` front end
 
 Switching front ends from MORE writes prefs then calls
-:func:`roku_engine.restart_app` (MCU ``reset``, else exit ``42`` after clean
+`roku_engine.restart_app` (MCU ``reset``, else exit ``42`` after clean
 teardown). Desktop relaunch is a host shell loop on exit ``42`` only — there
 is no in-process ``execv``. PyScript / Jupyter only show ``reload page`` /
 ``restart kernel``. Soft-reset is not relied on (it does not re-run ``main.py``).
@@ -35,7 +35,7 @@ Desktop launch from ``gallery/lib`` (same for ``micropython``,
     while ($true) { micropython -m examples.roku_remote; if ($LASTEXITCODE -ne 42) { break } }
 
 Requires Roku **Control by mobile apps -> Enabled**; join WiFi before running
-on a microcontroller. Optional fixed target: ``ROKU_HOST`` in :mod:`roku_engine`.
+on a microcontroller. Optional fixed target: ``ROKU_HOST`` in `roku_engine`.
 
 Desktop panel size: edit ``_WIDTH`` / ``_HEIGHT`` / ``_SCALE`` below. Those are
 applied via ``boarddev.env_set`` before any front end imports ``board_config``.

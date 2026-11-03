@@ -69,7 +69,7 @@ def _rgb888_from_565(c):
 class SimPixelFramebuffer(pygraphics.FrameBuffer):
     """RGB888 grid framebuffer that renders scaled LED blocks to a desktop display.
 
-    A drop-in for the ``pixel_buffer`` that :class:`PixelDisplay` wraps: it
+    A drop-in for the ``pixel_buffer`` that `PixelDisplay` wraps: it
     exposes ``width`` / ``height`` / ``rotation`` and a ``display()`` flush, but
     instead of pushing to a physical strip it paints each cell as a large square
     on ``backend`` (centered, square LEDs, dark gaps for a matrix look).
@@ -165,7 +165,7 @@ class SimPixelFramebuffer(pygraphics.FrameBuffer):
 
 
 class SimPixelDisplay(PixelDisplay):
-    """PixelDisplay that uses fast bulk blits into :class:`SimPixelFramebuffer`."""
+    """PixelDisplay that uses fast bulk blits into `SimPixelFramebuffer`."""
 
     def blit_rect(self, buf, x, y, w, h):
         inner = self._raw_buffer
