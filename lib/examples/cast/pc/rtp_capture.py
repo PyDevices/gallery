@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Capture the P4's RTP/MPEG-TS cast on a PC, with arrival times.
 
 Run it with the Windows Python (the LAN reaches it; a WSL socket never sees

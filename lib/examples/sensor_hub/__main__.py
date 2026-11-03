@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Run the hub: ``micropython -m examples.sensor_hub [--port 8080] [--udp-port 5005] [--no-ble]``.
 
 On a board, ``main.py`` joins Wi-Fi first (see README.md), then calls

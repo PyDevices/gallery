@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """The sensor hub: nodes publish readings, browsers watch them live.
 
 One asyncio program serves four doors, all feeding the same table:

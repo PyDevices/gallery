@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # The laptop drives the P4 over the cast: mouse and keyboard reports come back
 # over UIBC, become touch and key events through the board's own touch_read and
 # keypad_read and appdev's ordinary Touch and Keypad adapters, and the scene

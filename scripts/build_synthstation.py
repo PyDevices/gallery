@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Assemble Synth Station's page: its Python as one bundle, beside a runtime of its own.
 
     python scripts/build_synthstation.py _site/synthstation

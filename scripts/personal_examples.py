@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Local-only trees under ``lib/examples/`` — symlinks or gitignored checkouts.
 
 Never included in ``packages/examples.json``, PyScript gallery generation, or CI.

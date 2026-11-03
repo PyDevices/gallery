@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Minimal CST816 driver for CircuitPython (Waveshare RP2040-Touch-LCD-1.28)."""
 
 import time

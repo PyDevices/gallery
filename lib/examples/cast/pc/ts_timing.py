@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Timing analysis of a captured cast: the stream's clocks against the wall clock.
 
 ``python3 ts_timing.py CAPTURE.bin`` reads what rtp_capture.py wrote and reports,

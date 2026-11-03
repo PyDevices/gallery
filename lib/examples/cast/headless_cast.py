@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # headless_cast.py -- a P4 with no screen of its own casts a picture it draws
 # in memory: a clock, its uptime and a moving bar, to a Roku TV or a Windows
 # laptop's Wireless Display app.

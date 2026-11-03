@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 analyzer.py -- the spectrum analyzer as a widget any app can put on its screen.
 

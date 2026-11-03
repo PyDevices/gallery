@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # deps: audioeffects, lvgl
 # gallery: skip
 """rack_all.py - a screen, a USB MIDI port and live audio, all at once.

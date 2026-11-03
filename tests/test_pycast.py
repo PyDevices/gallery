@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """pycast's sound path on CPython: the LPCM mux against castif's C muxer,
 the resampler, the block ring, and the paced speaker."""
 import array

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """tower_climb launch flags (argv only — no getenv).
 
 Interactive MCU/desktop: run with no flags.

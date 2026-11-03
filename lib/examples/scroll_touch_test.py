@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # deps: palettes, pygraphics
 # utils: displaybuf
 # Vertical scroll + touch/click. Cycles display_drv ↔ DisplayBuffer on a timer

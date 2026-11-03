@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """RokuAudioSink: the WAV it serves the TV, and the clock that paces it."""
 import array
 import os

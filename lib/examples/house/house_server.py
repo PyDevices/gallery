@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # house_server.py -- the house dashboard alone, without the panel: the sensor
 # hub's HTTP + websocket server on the board, fed the SimHouse readings, so a
 # phone (or a PC browser) sees the rooms update live and an alert when a

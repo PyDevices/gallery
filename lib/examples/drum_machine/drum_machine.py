@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # deps: audioinstruments, controlkit, lvgl, multimer
 # gallery: featured, newwindow
 """

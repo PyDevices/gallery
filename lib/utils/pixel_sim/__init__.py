@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 pixel_sim — desktop simulator for addressable-LED matrices (NeoPixel / DotStar).
 

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # house_app.py -- the smart-home appliance the P4 boots into.
 #
 # One program: the house panel on the P4's own display, the sensor hub's

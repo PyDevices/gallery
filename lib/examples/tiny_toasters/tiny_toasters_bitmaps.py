@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 BITMAPS = 5
 HEIGHT = 32
 WIDTH = 32

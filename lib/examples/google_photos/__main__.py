@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Entry for ``-m examples.google_photos`` (MicroPython / CPython).
 
 MicroPython requires this file when using ``-m`` on a package. The launcher

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Publish readings to a sensor hub over Wi-Fi, by UDP or HTTP.
 
 From a PC (CPython) it sends the machine's own numbers, once a second::

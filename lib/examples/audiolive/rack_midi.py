@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # deps: audioeffects, audioinstruments
 # gallery: skip
 """rack_midi.py - the board is a USB MIDI instrument you play from a DAW.

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # tv_cast.py -- cast the P4's panel, with sound, to a Roku TV, and control
 # the TV over ECP. One producer plays a melody on the P4's speaker (at the
 # panel's listening level, 85 %) and on the TV, on the cast's clock, while a

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 color_setup.py - color setup for DisplayBuffer with displaydev (nano-gui bridge).
 

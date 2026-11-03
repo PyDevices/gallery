@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Generate RGB565 BMP assets for tower_climb.py (run once on CPython).
 
 Temporary generator — remove after assets are approved.

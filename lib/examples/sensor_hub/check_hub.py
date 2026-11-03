@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """End-to-end check of a running sensor hub, from a PC (CPython, stdlib only).
 
 It opens the dashboard's WebSocket feed, publishes a fresh random value over

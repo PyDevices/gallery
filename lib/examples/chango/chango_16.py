@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # Converted from Chango-Regular.ttf using:
 #     ./write_font_converter.py Chango-Regular.ttf 16 -c 0x20-0x7f
 

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # gallery: skip
 # The house appliance's modules import each other and the cast example by name
 # (house_panel, roku_cast, castfast), and the sensor hub as a package, so

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # gallery: skip
 # The modules in this example import each other by name (micecast, castfast,
 # roku_cast, ...), so importing the package puts its directory on the path.

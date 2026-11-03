@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Simon memory game for Waveshare RP2040-Touch-LCD-1.28 (CircuitPython)."""
 
 import time
