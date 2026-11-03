@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Fleet page: every board mpftp can reach, on one web page on your PC.
 
     python fleet.py                    # then open http://localhost:8700

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """``main.py`` for a board that hosts the hub. Copy it to the board as ``/main.py``.
 
 It joins Wi-Fi from the board's ``secrets.py`` (pydevices' ``wifi.py``, as in

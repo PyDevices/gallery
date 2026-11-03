@@ -10,7 +10,7 @@ Portrait Roku remote built with ``pdwidgets``.
 
 One of three interchangeable Roku front ends (``roku_graphics``,
 ``roku_widgets``, ``roku_lvgl``) that all drive the same
-:class:`roku_engine.RokuEngine`. Remote chrome matches ``roku_lvgl``: utility,
+`roku_engine.RokuEngine`. Remote chrome matches ``roku_lvgl``: utility,
 D-pad, options (replay / info / CC), transport, volume, channel, then
 APPS | MORE | SELECT. MORE lists TV inputs. Layout, padding, and text scales
 are derived from ``display.width`` / ``height`` so the UI scales from 320x480
@@ -323,7 +323,7 @@ class _RemoteUI:
         ESP32-P4 ``_thread`` stacks are ~5KiB. Starting a worker for
         name-refresh/ECP/scan led to ``Stack protection fault`` in ``mp_thread``
         while the main soft-timer path flooded with recursion-limit errors.
-        Jobs run on the main tick via :meth:`_pump` instead.
+        Jobs run on the main tick via `_pump` instead.
         """
         q = self._bg_q
         if len(q) >= 8:

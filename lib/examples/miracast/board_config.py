@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Run a PyDevices app on a TV or a laptop's Wireless Display window, from a P4
 with no screen of its own.
 

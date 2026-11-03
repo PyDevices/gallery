@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # hls_display.py -- a display that is live video: whatever an app draws, the
 # ESP32-P4 encodes as H.264 and serves as HLS, for a Roku TV (the PyDevices
 # Companion channel's video mode), VLC, or any HLS player.

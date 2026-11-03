@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # deps: pdwidgets
 # modules: calc_engine
 """
@@ -5,7 +9,7 @@ calc_widgets
 ====================================================
 Dark-theme pocket calculator built with ``pdwidgets``.
 
-Shares :class:`calc_engine.CalcEngine` with the graphics and LVGL front ends.
+Shares `calc_engine.CalcEngine` with the graphics and LVGL front ends.
 Layout, font scales, radii, and padding are derived from display size so the
 UI scales from 320x480 through 640x960 and similar desktop sizes.
 

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # deps: audioeffects, pygraphics
 # gallery: skip
 """rack_knob.py - an effect rack you turn with a knob.

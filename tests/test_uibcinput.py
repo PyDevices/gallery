@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """uibcinput: a touchscreen's and a remote's HID reports, read by their
 report descriptors, become touches and keys."""
 import os

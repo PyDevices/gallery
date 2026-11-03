@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Inject events.Quit through the QUEUE device read path (desktop SDL / PG backends).
 

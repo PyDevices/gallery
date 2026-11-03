@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # deps: audiodsp, pdwidgets
 """
 widgets_locker_kiosk

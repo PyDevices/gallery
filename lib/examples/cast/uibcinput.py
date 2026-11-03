@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """The laptop's mouse, keyboard, touchscreen and remote, arriving over the
 cast's back channel, as a pydevices input device: a cursor the board
 integrates from the relative mouse reports, clicks as touches at the cursor,

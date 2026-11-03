@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # melody.py -- a short looping arpeggio as 10 ms blocks of 48 kHz stereo s16
 # little-endian PCM, the format the audio pump and the cast both take. Built
 # once into RAM so a cast stays cheap.

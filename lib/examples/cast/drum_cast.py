@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # drum_cast.py -- the drum machine example on the P4, its sound on the cast.
 # The cast takes the audio pump's OUTPUT: castif reads the pump's tap from its
 # own task on core 0 (Cast.set_tap), so what the P4 plays is what the sink gets,

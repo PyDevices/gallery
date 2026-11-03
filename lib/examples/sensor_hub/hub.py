@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """The sensor hub: nodes publish readings, browsers watch them live.
 
 One asyncio program serves four doors, all feeding the same table:
@@ -291,5 +295,5 @@ async def main(port=80, udp_port=5005, ble=True, name="sensor-hub", plant=None, 
 
 
 def run(**kwargs):
-    """Start the hub and serve forever. Keyword arguments go to :func:`main`."""
+    """Start the hub and serve forever. Keyword arguments go to `main`."""
     asyncio.run(main(**kwargs))

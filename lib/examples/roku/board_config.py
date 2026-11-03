@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Run a PyDevices example on a Roku TV, with the TV's remote as its keyboard.
 
 Put this folder first on the path and run the example, e.g. testris.py.

@@ -1,7 +1,11 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Entry for ``-m examples.google_photos`` (MicroPython / CPython).
 
 MicroPython requires this file when using ``-m`` on a package. The launcher
-side effect lives in :mod:`google_photos` (also imported by ``__init__`` for
+side effect lives in `google_photos` (also imported by ``__init__`` for
 plain ``import google_photos`` / gallery). Re-import here is a no-op if
 ``__init__`` already ran the app to completion.
 

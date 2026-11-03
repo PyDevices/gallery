@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """A one-way WebSocket feed for an asyncio HTTP server (MicroPython and CPython).
 
 The server pushes text frames to every browser that connects; what the

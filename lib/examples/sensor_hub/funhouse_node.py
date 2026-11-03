@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """The FunHouse as a sensor node for the house hub (Batch 2).
 
 It reads the FunHouse's own sensors -- temperature and humidity (AHT20),

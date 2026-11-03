@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 touch_setup.py - hardware setup for micropython-touch using DisplayBuffer on displaydev.
 See: https://github.com/peterhinch/micropython-touch

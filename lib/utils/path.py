@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Portable, idempotent search-path configuration for PyDevices interpreters.
 
 Applies the documented interpreter search path when the environment has not

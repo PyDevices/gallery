@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # pycast.py -- castif's cast on CPython: ffmpeg encodes the H.264, Python muxes
 # the MPEG-TS and sends the RTP, for micecast's session. So CastDisplay (and any
 # app on ../miracast/board_config.py) runs from python and python.exe, to a Roku

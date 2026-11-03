@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # gallery: skip
 # A proof of the house appliance's SHOW-TV path with nobody at the panel: the
 # house app, unchanged, with board_config.touch_read wrapped so that at each

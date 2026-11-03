@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Run a PyDevices app as live video on a Roku TV (or in VLC), from an
 ESP32-P4 with no screen of its own, or from a desktop's CPython with ffmpeg.
 

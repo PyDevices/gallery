@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """The hub's Bluetooth door: a GATT service a node or a phone writes readings to.
 
 One service, one writable characteristic. Each write is one reading, in the

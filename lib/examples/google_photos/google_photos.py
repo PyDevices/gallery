@@ -12,10 +12,10 @@ the list with thumbnails, view them full screen, or run a slideshow.
 
 Launcher for the Google Photos stack:
 
-* :mod:`gphotos_engine` -- Picker API client, token refresh, prefs, thumbnail
+* `gphotos_engine` -- Picker API client, token refresh, prefs, thumbnail
   cache (no UI)
-* :mod:`gphotos_sim`    -- offline / PyScript stand-in (``make_engine``)
-* :mod:`gphotos_lvgl`   -- LVGL front end (list, view, slideshow, QR pairing)
+* `gphotos_sim`    -- offline / PyScript stand-in (``make_engine``)
+* `gphotos_lvgl`   -- LVGL front end (list, view, slideshow, QR pairing)
 
 How picking works: the device creates a Picker API *session* and shows its
 link as a QR code. Scan it with your phone, choose photos in Google Photos,

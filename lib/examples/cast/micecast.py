@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Cast from MicroPython to a Wi-Fi Display sink (a Windows PC or a Roku) over Miracast-over-Infrastructure (MS-MICE).
 
 One poll loop, no threads: MICE on TCP 7250, the Wi-Fi Display

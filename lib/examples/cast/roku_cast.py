@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # roku_cast.py -- a Roku TV as a wireless display you can also control.
 #
 # Two halves, for a PyDevices smart-home app:

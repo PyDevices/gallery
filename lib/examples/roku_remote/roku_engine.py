@@ -294,7 +294,7 @@ def format_delete_status(name, fits, tail=""):
 
 
 def format_delete_status_chars(name, max_chars, tail=""):
-    """Like :func:`format_delete_status` with a character budget for the whole string."""
+    """Like `format_delete_status` with a character budget for the whole string."""
     limit = max(8, int(max_chars or 0))
 
     def fits(s):
@@ -1532,7 +1532,7 @@ def _save_known_hosts(devices):
     """Merge *devices* into prefs (additive).
 
     - Never removes a cached TV unless the caller rewrites via
-      :func:`_remove_known_host`.
+      `_remove_known_host`.
     - When a device reports ``serial``, a prior entry with the same serial but a
       different IP is replaced (DHCP move) so the list does not grow duplicates.
     """
@@ -2096,7 +2096,7 @@ class RokuEngine:
         self._ecp_last_conn_close = False
 
     def cancel_discover(self):
-        """Ask an in-flight :meth:`discover` to stop at the next checkpoint."""
+        """Ask an in-flight `discover` to stop at the next checkpoint."""
         self._discover_cancel = True
 
     def _ecp_sock_close(self):
@@ -2427,7 +2427,7 @@ class RokuEngine:
         """``position_ms / duration_ms`` in ``0.0..1.0``, or ``None`` if unusable.
 
         Requires a positive duration and a non-stale position (same 3s rule as
-        :meth:`position_label`). Used for the under-plaque scrub rail.
+        `position_label`). Used for the under-plaque scrub rail.
         """
         ms = self.media_state or {}
         pos = ms.get("position_ms")
@@ -2554,7 +2554,7 @@ class RokuEngine:
         """Flip cached ``power-mode`` for an immediate UI redraw; return the key.
 
         Lets a front end repaint the power face before the (blocking) ECP call
-        runs on a worker. Pair with :meth:`press_refresh` on the returned key.
+        runs on a worker. Pair with `press_refresh` on the returned key.
         """
         key = self.power_key()
         if not self.device_info:
@@ -2566,8 +2566,8 @@ class RokuEngine:
         """Blocking convenience: flip power, send the key, resync device state.
 
         Returns the ECP key that was sent. Front ends that want an optimistic
-        redraw should instead call :meth:`mark_power_optimistic` on the main
-        thread and :meth:`press_refresh` on a worker.
+        redraw should instead call `mark_power_optimistic` on the main
+        thread and `press_refresh` on a worker.
         """
         key = self.mark_power_optimistic()
         self.press(key)
@@ -2620,7 +2620,7 @@ class RokuEngine:
         Cache hosts are probed first (and reported via ``on_device``) so the UI
         can populate quickly. Select **SCAN** passes ``scan_fallback=False``
         (SSDP + known-host reprobe only). Select **FULL** passes ``True`` so a
-        unicast ``/24`` runs when :func:`unicast_scan_supported` (skipped on
+        unicast ``/24`` runs when `unicast_scan_supported` (skipped on
         MicroPython ``network`` STA targets where the sweep wedges the UI).
         Does not pick a target host — callers use Select / ``set_host`` /
         ``resume_last_host``.

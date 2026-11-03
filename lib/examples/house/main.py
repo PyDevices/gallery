@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # Copy to the board as /main.py to boot into the house appliance: the house
 # panel on the display, the dashboard at http://<board ip>/, and a SHOW-TV
 # button that casts to the TV. Ctrl-C at the REPL stops it.

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 hardware_setup.py - hardware setup for micropython-micro-gui using DisplayBuffer.
 See: https://github.com/peterhinch/micropython-micro-gui

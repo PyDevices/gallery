@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # house_panel.py -- the smart-home house display.
 #
 # The P4 is the house panel: it shows every room's sensor node from the

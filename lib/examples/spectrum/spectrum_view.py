@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 spectrum_view.py -- draws a log-frequency spectrum analyzer with pygraphics.
 

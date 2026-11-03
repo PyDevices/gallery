@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # Shared by the demos: a console log with a millisecond clock, and Wi-Fi up
 # with power save off (an ESP32 in power save answers late enough to starve a
 # stream). The log is never written to flash: a littlefs block erase parks

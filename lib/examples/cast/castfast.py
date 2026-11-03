@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # castfast.py -- cast with the castif C task.
 #
 # Same MICE + RTSP session as micecast, but on PLAY the streaming loop is the

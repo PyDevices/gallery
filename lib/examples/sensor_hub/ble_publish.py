@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """Publish readings to the hub over Bluetooth, from a PC (or a board acting as central).
 
     python ble_publish.py                      # find the hub by its service, send once a second

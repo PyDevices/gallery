@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # deps: audioeffects, audioinstruments, pygraphics
 # gallery: skip
 # (this is a library with no main(); the gallery's card for it is the

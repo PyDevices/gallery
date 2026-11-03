@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # cast_display.py -- a display that is a TV or a laptop across the room.
 #
 # CastDisplay is an FBDisplay over a framebuffer in RAM. Whatever an app draws
