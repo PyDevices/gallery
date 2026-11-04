@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-FileCopyrightText: 2026 Brad Barnett
+#
 # SPDX-License-Identifier: MIT
 """Test PyScript HTML shells against the live deployed GitHub Pages site."""
 

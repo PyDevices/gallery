@@ -1,7 +1,7 @@
-# deps: lvgl, pygraphics, pdwidgets
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
+# deps: lvgl, pygraphics, pdwidgets
 """
 roku_remote
 ====================================================
