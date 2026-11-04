@@ -13,7 +13,7 @@ chango.py
 
     Test for TrueType write_font_converter.
 
-See the :ref:`write_font_converter.py<write_font_converter>` program in the utils directory.
+See the `write_font_converter.py` program in the utils directory.
 
 .. note:: This example requires the following modules:
 

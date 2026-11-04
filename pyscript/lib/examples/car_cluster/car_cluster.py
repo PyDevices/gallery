@@ -1,6 +1,8 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
 # gallery: newwindow
 # deps: lvgl
-# SPDX-License-Identifier: MIT
 """
 car_cluster
 ====================================================

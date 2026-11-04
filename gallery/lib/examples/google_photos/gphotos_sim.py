@@ -1,7 +1,7 @@
-# gallery: skip
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
+# gallery: skip
 """
 gphotos_sim
 ====================================================

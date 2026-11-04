@@ -1,7 +1,7 @@
-# deps: pygraphics
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
+# deps: pygraphics
 """
 tv_remote_menu.py — 10-foot / remote-friendly menu for PyScript TV browsers.
 

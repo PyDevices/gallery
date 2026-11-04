@@ -1,8 +1,8 @@
-# deps: pdwidgets
-# modules: roku_engine
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
+# deps: pdwidgets
+# modules: roku_engine
 """
 roku_widgets
 ====================================================

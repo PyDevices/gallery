@@ -15,7 +15,7 @@ proverbs.py
 
     Displays what I hope are chinese proverbs in simplified chinese to test UTF-8 font support.
 The fonts were converted from True Type fonts using the
-:ref:`write_font_converter.py<write_font_converter>` utility.
+`write_font_converter.py` utility.
 
 .. literalinclude:: ../../../examples/proverbs/make_proverbs_fonts.sh
 
