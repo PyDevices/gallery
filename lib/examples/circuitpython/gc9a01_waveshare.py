@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2017 Scott Shawcroft, written for Adafruit Industries
 # SPDX-FileCopyrightText: Copyright (c) 2021 Tyler Crumpton
+#
 # SPDX-License-Identifier: MIT
 """GC9A01 displayio driver — Waveshare RP2040-Touch-LCD-1.28 init (MADCTL 0x98, COLMOD 0x05)."""
 
