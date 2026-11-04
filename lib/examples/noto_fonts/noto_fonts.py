@@ -15,7 +15,7 @@ noto_fonts.py
 
 Writes the names of three Noto fonts centered on the display using the font.
 The fonts were converted from True Type fonts using the
-:ref:`write_font_converter.py<write_font_converter>` utility.
+`write_font_converter.py` utility.
 
 .. note:: This example requires the following modules:
 
