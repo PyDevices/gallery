@@ -1,0 +1,8 @@
+# Paths the style check skips: code that isn't ours, and generated files.
+# One glob per line.
+
+# Adapted from Russ Hughes' st7789py examples.
+lib/examples/alien/
+
+# The tft_* helpers keep their upstream holders and licence text.
+lib/utils/tft_*.py
