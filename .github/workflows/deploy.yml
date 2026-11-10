@@ -73,6 +73,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: _site
           publish_branch: gh-pages
+          cname: gallery.omnipython.org
 
       - name: Wait for GitHub Pages to publish
         run: sleep 60
