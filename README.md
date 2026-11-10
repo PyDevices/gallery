@@ -8,7 +8,7 @@ phone.
 
 ## Try one in your browser
 
-Open [pydevices.github.io/gallery](https://pydevices.github.io/gallery/),
+Open [gallery.omnipython.org](https://gallery.omnipython.org/),
 choose an app and press run. Nothing to install.
 
 ## Run one on your computer

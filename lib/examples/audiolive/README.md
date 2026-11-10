@@ -18,7 +18,7 @@ a codec register.
 | [`rack_midi.py`](rack_midi.py) | the same P4 | The board is a USB MIDI instrument. Play it from a DAW; CCs move the pedals; a program change swaps the whole board |
 | [`rack_all.py`](rack_all.py) | the same P4 | All three at once — screen, USB MIDI and the microphone through the pedals — with STARVED on screen in numbers you can read across the room |
 | [`rack_knob.py`](rack_knob.py) | LilyGO T-Embed S3 | The same pedalboard for a board with one encoder and no touchscreen |
-| [`../audiolive_rack.py`](../audiolive_rack.py) | any browser | The same rack with no board at all — a timer services the pump and drains it into Web Audio. [Play it](https://pydevices.github.io/gallery/gallery/) |
+| [`../audiolive_rack.py`](../audiolive_rack.py) | any browser | The same rack with no board at all — a timer services the pump and drains it into Web Audio. [Play it](https://gallery.omnipython.org/) |
 
 ## Playing it without a board
 
