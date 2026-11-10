@@ -578,8 +578,8 @@ def fetch_ph_gui(which, apply_patches=True):
     that import ``color_setup`` / ``hardware_setup`` / ``touch_setup`` will
     call again with patches enabled.
 
-    Uses ``mip.install`` (firmware on MicroPython; portable ``mip.py`` from
-    pydevices ``utils/`` on CPython / Pyodide / CircuitPython).
+    Installs with the firmware's ``mip`` on MicroPython, and with ``omip``
+    (in the ``pydevices`` package) on CPython, Pyodide and CircuitPython.
     """
     global _IN_FETCH
 
@@ -616,13 +616,21 @@ def fetch_ph_gui(which, apply_patches=True):
         if present is not None or _gui_exists():
             _empty_gui()
 
+        import sys
+
         try:
-            import mip
+            if sys.implementation.name == "micropython":
+                import mip as installer
+            else:
+                import omip as installer
         except ImportError:
             return False
 
         try:
-            mip.install(_PACKAGES[which], target=_utils_dir(), mpy=False)
+            if installer.__name__ == "omip":
+                installer.install(_PACKAGES[which], target=_utils_dir(), mpy=False, prompt=False)
+            else:
+                installer.install(_PACKAGES[which], target=_utils_dir(), mpy=False)
         except Exception:
             return False
 

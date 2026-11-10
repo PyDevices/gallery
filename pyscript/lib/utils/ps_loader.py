@@ -7,7 +7,7 @@ Consolidates loader install logic for ``micropython.html``, ``pyodide.html``,
 ``mp.html``, and ``py.html``. Gallery pages call ``_ps_loader()`` on
 Run only (``import utils.path`` then ``import ps_loader``). MicroPython WASM uses
 firmware ``mip`` after ``utils.path``; Pyodide installs every library with
-micropip, and its portable ``mip.py`` comes in the ``pydevices-desktop`` wheel.
+micropip, and manifests with ``omip``, which comes in the ``pydevices`` wheel.
 """
 
 MIP_LIB_INDEX = "https://PyDevices.github.io/mip"
@@ -151,13 +151,11 @@ def module_url(name):
     return "github:PyDevices/gallery/lib/examples/" + name + ".py"
 
 
-def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url_base=None):
+def _install_manifests_and_modules(mip_mod, modules, manifests, status=None):
     import os
     import sys
 
     manifest_kw = {"target": MANIFEST_MIP_TARGET}
-    if url_base is not None:
-        manifest_kw["url_base"] = url_base
     for name in manifests:
         found = False
         for prefix in ("", "/examples/", "/lib/examples/", "lib/examples/"):
@@ -301,13 +299,13 @@ def _import_firmware_mip():
     return mip
 
 
-def _import_portable_mip():
-    """Portable ``mip.py`` for Pyodide (no firmware ``mip``)."""
+def _import_omip():
+    """``omip`` for Pyodide, which has no firmware ``mip``."""
     _ensure_cwd()
-    import mip
+    import omip
     import utils.path  # noqa: F401
 
-    return mip
+    return omip
 
 
 def _refresh_path_after_install():
@@ -331,15 +329,13 @@ def _has_board_config():
     return False
 
 
-def _ensure_board_config(mip_mod, status=None, url_base=None):
+def _ensure_board_config(mip_mod, status=None):
     """Install desktop board_config (+ audio) when it is not already present."""
     if _has_board_config():
         return
     if status:
         status("Installing board_config (desktop)…")
     kwargs = {"target": MANIFEST_MIP_TARGET, "index": MIP_LIB_INDEX}
-    if url_base is not None:
-        kwargs["url_base"] = url_base
     _quiet_install(mip_mod, DESKTOP_BOARD_CONFIG_PACKAGE, **kwargs)
     _refresh_path_after_install()
 
@@ -466,15 +462,10 @@ async def install_pyodide(modules, manifests, wheel_deps, status=None):
     if status:
         status("Installing PyDevices…")
     await micropip.install(list(DESKTOP_WHEELS), deps=False, pre=True)
-    mip = _import_portable_mip()
-    _ensure_board_config(mip, status, url_base=_page_base())
-
-    _install_manifests_and_modules(
-        mip,
-        modules,
-        manifests,
-        status,
-        url_base=_page_base(),
-    )
+    # A manifest's relative URLs resolve against the manifest's own folder,
+    # as they do on a board.
+    omip = _import_omip()
+    _ensure_board_config(omip, status)
+    _install_manifests_and_modules(omip, modules, manifests, status)
     _refresh_path_after_install()
     await _install_wheels_pyodide(wheel_deps, status)
