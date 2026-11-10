@@ -154,7 +154,7 @@ ffmpeg makes the stream.
 
 ## Let AutoDisplay pick a cast display
 
-With PyDevices 0.7.7 or later (experimental), the Roku, HLS and Miracast
+With PyDevices 0.7.7 or later, the Roku, HLS and Miracast
 displays register themselves with the `backends` registry. The three
 `board_config.py` files (`roku`, `roku_hls`, `miracast`) each ask for theirs
 with one line, so an app that calls `AutoDisplay(...)` under that config gets
@@ -172,8 +172,11 @@ URL in VLC) and `cast` (`sink=` and `kind="windows"` or `"roku"`). A cast
 display is never picked unless something asks for it, so nothing streams to a
 TV by surprise. `PYDEVICES_DISPLAY=hls` names one for a single run. On an
 earlier PyDevices there is no registry and the configs work as they always
-did. The registry itself is described in the
-[displaydev guide](https://github.com/PyDevices/pydevices/blob/main/docs/guides/displays.md#experimental-your-own-backend).
+did. `rotation=` reaches a cast display only if it takes one, and these three
+don't, so `AutoDisplay(rotation=90)` under one of these configs raises a
+`TypeError` naming the display. `scale=`, `title=` and the other window hints
+are never passed to a cast display. The registry itself is described in the
+[displaydev guide](https://github.com/PyDevices/pydevices/blob/main/docs/guides/displays.md#write-your-own-backend).
 
 ## Run a cast example
 
