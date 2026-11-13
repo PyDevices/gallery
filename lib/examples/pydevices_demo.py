@@ -120,6 +120,9 @@ def redraw():
 
     y = TOP
     for i, msg in enumerate(TIPS):
+        # A short panel shows the first notes that fit and leaves out the rest.
+        if y + ROW > h - BOT:
+            break
         bg = ROW_A if i % 2 else ROW_B
         display_drv.fill_rect(0, y, w, ROW, bg)
         display_drv.fill_rect(0, y, ACCENT, ROW, accent)

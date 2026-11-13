@@ -290,20 +290,36 @@ def _wrap(text, cols):
     return lines
 
 
+# Nothing is drawn below this line except the hint at the bottom of the panel,
+# so a short panel shows the top of the layout and leaves out the rest instead
+# of drawing off the edge, where a framebuffer display raises.
+LIMIT = HEIGHT - 26
+
+
+def _lines(lines, x, y, color):
+    """Draw each line that still fits above LIMIT and return the next y."""
+    for line in lines:
+        if y + 8 > LIMIT:
+            break
+        pygraphics.text(display_drv, line, x, y, color, scale=1)
+        y += ROW
+    return y
+
+
 def _draw_tick(_=None):
     global _peak
     pygraphics.fill(display_drv, BG)
     scale = 2 if WIDTH < 400 else 3
+    # A panel shorter than 400 pixels gets a smaller patch name to save height.
+    name_scale = 3 if HEIGHT < 400 else scale + 2
     pad = 10
     pygraphics.text(display_drv, "audiolive", pad, pad, DIM, scale=scale)
     y = pad + 10 * scale
-    for line in _wrap(_WHERE, COLS):
-        pygraphics.text(display_drv, line, pad, y, DIM, scale=1)
-        y += ROW
+    y = _lines(_wrap(_WHERE, COLS), pad, y, DIM)
 
     y += 6
-    pygraphics.text(display_drv, _name(), pad, y, ACCENT, scale=scale + 2)
-    y += 10 * (scale + 2)
+    pygraphics.text(display_drv, _name(), pad, y, ACCENT, scale=name_scale)
+    y += 10 * name_scale
     pygraphics.text(display_drv, _labels()[:COLS], pad, y, FG, scale=1)
     y += ROW + 8
 
@@ -322,18 +338,14 @@ def _draw_tick(_=None):
         if _no_sound is not None:
             pygraphics.text(display_drv, "NO SOUND HERE", pad, y, ACCENT, scale=2)
             y += 22
-            for line in _wrap(_no_sound, COLS):
-                pygraphics.text(display_drv, line, pad, y, DIM, scale=1)
-                y += ROW
+            _lines(_wrap(_no_sound, COLS), pad, y, DIM)
             return
         pygraphics.text(display_drv, "CLICK OR PRESS", pad, y, ACCENT, scale=2)
         y += 20
         pygraphics.text(display_drv, "A KEY", pad, y, ACCENT, scale=2)
         y += 26
-        for line in _wrap("a page is not allowed to make a sound until you "
-                          "have touched it", COLS):
-            pygraphics.text(display_drv, line, pad, y, DIM, scale=1)
-            y += ROW
+        _lines(_wrap("a page is not allowed to make a sound until you "
+                     "have touched it", COLS), pad, y, DIM)
         return
 
     status = live.status()
@@ -345,20 +357,18 @@ def _draw_tick(_=None):
     if _drains:
         rows.append(("QUEUED", "%d ms in the sink" % (_queued // BYTES_PER_MS)))
     for label, value in rows:
+        if y + 8 > LIMIT:
+            break
         pygraphics.text(display_drv, label, pad, y, DIM, scale=1)
         pygraphics.text(display_drv, value, pad + 8 * 9, y, FG, scale=1)
         y += ROW
 
     y += 10
-    for line in _wrap(audiolive.why(), COLS):
-        pygraphics.text(display_drv, line, pad, y, DIM, scale=1)
-        y += ROW
+    y = _lines(_wrap(audiolive.why(), COLS), pad, y, DIM)
     why = status["why"]
     if why:
         y += 6
-        for line in _wrap(why, COLS):
-            pygraphics.text(display_drv, line, pad, y, ACCENT, scale=1)
-            y += ROW
+        y = _lines(_wrap(why, COLS), pad, y, ACCENT)
 
     # The whole pedalboard, so a visitor can see what is coming as well as
     # what is playing. Five rows of text is cheaper than one more effect.
@@ -366,8 +376,7 @@ def _draw_tick(_=None):
     for index, (name, chain) in enumerate(PATCHES):
         color = ACCENT if index == _patch else DIM
         row = "%-7s %s" % (name, " -> ".join(str(fx[0]) for fx in chain))
-        pygraphics.text(display_drv, row[:COLS], pad, y, color, scale=1)
-        y += ROW
+        y = _lines((row[:COLS],), pad, y, color)
 
     pygraphics.text(
         display_drv, "click or a key: next patch", pad, HEIGHT - pad - 8, DIM, scale=1
