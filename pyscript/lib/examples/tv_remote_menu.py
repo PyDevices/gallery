@@ -26,6 +26,7 @@ from pygraphics import RGB565, Font, FrameBuffer
 ROW_H = 48
 PAD = 16
 TITLE_H = 40
+STATUS_H = 28
 
 BLACK = 0
 INK = color565(0xF7, 0xF7, 0xF4)
@@ -67,15 +68,18 @@ def redraw():
     display_drv.fill_rect(0, 0, w, TITLE_H, SURFACE)
     blit_text("TV remote menu", PAD, 12, INK, SURFACE)
 
+    # Rows keep their full height when the panel has room and shrink to share
+    # the space between the title and the status bar when it doesn't.
     y = TITLE_H + PAD
+    row_h = min(ROW_H, (h - y - STATUS_H) // len(ITEMS))
     for i, label in enumerate(ITEMS):
         bg = FOCUS if i == state["index"] else CHROME
         fg = BLACK if i == state["index"] else INK
-        display_drv.fill_rect(PAD, y, w - 2 * PAD, ROW_H - 4, bg)
-        blit_text(label, PAD + 12, y + (ROW_H - 4 - FONT.height) // 2, fg, bg)
-        y += ROW_H
+        display_drv.fill_rect(PAD, y, w - 2 * PAD, row_h - 4, bg)
+        blit_text(label, PAD + 12, y + (row_h - 4 - FONT.height) // 2, fg, bg)
+        y += row_h
 
-    display_drv.fill_rect(0, h - 28, w, 28, SURFACE)
+    display_drv.fill_rect(0, h - STATUS_H, w, STATUS_H, SURFACE)
     blit_text(state["status"][:40], PAD, h - 22, MUTED, SURFACE)
 
 
