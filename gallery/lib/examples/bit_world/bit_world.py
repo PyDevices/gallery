@@ -458,9 +458,9 @@ def _on_quit(_e=None):
     display_drv.quit()
 
 
-# A board whose panel memory the program can reach cannot keep up with FRAME_MS, and a
-# timer whose frames overrun its period only fires on every second or third slot, so it
-# gets a short period and runs frames back to back.
+# A board whose panel memory the program can reach cannot keep up with FRAME_MS, so its
+# frames overrun the period whatever it is. Give it a short period: the frame rate is
+# then set by how long each frame takes and by the pause below.
 frame_timer = app.every(
     PANEL_FRAME_MS if getattr(display_drv, "share_framebuffer", False) else FRAME_MS, director.step
 )
