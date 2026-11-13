@@ -54,7 +54,9 @@ from bit_palette import (
     icos,
     isin,
     make_fb,
+    rect_sources,
     restore_rects,
+    restore_sources,
 )
 
 # Change these to match your setup.
@@ -156,6 +158,14 @@ class CyberDeckAct:
         self.bg_buf, self.bg_fb = make_fb(w, layout.h, VOID)
         self.bg_draw = Draw(self.bg_fb)
         self._build_static_console()
+
+        # The gauge needles turn in place, so the background under them is prepared once.
+        self.gauge_sources = rect_sources(
+            self.bg_buf,
+            [(cx - rad - 3, cy - rad - 3, rad * 2 + 7, rad * 2 + 7) for cx, cy, rad, _ in self.gauge_centers],
+            w,
+            layout.h,
+        )
 
     # Pre-render the industrial console chassis, rivets, and static gauge arcs.
     def _build_static_console(self):
@@ -320,8 +330,6 @@ class CyberDeckAct:
     def draw_changes(self, fb, draw_obj, st):
         lay = self.lay
         rects = []
-        for cx, cy, rad, _ in self.gauge_centers:
-            rects.append((cx - rad - 3, cy - rad - 3, rad * 2 + 7, rad * 2 + 7))
         flips = []
         for i, rect in enumerate(self.switch_rects):
             if st.changed(("switch", i), self.switches[i]):
@@ -332,6 +340,7 @@ class CyberDeckAct:
             if st.changed(("pad", i), (self.pads[i], i == play_slot and self.pads[i])):
                 flips.append(("pad", i))
                 rects.append(rect)
+        restore_sources(fb, self.gauge_sources)
         restore_rects(fb, self.bg_buf, rects, lay.w, lay.h)
 
         self._draw_gauges(fb, draw_obj)
