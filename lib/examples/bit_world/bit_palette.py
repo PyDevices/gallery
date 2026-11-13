@@ -289,7 +289,8 @@ class PanelState:
 
 # Copy rectangles of the pre-rendered background back over a frame. Each one is a
 # FrameBuffer.blit from a (buffer, width, height, format, stride) view into the background,
-# which copies the rows in C; slicing the rows in Python is far slower on a board.
+# or a blit_rect when it spans whole rows; both copy in C, while slicing the rows in Python
+# is far slower on a board.
 # Rectangles are (x, y, w, h) and are clipped to the w x h frame.
 def restore_rects(fb, src, rects, w, h):
     view = memoryview(src)
@@ -303,5 +304,10 @@ def restore_rects(fb, src, rects, w, h):
         y0 = max(0, y)
         x1 = min(w, x + rw)
         y1 = min(h, y + rh)
-        if x1 > x0 and y1 > y0:
+        if x1 <= x0 or y1 <= y0:
+            continue
+        if x0 == 0 and x1 == w:
+            # Whole rows are one contiguous run of the background.
+            fb.blit_rect(view[y0 * w * 2 : y1 * w * 2], 0, y0, w, y1 - y0)
+        else:
             fb.blit((view[(y0 * w + x0) * 2 :], x1 - x0, y1 - y0, RGB565, w), x0, y0)

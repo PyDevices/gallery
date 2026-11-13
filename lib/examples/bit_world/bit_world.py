@@ -83,7 +83,7 @@ from act_deck import CyberDeckAct
 
 # Change these to match your setup.
 FRAME_MS = 33  # Target frame interval in milliseconds (~30 FPS)
-PANEL_FRAME_MS = 10  # Frame interval when drawing straight into a board's panel buffers
+PANEL_FRAME_MS = 10  # Frame interval on a board that shares its panel memory with the program
 ACT_DURATION = 16.0  # Seconds per scene in hands-free Attract Mode
 WIPE_SPEED = 1.85  # Transition curtain speed (full wipe in ~0.54 seconds)
 
@@ -113,6 +113,7 @@ class BitWorldDirector:
         if not self.direct:
             self.screen_buf, self.screen_fb = make_fb(WIDTH, HEIGHT, VOID)
             self.screen_draw = Draw(self.screen_fb)
+            self.screen_state = PanelState()
 
         self.sprites = SpriteBank(self.lay)
         self.sound = SoundEngine(board_peripherals, app)
@@ -243,17 +244,16 @@ class BitWorldDirector:
         act = self.acts[self.act_idx]
         if self.direct:
             fb, draw, state = self._back_panel()
-            if state.act == self.act_idx and self.wipe_progress == 0.0:
-                # This buffer already shows the act: repaint what changed.
-                act.draw_changes(fb, draw, state)
-            else:
-                act.draw(fb, draw, state)
-                state.bar = None  # the full redraw painted over the stage bar
-                # A buffer that gets a curtain wipe no longer shows its act.
-                state.act = self.act_idx if self.wipe_progress == 0.0 else -1
         else:
-            fb = self.screen_fb
-            act.draw(fb, self.screen_draw)
+            fb, draw, state = self.screen_fb, self.screen_draw, self.screen_state
+        if state.act == self.act_idx and self.wipe_progress == 0.0:
+            # This buffer already shows the act: repaint what changed.
+            act.draw_changes(fb, draw, state)
+        else:
+            act.draw(fb, draw, state)
+            state.bar = None  # the full redraw painted over the stage bar
+            # A buffer that gets a curtain wipe no longer shows its act.
+            state.act = self.act_idx if self.wipe_progress == 0.0 else -1
 
         if self.wipe_progress > 0.0:
             accent = ACT_ACCENTS[self.next_act_idx]
@@ -268,14 +268,11 @@ class BitWorldDirector:
                 accent,
             )
 
-        if self.direct:
-            # The stage bar only changes when a tab, a toggle or the progress line does.
-            bar = (self.act_idx, self.auto_mode, self.sound.muted, self._bar_progress())
-            if state.bar != bar or self.wipe_progress > 0.0:
-                self._draw_stage_bar(fb)
-                state.bar = bar if self.wipe_progress == 0.0 else None
-        else:
+        # The stage bar only changes when a tab, a toggle or the progress line does.
+        bar = (self.act_idx, self.auto_mode, self.sound.muted, self._bar_progress())
+        if state.bar != bar or self.wipe_progress > 0.0:
             self._draw_stage_bar(fb)
+            state.bar = bar if self.wipe_progress == 0.0 else None
         if self.direct:
             # Promote the finished frame; the next frame waits for the flip.
             if hasattr(display_drv, "show_nowait"):
@@ -457,10 +454,12 @@ def _on_quit(_e=None):
     display_drv.quit()
 
 
-# A board that draws straight into its panel buffers cannot keep up with FRAME_MS, and a
+# A board whose panel memory the program can reach cannot keep up with FRAME_MS, and a
 # timer whose frames overrun its period only fires on every second or third slot, so it
 # gets a short period and runs frames back to back.
-frame_timer = app.every(PANEL_FRAME_MS if director.direct else FRAME_MS, director.step)
+frame_timer = app.every(
+    PANEL_FRAME_MS if getattr(display_drv, "share_framebuffer", False) else FRAME_MS, director.step
+)
 # After a frame that runs longer than its period, multimer idles the timer for as long as
 # the frame took (up to yield_cap ms), which halves the frame rate of a slow board.
 # Idle only briefly: other timers and the REPL still get their turn between frames.
