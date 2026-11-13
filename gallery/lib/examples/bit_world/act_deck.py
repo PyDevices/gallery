@@ -54,6 +54,7 @@ from bit_palette import (
     icos,
     isin,
     make_fb,
+    restore_rects,
 )
 
 SWITCH_NAMES = ("BOOST", "SHLD", "PHASE", "OVRD")
@@ -279,7 +280,7 @@ class CyberDeckAct:
                     self.sound.sfx_pad(pad_idx, self.pads[pad_idx])
 
     # Render the Cyber-Deck console into the target FrameBuffer and Draw wrapper.
-    def draw(self, fb, draw_obj=None):
+    def draw(self, fb, draw_obj=None, st=None):
         if draw_obj is None:
             draw_obj = Draw(fb)
         fb.blit(self.bg_fb, 0, 0)
@@ -290,6 +291,45 @@ class CyberDeckAct:
         self._draw_switches_and_throttle(fb)
         self._draw_spectrum_analyzer(fb)
         self._draw_synth_pads(fb)
+        if st is not None:
+            st.sig = {}
+            for i in range(len(self.switch_rects)):
+                st.sig[("switch", i)] = self.switches[i]
+            play_slot = self.sound._step_index & 7
+            for i in range(len(self.pad_rects)):
+                st.sig[("pad", i)] = (self.pads[i], i == play_slot and self.pads[i])
+
+    # Repaint only what changed since this display buffer was last drawn: the gauge dials
+    # get their background back, the wells paint over themselves, and the switches and pads
+    # are redrawn when they flip.
+    def draw_changes(self, fb, draw_obj, st):
+        lay = self.lay
+        rects = []
+        for cx, cy, rad, _ in self.gauge_centers:
+            rects.append((cx - rad - 3, cy - rad - 3, rad * 2 + 7, rad * 2 + 7))
+        flips = []
+        for i, rect in enumerate(self.switch_rects):
+            if st.changed(("switch", i), self.switches[i]):
+                flips.append(("switch", i))
+                rects.append(rect)
+        play_slot = self.sound._step_index & 7
+        for i, rect in enumerate(self.pad_rects):
+            if st.changed(("pad", i), (self.pads[i], i == play_slot and self.pads[i])):
+                flips.append(("pad", i))
+                rects.append(rect)
+        restore_rects(fb, self.bg_buf, rects, lay.w, lay.h)
+
+        self._draw_gauges(fb, draw_obj)
+        self._draw_oscilloscope(fb)
+        self._draw_holo_and_coolant(fb)
+        for kind, i in flips:
+            if kind == "switch":
+                self._draw_switch(fb, i)
+        self._draw_throttle(fb)
+        self._draw_spectrum_analyzer(fb)
+        for kind, i in flips:
+            if kind == "pad":
+                self._draw_synth_pad(fb, i, play_slot)
 
     # Render rotating polygon needles and digital readouts for the twin gauges.
     def _draw_gauges(self, fb, d):
@@ -406,24 +446,31 @@ class CyberDeckAct:
 
     # Render the 4 tactile toggle switches and vertical throttle fader.
     def _draw_switches_and_throttle(self, fb):
-        for i, (bx, by, bw, bh) in enumerate(self.switch_rects):
-            on = self.switches[i]
-            border = LIME_GLOW if on else STEEL
-            draw_pixel_panel(fb, bx, by, bw, bh, NIGHT, border)
-            # Status LED bar at top of switch.
-            led_col = LIME_GLOW if on else DEEP_SLATE
-            fb.fill_rect(bx + 5, by + 5, bw - 10, 4, led_col)
-            # Tactile rocker handle (up when ON, down when OFF).
-            rock_h = max(10, (bh - 26) >> 1)
-            rock_y = (by + 12) if on else (by + 12 + rock_h)
-            rock_col = AQUA_GLOW if on else SLATE
-            fb.fill_rect(bx + 5, rock_y, bw - 10, rock_h, rock_col)
-            fb.hline(bx + 5, rock_y, bw - 10, WHITE if on else SILVER)
-            # Label at bottom of switch.
-            lbl = SWITCH_NAMES[i][: max(3, (bw - 4) // 8)]
-            fb.text(lbl, bx + ((bw - len(lbl) * 8) >> 1), by + bh - 11, WHITE if on else MIST)
+        for i in range(len(self.switch_rects)):
+            self._draw_switch(fb, i)
+        self._draw_throttle(fb)
 
-        # Render the vertical THROTTLE fader track and brass thumb cap.
+    # Render one tactile breaker switch.
+    def _draw_switch(self, fb, i):
+        bx, by, bw, bh = self.switch_rects[i]
+        on = self.switches[i]
+        border = LIME_GLOW if on else STEEL
+        draw_pixel_panel(fb, bx, by, bw, bh, NIGHT, border)
+        # Status LED bar at top of switch.
+        led_col = LIME_GLOW if on else DEEP_SLATE
+        fb.fill_rect(bx + 5, by + 5, bw - 10, 4, led_col)
+        # Tactile rocker handle (up when ON, down when OFF).
+        rock_h = max(10, (bh - 26) >> 1)
+        rock_y = (by + 12) if on else (by + 12 + rock_h)
+        rock_col = AQUA_GLOW if on else SLATE
+        fb.fill_rect(bx + 5, rock_y, bw - 10, rock_h, rock_col)
+        fb.hline(bx + 5, rock_y, bw - 10, WHITE if on else SILVER)
+        # Label at bottom of switch.
+        lbl = SWITCH_NAMES[i][: max(3, (bw - 4) // 8)]
+        fb.text(lbl, bx + ((bw - len(lbl) * 8) >> 1), by + bh - 11, WHITE if on else MIST)
+
+    # Render the vertical THROTTLE fader track and brass thumb cap.
+    def _draw_throttle(self, fb):
         tx, ty, tw, th = self.throttle_rect
         fb.fill_rect(tx, ty, tw, th, VOID)
         fb.rect(tx, ty, tw, th, AMBER)
@@ -470,23 +517,28 @@ class CyberDeckAct:
     # Render the 2x4 harmonic synth pad matrix with live step highlighter.
     def _draw_synth_pads(self, fb):
         play_slot = self.sound._step_index & 7
-        for i, (bx, by, bw, bh) in enumerate(self.pad_rects):
-            active = self.pads[i]
-            playing = (i == play_slot) and active
-            if playing:
-                bg = MAGENTA
-                border = WHITE
-            elif active:
-                bg = DEEP_TEAL
-                border = AQUA_GLOW
-            else:
-                bg = NIGHT
-                border = SLATE
-            draw_pixel_panel(fb, bx, by, bw, bh, bg, border, ICE_CYAN if active else None)
-            lbl = PAD_NOTES[i]
-            fb.text(
-                lbl,
-                bx + ((bw - len(lbl) * 8) >> 1),
-                by + ((bh - 8) >> 1),
-                WHITE if active else STEEL,
-            )
+        for i in range(len(self.pad_rects)):
+            self._draw_synth_pad(fb, i, play_slot)
+
+    # Render one synth pad.
+    def _draw_synth_pad(self, fb, i, play_slot):
+        bx, by, bw, bh = self.pad_rects[i]
+        active = self.pads[i]
+        playing = (i == play_slot) and active
+        if playing:
+            bg = MAGENTA
+            border = WHITE
+        elif active:
+            bg = DEEP_TEAL
+            border = AQUA_GLOW
+        else:
+            bg = NIGHT
+            border = SLATE
+        draw_pixel_panel(fb, bx, by, bw, bh, bg, border, ICE_CYAN if active else None)
+        lbl = PAD_NOTES[i]
+        fb.text(
+            lbl,
+            bx + ((bw - len(lbl) * 8) >> 1),
+            by + ((bh - 8) >> 1),
+            WHITE if active else STEEL,
+        )

@@ -56,6 +56,7 @@ from bit_palette import (
     isin,
     make_fb,
     paint_gradient,
+    restore_rects,
     rng_int,
 )
 
@@ -452,10 +453,101 @@ class WorkshopAct:
                 sp[1] = self.ter_y + 10
 
     # Render the complete Workshop scene into the target FrameBuffer.
-    def draw(self, fb):
+    def draw(self, fb, draw_obj=None, st=None):
         # Copy the pre-rendered workshop interior in one fast C-level blit.
         fb.blit(self.bg_fb, 0, 0)
+        self._draw_scene(fb, True, True)
+        if st is not None:
+            st.rects = self.moving_rects()
+            st.sig = {
+                "speech": (self.speech_full, self.speech_chars),
+                "buttons": self.active_btn,
+                "mood": self.mood,
+            }
 
+    # Repaint only what moved since this display buffer was last drawn.
+    def draw_changes(self, fb, draw_obj, st):
+        rects = self.moving_rects()
+        lay = self.lay
+        extra = []
+        speech_sig = (self.speech_full, self.speech_chars)
+        speech = st.sig.get("speech") != speech_sig
+        if speech:
+            cx, cy, cw, ch = self.card_speech
+            extra.append((cx + 6, cy + 18, cw - 12, ch - 18))
+        buttons = st.sig.get("buttons") != self.active_btn
+        if buttons:
+            extra.extend(self.btn_rects)
+        if st.sig.get("mood") != self.mood:
+            cx, cy, cw, ch = self.card_voice
+            extra.append((cx + 4, cy + 4, cw - 8, 12))
+        restore_rects(fb, self.bg_buf, rects + st.rects + extra, lay.w, lay.h)
+        self._draw_scene(fb, speech, buttons)
+        st.rects = rects
+        st.sig = {"speech": speech_sig, "buttons": self.active_btn, "mood": self.mood}
+
+    # Bounding boxes of everything the scene paints over the background right now.
+    def moving_rects(self):
+        rects = []
+        for sx, sy_star, _ in self.stars:
+            rects.append((sx - 1, sy_star - 1, 3, 3))
+        wx, wy, ww, wh = self.win_rect
+        meteor_tick = (self.phase >> 1) & 0x7F
+        if meteor_tick < 24:
+            mx = wx + 14 + meteor_tick * ((ww - 36) // 24)
+            my = wy + 10 + meteor_tick * 2
+            rects.append((mx - 8, my - 4, 9, 5))
+        for sp in self.spores:
+            sx = int(sp[0]) + ((isin(sp[2]) * 3) >> 10)
+            sy_sp = int(sp[1])
+            rects.append((sx - 7, sy_sp - 7, 16, 16))
+        for i in range(3):
+            p = (self.phase + i * 85) & 0xFF
+            rise = (p * 26) >> 8
+            sway = (isin((p * 2) & 0xFF) * 4) >> 10
+            st_x = self.mug_x + (self.sprites.mug.w >> 1) - 2 + sway
+            rects.append((st_x, self.mug_y - 4 - rise, 3, 2))
+        pad_cy = self.desk_y + (4 if self.lay.compact else 5)
+        pulse_r = (34 if self.lay.compact else 50) + ((isin(self.phase * 2) * 6) >> 10)
+        rects.append((self.bit_home_x - pulse_r - 1, pad_cy - 7, pulse_r * 2 + 3, 15))
+
+        # Bit, his thruster flame and the glows around them.
+        bob = ((isin(self.phase) * (5 if self.lay.compact else 8)) >> 10) + int(self.bounce_y)
+        bit_cy = self.bit_home_y + bob
+        frame = (self.phase >> 4) & 1
+        body = self.sprites.bit_body[frame & 1]
+        flame = self.sprites.flames[frame % len(self.sprites.flames)]
+        px = self.sprites.pet_px
+        top = bit_cy - (body.h >> 1)
+        flame_cy = top + body.h - px + (flame.h >> 1)
+        half = max(body.w >> 1, 12) + px * 2 + 2
+        bottom = max(top + body.h - px + flame.h, flame_cy + 12, top + body.h) + 2
+        rects.append((self.bit_home_x - half, top - 10, half * 2, bottom - top + 10))
+
+        if self.scan_sweep > 0.0:
+            scan_y = int(
+                self.lay.scene_y
+                + 24
+                + (1.0 - self.scan_sweep) * (self.desk_y - self.lay.scene_y - 16)
+            )
+            beam_x0 = wx + 8
+            rects.append((beam_x0, scan_y, self.card_chrono[0] - beam_x0 - 8, 2))
+        for p in self.particles:
+            em = self.sprites.emotes.get(p[4])
+            if em is not None:
+                rects.append((int(p[0]) - (em.w >> 1), int(p[1]) - (em.h >> 1), em.w, em.h))
+
+        # The clock readout and the telemetry bars on the first card.
+        cx, cy, cw, ch = self.card_chrono
+        rects.append((cx + 4, cy + 17, cw - 8, 21))
+        step = 8 if self.lay.compact else 10
+        bx0 = cx + cw - (64 if self.lay.compact else 84)
+        bar_max = 6 + ((2048 * (ch - 26)) >> 12)
+        rects.append((bx0, cy + ch - 7 - bar_max, 6 * step + 6, bar_max))
+        return rects
+
+    # Paint everything that moves; speech and buttons only when asked.
+    def _draw_scene(self, fb, speech, buttons):
         # Animate twinkling stars and a periodic shooting star in the window.
         wx, wy, ww, wh = self.win_rect
         for sx, sy_star, offs in self.stars:
@@ -536,8 +628,10 @@ class WorkshopAct:
         # Draw the three live right-side holographic companion cards.
         self._draw_chrono_card(fb)
         self._draw_voice_card(fb)
-        self._draw_speech_card(fb)
-        self._draw_action_buttons(fb)
+        if speech:
+            self._draw_speech_card(fb)
+        if buttons:
+            self._draw_action_buttons(fb)
 
     # Render Card 1: Lab Chrono, Solar Charge, and 7-bar Eco Telemetry.
     def _draw_chrono_card(self, fb):
