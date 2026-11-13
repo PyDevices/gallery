@@ -18,7 +18,7 @@ Optional headers (first 10 lines), one line per namespace::
   # utils: console, tft_config  — gallery utils modules (shown as badges)
   # modules: calc_engine          — extra example .py stems (site)
   # manifests: alien              — site-served packages/<name>.json bundles
-  # gallery: featured|skip|binaries|nochrome|newwindow  (comma-separated)
+  # gallery: featured|skip|binaries|nochrome|newwindow|no-pyodide  (comma-separated)
 
 MIP manifests for package examples live in ``packages/<name>.json`` (generated
 by ``scripts/install_gen_manifests.py``). The direct host loads them from the
@@ -31,6 +31,9 @@ gallery's embedded preview — for demos too large to read beside the cards.
 / ``py.html`` shells, which carry no chrome at all. The two are separate
 choices: new tab is about where the demo opens, chrome is about what it looks
 like when it gets there. Values combine, so ``featured, newwindow`` is valid.
+
+``# gallery: no-pyodide`` lists the card on the MicroPython page only, for an
+example that imports a firmware module Pyodide has no build of.
 
 Then:
 
@@ -117,7 +120,7 @@ GENERIC_ICON = (
 )
 
 HEADER_SCAN_LINES = 10
-GALLERY_VALUES = frozenset({"featured", "skip", "binaries", "nochrome", "newwindow"})
+GALLERY_VALUES = frozenset({"featured", "skip", "binaries", "nochrome", "newwindow", "no-pyodide"})
 INSTALLABLE_DEPS = frozenset(
     {"palettes", "pygraphics", "pdwidgets", "audioinstruments", "audioeffects", "controlkit"}
 )
@@ -155,6 +158,7 @@ class Example:
         self.nochrome = False
         self.new_window = False
         self.in_gallery = True
+        self.no_pyodide = False
 
     @property
     def title(self) -> str:
@@ -404,6 +408,7 @@ def parse_example(path: Path) -> Example | None:
     gallery = parse_gallery_values(lines)
     ex.in_gallery = not (gallery & {"skip", "binaries"})
     ex.featured = "featured" in gallery
+    ex.no_pyodide = "no-pyodide" in gallery
     ex.nochrome = "nochrome" in gallery
     # A bare shell is only reachable in its own tab, so nochrome implies it.
     ex.new_window = "newwindow" in gallery or ex.nochrome
@@ -624,7 +629,8 @@ def render_card(ex: Example, *, runtime: str = "micropython") -> str:
 
 
 def render_cards(examples: list[Example], *, runtime: str = "micropython") -> str:
-    return "\n".join(render_card(ex, runtime=runtime) for ex in examples if ex.in_gallery)
+    shown = [ex for ex in examples if ex.in_gallery and not (runtime == "pyodide" and ex.no_pyodide)]
+    return "\n".join(render_card(ex, runtime=runtime) for ex in shown)
 
 
 def replace_block(text: str, key: str, payload: str) -> str:

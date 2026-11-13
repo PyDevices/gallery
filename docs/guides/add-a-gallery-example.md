@@ -48,6 +48,9 @@ The values for `# gallery:` are:
   cards.
 - `nochrome` opens it in its own tab on a bare page with none of the site's
   header and footer.
+- `no-pyodide` lists the card on the MicroPython page only. Use it for an
+  example that imports a firmware module, such as `svgio`, that Pyodide can't
+  load.
 
 An unknown value stops the generator with an error, so a typo shows up at once.
 
