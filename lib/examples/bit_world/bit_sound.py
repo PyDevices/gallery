@@ -141,8 +141,10 @@ class SoundEngine:
             attack_time=0.002, decay_time=0.09, release_time=0.08, sustain_level=0.35
         )
 
+        # The music plays behind the animation, so a buffered output is fine. It
+        # carries the sound through a garbage collection, which a busy frame causes.
         try:
-            self.audio_out = board_peripherals_mod.audio_out(latency="low")
+            self.audio_out = board_peripherals_mod.audio_out(latency="buffered")
             if app is not None and hasattr(self.audio_out, "attach"):
                 self.audio_out.attach(app)
             self.synth = synthio.Synthesizer(
