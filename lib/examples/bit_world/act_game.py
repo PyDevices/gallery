@@ -54,6 +54,7 @@ from bit_palette import (
     isin,
     make_fb,
     paint_gradient,
+    restore_rects,
     rng_int,
 )
 
@@ -419,8 +420,27 @@ class SkyRuinsAct:
                 break
 
     # Render all 4 parallax layers, sprites, particles, and arcade HUD.
-    def draw(self, fb):
+    def draw(self, fb, draw_obj=None, st=None):
         fb.blit(self.sky_fb, 0, 0)
+        self._draw_scene(fb)
+        if st is not None:
+            st.sig = {}
+
+    # Repaint the scene down to the foreground floor, which paints itself in full.
+    def draw_changes(self, fb, draw_obj, st):
+        lay = self.lay
+        top = lay.scene_y
+        restore_rects(
+            fb,
+            self.sky_buf,
+            [(0, top, lay.w, self.ground_y + 3 - top)],
+            lay.w,
+            lay.h,
+        )
+        self._draw_scene(fb)
+
+    # Paint every parallax layer, entity and HUD element over the sky.
+    def _draw_scene(self, fb):
         shake_y = rng_int(-2, 2) if self.shake_timer > 0.0 else 0
 
         self._draw_sky_islands(fb, shake_y)
