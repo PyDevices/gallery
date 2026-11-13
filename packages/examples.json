@@ -81,6 +81,10 @@
       "github:PyDevices/gallery/lib/examples/simon.py"
     ],
     [
+      "svg_icons.py",
+      "github:PyDevices/gallery/lib/examples/svg_icons.py"
+    ],
+    [
       "testris.py",
       "github:PyDevices/gallery/lib/examples/testris.py"
     ],
