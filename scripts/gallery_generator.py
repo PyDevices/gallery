@@ -121,6 +121,16 @@ GALLERY_VALUES = frozenset({"featured", "skip", "binaries", "nochrome", "newwind
 INSTALLABLE_DEPS = frozenset(
     {"palettes", "pygraphics", "pdwidgets", "audioinstruments", "audioeffects", "controlkit"}
 )
+# A dep counts as used when the example imports any module it ships.
+DEP_MODULES = {
+    "audiodsp": frozenset(
+        {"synthio", "audiopump", "audiocore", "audiomixer", "audiodelays", "audiofilters",
+         "audiofreeverb", "audioecho", "audiobiquad", "audioconvolve", "audiodynamics",
+         "audiofeatures", "audiograph", "audioladder", "audiomath", "audiometer",
+         "audiomodal", "audiomp3", "audiooscillator", "audioroute", "audiosampler",
+         "audioshaper", "audiospeed", "audioverb", "audiovorbis"}
+    ),
+}
 
 LOCAL_IMPORT_RE = re.compile(
     r"^\s*(?:from\s+([\w.]+)\s+import|import\s+([\w.]+))",
@@ -486,7 +496,7 @@ def validate_example_deps(examples: list[Example]) -> None:
         missing = sorted((imported & INSTALLABLE_DEPS) - set(ex.deps))
         if missing:
             errors.append(f"{ex.source_rel}: missing # deps: {', '.join(missing)}")
-        unused = sorted(set(ex.deps) - imported)
+        unused = sorted(d for d in ex.deps if not imported & DEP_MODULES.get(d, {d}))
         if unused:
             print(
                 f"warning: {ex.source_rel}: declared # deps not imported: {', '.join(unused)}",

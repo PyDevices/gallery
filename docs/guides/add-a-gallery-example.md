@@ -5,9 +5,10 @@ install manifests and on the site once you regenerate. This page covers what
 to put in the file, what the generator does with it, and how to see it run in a
 browser before you open a pull request.
 
-Write the file itself like its neighbours in `lib/examples/`: the three SPDX
-licence lines first, then a docstring. This page covers only what the gallery
-adds on top.
+Write the file itself in the house example style, summed up at the end of
+[AGENTS.md](../../AGENTS.md): the three SPDX licence lines, then a docstring
+with `Needs:`, `Run it:` and `Tested on:`. This page covers only what the
+gallery adds on top.
 
 ## Where the file goes
 
@@ -55,7 +56,9 @@ An unknown value stops the generator with an error, so a typo shows up at once.
 If the example imports `palettes`, `pygraphics`, `pdwidgets`,
 `audioinstruments`, `audioeffects` or `controlkit`, list it in `# deps:`. The
 generator fails when one of those six is imported and not declared, and prints
-a warning when you declare a package the example never imports. No other name
+a warning when you declare a package the example never imports. `audiodsp`
+counts as imported when the example imports one of its modules, such as
+`synthio` or `audiopump`. No other name
 is checked, so a dependency outside those six is on you to get right: run the
 example in a browser, as below, and see whether it loads.
 
