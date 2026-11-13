@@ -37,6 +37,6 @@ mip.install("github:PyDevices/gallery/packages/alien.json")
 Swap `alien` for any other file name in [packages/](packages/). The `utils`
 manifest installs the shared helpers the apps import.
 
-[Roadmap](ROADMAP.md)
+[Add an example](docs/guides/add-a-gallery-example.md) · [Roadmap](ROADMAP.md)
 
 Made by [PyDevices](https://pydevices.com).
