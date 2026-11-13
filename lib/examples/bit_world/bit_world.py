@@ -460,15 +460,10 @@ def _on_quit(_e=None):
 
 # A board whose panel memory the program can reach cannot keep up with FRAME_MS, so its
 # frames overrun the period whatever it is. Give it a short period: the frame rate is
-# then set by how long each frame takes and by the pause below.
+# then set by how long each frame takes.
 frame_timer = app.every(
     PANEL_FRAME_MS if getattr(display_drv, "share_framebuffer", False) else FRAME_MS, director.step
 )
-# After a frame that runs longer than its period, multimer idles the timer for as long as
-# the frame took (up to yield_cap ms), which halves the frame rate of a slow board.
-# Idle only briefly: other timers and the REPL still get their turn between frames.
-if hasattr(frame_timer, "yield_cap"):
-    frame_timer.yield_cap = 8
 app.every(250, _retry_audio)
 app.on([app.events.MOUSEBUTTONDOWN, app.events.MOUSEBUTTONUP], _on_mouse_button)
 app.on(app.events.MOUSEMOTION, _on_mouse_motion)
