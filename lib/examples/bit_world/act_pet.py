@@ -56,7 +56,9 @@ from bit_palette import (
     isin,
     make_fb,
     paint_gradient,
+    rect_sources,
     restore_rects,
+    restore_sources,
     rng_int,
 )
 
@@ -180,6 +182,17 @@ class WorkshopAct:
         # Pre-render the static workshop interior into a background FrameBuffer.
         self.bg_buf, self.bg_fb = make_fb(w, layout.h, VOID)
         self._build_static_background()
+
+        # The stars, the clock readout and the telemetry bars change in place, so the
+        # background under them is prepared once.
+        cx, cy, cw, ch = self.card_chrono
+        bx0 = cx + cw - (64 if layout.compact else 84)
+        bar_max = 6 + ((2048 * (ch - 26)) >> 12)
+        step = 8 if layout.compact else 10
+        fixed = [(sx - 1, sy_star - 1, 3, 3) for sx, sy_star, _ in self.stars]
+        fixed.append((cx + 4, cy + 17, cw - 8, 21))
+        fixed.append((bx0, cy + ch - 7 - bar_max, 6 * step + 6, bar_max))
+        self.fixed_sources = rect_sources(self.bg_buf, fixed, w, layout.h)
 
     # Populate rising bioluminescent spore particles above the desk terrarium.
     def _init_spores(self):
@@ -481,16 +494,15 @@ class WorkshopAct:
         if st.sig.get("mood") != self.mood:
             cx, cy, cw, ch = self.card_voice
             extra.append((cx + 4, cy + 4, cw - 8, 12))
+        restore_sources(fb, self.fixed_sources)
         restore_rects(fb, self.bg_buf, rects + st.rects + extra, lay.w, lay.h)
         self._draw_scene(fb, speech, buttons)
         st.rects = rects
         st.sig = {"speech": speech_sig, "buttons": self.active_btn, "mood": self.mood}
 
-    # Bounding boxes of everything the scene paints over the background right now.
+    # Bounding boxes of what the scene paints over the background now, apart from the fixed ones.
     def moving_rects(self):
         rects = []
-        for sx, sy_star, _ in self.stars:
-            rects.append((sx - 1, sy_star - 1, 3, 3))
         wx, wy, ww, wh = self.win_rect
         meteor_tick = (self.phase >> 1) & 0x7F
         if meteor_tick < 24:
@@ -536,14 +548,6 @@ class WorkshopAct:
             em = self.sprites.emotes.get(p[4])
             if em is not None:
                 rects.append((int(p[0]) - (em.w >> 1), int(p[1]) - (em.h >> 1), em.w, em.h))
-
-        # The clock readout and the telemetry bars on the first card.
-        cx, cy, cw, ch = self.card_chrono
-        rects.append((cx + 4, cy + 17, cw - 8, 21))
-        step = 8 if self.lay.compact else 10
-        bx0 = cx + cw - (64 if self.lay.compact else 84)
-        bar_max = 6 + ((2048 * (ch - 26)) >> 12)
-        rects.append((bx0, cy + ch - 7 - bar_max, 6 * step + 6, bar_max))
         return rects
 
     # Paint everything that moves; speech and buttons only when asked.
