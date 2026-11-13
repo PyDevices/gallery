@@ -287,6 +287,28 @@ class PanelState:
         return True
 
 
+# Blit sources for rectangles of the background that never move: (source, x, y) for each,
+# clipped like restore_rects. Build them once, and restoring them each frame with
+# restore_sources allocates nothing.
+def rect_sources(src, rects, w, h):
+    view = memoryview(src)
+    sources = []
+    for x, y, rw, rh in rects:
+        x0 = max(0, x)
+        y0 = max(0, y)
+        x1 = min(w, x + rw)
+        y1 = min(h, y + rh)
+        if x1 > x0 and y1 > y0:
+            sources.append(((view[(y0 * w + x0) * 2 :], x1 - x0, y1 - y0, RGB565, w), x0, y0))
+    return sources
+
+
+# Copy the rectangles rect_sources prepared back over a frame.
+def restore_sources(fb, sources):
+    for source, x, y in sources:
+        fb.blit(source, x, y)
+
+
 # Copy rectangles of the pre-rendered background back over a frame. Each one is a
 # FrameBuffer.blit from a (buffer, width, height, format, stride) view into the background,
 # or a blit_rect when it spans whole rows; both copy in C, while slicing the rows in Python
