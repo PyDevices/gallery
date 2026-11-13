@@ -57,7 +57,9 @@ def _resolve_example(example, repo_root):
     path = Path(example)
     candidates = (path, repo_root / "lib" / "examples" / path)
     if not path.suffix:
-        candidates += (repo_root / "lib" / "examples" / f"{example}.py",)
+        examples = repo_root / "lib" / "examples"
+        # A package example's entry point is examples/<name>/<name>.py.
+        candidates += (examples / f"{example}.py", examples / example / f"{path.name}.py")
     for candidate in candidates:
         if candidate.is_file():
             return candidate.resolve()
@@ -143,13 +145,13 @@ def _prepare_paths(repo_root):
     ):
         if Path(path).is_dir() and path not in sys.path:
             sys.path.insert(0, path)
-    import sibling_repos
-
-    sibling_repos.prepend_sibling_sys_path(repo_root=str(repo_root))
 
 
 def _run_example(example):
     if isinstance(example, Path):
+        # As `python example.py` would: the example's own folder comes first,
+        # so a package example imports its sibling modules.
+        sys.path.insert(0, str(example.parent))
         runpy.run_path(str(example), run_name="__main__")
     else:
         runpy.run_module(example, run_name="__main__", alter_sys=True)
