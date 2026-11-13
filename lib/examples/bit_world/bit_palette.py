@@ -268,3 +268,40 @@ def make_fb(w, h, fill_color=None):
     if fill_color is not None:
         fb.fill(fill_color)
     return buf, fb
+
+
+class PanelState:
+    """What one display buffer holds: which act, where its moving parts were, what it drew."""
+
+    def __init__(self):
+        self.act = -1
+        self.rects = []
+        self.sig = {}
+        self.bar = None
+
+    # True, and remember it, when value differs from what this buffer last drew for key.
+    def changed(self, key, value):
+        if self.sig.get(key) == value:
+            return False
+        self.sig[key] = value
+        return True
+
+
+# Copy rectangles of the pre-rendered background back over a frame. Each one is a
+# FrameBuffer.blit from a (buffer, width, height, format, stride) view into the background,
+# which copies the rows in C; slicing the rows in Python is far slower on a board.
+# Rectangles are (x, y, w, h) and are clipped to the w x h frame.
+def restore_rects(fb, src, rects, w, h):
+    view = memoryview(src)
+    seen = set()
+    for rect in rects:
+        if rect in seen:
+            continue
+        seen.add(rect)
+        x, y, rw, rh = rect
+        x0 = max(0, x)
+        y0 = max(0, y)
+        x1 = min(w, x + rw)
+        y1 = min(h, y + rh)
+        if x1 > x0 and y1 > y0:
+            fb.blit((view[(y0 * w + x0) * 2 :], x1 - x0, y1 - y0, RGB565, w), x0, y0)

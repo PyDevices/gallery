@@ -23,7 +23,7 @@ Run it:
 
     import examples.bit_world
 
-Tested on: unix MicroPython 1.30 (preview), CircuitPython 10.3, CPython 3.12, and Chromium via PyScript/MicroPython WASM.
+Tested on: unix MicroPython 1.30 (preview), CircuitPython 10.3, CPython 3.12, Chromium via PyScript/MicroPython WASM, and an ESP32-S3 with an 800x480 RGB panel (MicroPython 1.30 preview).
 """
 
 from boarddev import env_get, env_set
@@ -42,7 +42,12 @@ app = appdev.App(board_config)
 import board_peripherals
 import keys
 from multimer import ticks_diff, ticks_ms
-from pygraphics import Draw
+
+try:
+    from uctypes import addressof
+except ImportError:
+    addressof = None
+from pygraphics import Draw, FrameBuffer, RGB565
 from bit_palette import (
     ABYSS,
     AMBER,
@@ -64,6 +69,7 @@ from bit_palette import (
     VOID,
     WHITE,
     Layout,
+    PanelState,
     draw_pixel_panel,
     draw_pixel_wipe,
     init_rng,
@@ -77,6 +83,7 @@ from act_deck import CyberDeckAct
 
 # Change these to match your setup.
 FRAME_MS = 33  # Target frame interval in milliseconds (~30 FPS)
+PANEL_FRAME_MS = 10  # Frame interval when drawing straight into a board's panel buffers
 ACT_DURATION = 16.0  # Seconds per scene in hands-free Attract Mode
 WIPE_SPEED = 1.85  # Transition curtain speed (full wipe in ~0.54 seconds)
 
@@ -98,8 +105,14 @@ class BitWorldDirector:
     def __init__(self):
         init_rng(42)
         self.lay = Layout(WIDTH, HEIGHT)
-        self.screen_buf, self.screen_fb = make_fb(WIDTH, HEIGHT, VOID)
-        self.screen_draw = Draw(self.screen_fb)
+        # A board whose panel hands out two scan-out buffers is drawn into
+        # directly; every other display gets one off-screen frame that is
+        # copied across.
+        self.panels = {}
+        self.direct = self._share_panel_buffers()
+        if not self.direct:
+            self.screen_buf, self.screen_fb = make_fb(WIDTH, HEIGHT, VOID)
+            self.screen_draw = Draw(self.screen_fb)
 
         self.sprites = SpriteBank(self.lay)
         self.sound = SoundEngine(board_peripherals, app)
@@ -120,6 +133,38 @@ class BitWorldDirector:
 
         self._compute_bar_geometry()
         self.render_and_present(first_frame=True)
+
+    # Decide whether to draw straight into the panel's two scan-out buffers.
+    def _share_panel_buffers(self):
+        drv = display_drv
+        if addressof is None or not getattr(drv, "share_framebuffer", False):
+            return False
+        if drv.rotation or getattr(drv, "requires_byteswap", False):
+            return False
+        if not callable(getattr(drv, "framebuffers", None)):
+            return False
+        try:
+            bufs = drv.framebuffers()
+        except Exception:
+            return False
+        # One buffer would show every half-drawn frame, so it keeps the copy.
+        if len(bufs) < 2 or bufs[1] is None or bufs[3] != WIDTH * 2:
+            return False
+        if len(bufs[0]) < WIDTH * HEIGHT * 2:
+            return False
+        app.pause_refresh()
+        return True
+
+    # The panel's back buffer wrapped for drawing: (FrameBuffer, Draw, PanelState).
+    def _back_panel(self):
+        buf = display_drv.framebuffers()[0]
+        key = addressof(buf)
+        panel = self.panels.get(key)
+        if panel is None:
+            fb = FrameBuffer(buf, WIDTH, HEIGHT, RGB565)
+            panel = (fb, Draw(fb), PanelState())
+            self.panels[key] = panel
+        return panel
 
     # Compute top stage bar tab and button hit rectangles for the active screen width.
     def _compute_bar_geometry(self):
@@ -195,11 +240,20 @@ class BitWorldDirector:
 
     # Render the active act, transition curtain, and top stage bar, then blit to display.
     def render_and_present(self, first_frame=False):
-        fb = self.screen_fb
-        if self.act_idx == 2:
-            self.act_deck.draw(fb, self.screen_draw)
+        act = self.acts[self.act_idx]
+        if self.direct:
+            fb, draw, state = self._back_panel()
+            if state.act == self.act_idx and self.wipe_progress == 0.0:
+                # This buffer already shows the act: repaint what changed.
+                act.draw_changes(fb, draw, state)
+            else:
+                act.draw(fb, draw, state)
+                state.bar = None  # the full redraw painted over the stage bar
+                # A buffer that gets a curtain wipe no longer shows its act.
+                state.act = self.act_idx if self.wipe_progress == 0.0 else -1
         else:
-            self.acts[self.act_idx].draw(fb)
+            fb = self.screen_fb
+            act.draw(fb, self.screen_draw)
 
         if self.wipe_progress > 0.0:
             accent = ACT_ACCENTS[self.next_act_idx]
@@ -214,10 +268,31 @@ class BitWorldDirector:
                 accent,
             )
 
-        self._draw_stage_bar(fb)
+        if self.direct:
+            # The stage bar only changes when a tab, a toggle or the progress line does.
+            bar = (self.act_idx, self.auto_mode, self.sound.muted, self._bar_progress())
+            if state.bar != bar or self.wipe_progress > 0.0:
+                self._draw_stage_bar(fb)
+                state.bar = bar if self.wipe_progress == 0.0 else None
+        else:
+            self._draw_stage_bar(fb)
+        if self.direct:
+            # Promote the finished frame; the next frame waits for the flip.
+            if hasattr(display_drv, "show_nowait"):
+                display_drv.show_nowait()
+            else:
+                display_drv.show()
+            return
         display_drv.blit_rect(self.screen_buf, 0, 0, WIDTH, HEIGHT)
         if first_frame:
             display_drv.show()
+
+    # Width in pixels of the attract-mode progress line on the active tab.
+    def _bar_progress(self):
+        if not self.auto_mode:
+            return 0
+        tab_w = self.tab_rects[self.act_idx][2]
+        return int((tab_w - 6) * min(1.0, self.act_timer / ACT_DURATION))
 
     # Draw the top navigation bar with act tabs, attract-mode progress, and toggles.
     def _draw_stage_bar(self, fb):
@@ -382,7 +457,15 @@ def _on_quit(_e=None):
     display_drv.quit()
 
 
-app.every(FRAME_MS, director.step)
+# A board that draws straight into its panel buffers cannot keep up with FRAME_MS, and a
+# timer whose frames overrun its period only fires on every second or third slot, so it
+# gets a short period and runs frames back to back.
+frame_timer = app.every(PANEL_FRAME_MS if director.direct else FRAME_MS, director.step)
+# After a frame that runs longer than its period, multimer idles the timer for as long as
+# the frame took (up to yield_cap ms), which halves the frame rate of a slow board.
+# Idle only briefly: other timers and the REPL still get their turn between frames.
+if hasattr(frame_timer, "yield_cap"):
+    frame_timer.yield_cap = 8
 app.every(250, _retry_audio)
 app.on([app.events.MOUSEBUTTONDOWN, app.events.MOUSEBUTTONUP], _on_mouse_button)
 app.on(app.events.MOUSEMOTION, _on_mouse_motion)
