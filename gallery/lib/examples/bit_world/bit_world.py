@@ -213,6 +213,10 @@ class BitWorldDirector:
         now = ticks_ms()
         dt = ticks_diff(now, self.last_ms) / 1000.0
         self.last_ms = now
+
+        # Smooth the frame rate for the deck's frames-per-second dial.
+        if dt > 0.0:
+            self.act_deck.fps += (1.0 / dt - self.act_deck.fps) * 0.1
         if dt <= 0.0:
             dt = 0.016
         elif dt > 0.10:

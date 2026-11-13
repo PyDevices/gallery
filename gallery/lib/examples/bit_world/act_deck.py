@@ -57,6 +57,10 @@ from bit_palette import (
     restore_rects,
 )
 
+# Change these to match your setup.
+# The frame rate at which the FPS dial reads full scale.
+FPS_FULL_SCALE = 60.0
+
 SWITCH_NAMES = ("BOOST", "SHLD", "PHASE", "OVRD")
 PAD_NOTES = ("D4", "E4", "F4", "A4", "C5", "D5", "E5", "A5")
 
@@ -69,6 +73,7 @@ class CyberDeckAct:
         self.sprites = sprites
         self.sound = sound
         self.phase = 0
+        self.fps = 0.0
         self.auto_timer = 1.8
         self.auto_step = 0
 
@@ -186,14 +191,24 @@ class CyberDeckAct:
         cy = gy + 20 + r + 4
         cx1 = gx + (gw >> 2) + 2
         cx2 = gx + ((gw * 3) >> 2) - 2
-        self.gauge_centers = ((cx1, cy, r, "FLUX MW"), (cx2, cy, r, "TURB RPM"))
+        self.gauge_centers = ((cx1, cy, r, "FLUX MW"), (cx2, cy, r, "FPS"))
         thick = 4 if lay.compact else 6
-        for cx, c_y, rad, label in self.gauge_centers:
+        # The flux dial runs green to red; the FPS dial runs red below 12 fps,
+        # gold to 30 fps and green above, scaled to FPS_FULL_SCALE.
+        fps_deg = 239 / FPS_FULL_SCALE
+        zones = (
+            ((135, 270, EMERALD), (270, 345, GOLD), (345, 405, CORAL)),
+            (
+                (135, 135 + int(12 * fps_deg), CORAL),
+                (135 + int(12 * fps_deg), 135 + int(30 * fps_deg), GOLD),
+                (135 + int(30 * fps_deg), 405, EMERALD),
+            ),
+        )
+        for (cx, c_y, rad, label), dial_zones in zip(self.gauge_centers, zones):
             d.circle(cx, c_y, rad + 2, DEEP_SLATE, False)
             for dr in range(thick):
-                d.arc(cx, c_y, rad - dr, 135, 270, EMERALD)
-                d.arc(cx, c_y, rad - dr, 270, 345, GOLD)
-                d.arc(cx, c_y, rad - dr, 345, 405, CORAL)
+                for a0, a1, zcol in dial_zones:
+                    d.arc(cx, c_y, rad - dr, a0, a1, zcol)
             lbl_x = cx - (len(label) * 4)
             fb.text(label, lbl_x, c_y + rad + (6 if lay.compact else 10), SILVER)
 
@@ -339,8 +354,10 @@ class CyberDeckAct:
 
         val1 = min(1.0, max(0.05, self.throttle * 0.78 + boost_bonus + jitter))
         val2 = min(1.0, max(0.05, self.throttle * 0.72 + ovr_bonus - jitter))
-        vals = (val1, val2)
-        readouts = (f"{int(val1 * 990):03d}MW", f"{int(val2 * 5400):04d}")
+        # The second dial shows the frame rate, full scale at FPS_FULL_SCALE.
+        fps_val = min(1.0, max(0.0, self.fps / FPS_FULL_SCALE))
+        vals = (val1, fps_val)
+        readouts = (f"{int(val1 * 990):03d}MW", f"{self.fps:.1f}")
 
         for idx, (cx, cy, rad, _) in enumerate(self.gauge_centers):
             v = vals[idx]
