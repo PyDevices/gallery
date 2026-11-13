@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 # deps: pygraphics
+# gallery: no-pyodide
 """Draw SVG icons and a gauge at the size the screen needs.
 
 Four icons are drawn in their own colours, blended over the background so
@@ -13,14 +14,15 @@ of the screen. Every picture comes from SVG text in this file, drawn by
 right on a small panel and a large one.
 
 Needs: a display, and svgio: on MicroPython, a firmware built with it
-(``--modules all,svgio``); on CPython, pydevices-desktop's ``svgio`` and
+(``--modules all``); on CPython, pydevices-desktop's ``svgio`` and
 ``pip install resvg-py pillow``.
 
 Run it:
 
     mpremote run svg_icons.py
 
-Tested on: MicroPython in a browser (the WebAssembly port) and CPython on Linux with SDL2.
+Tested on: MicroPython in a browser (the WebAssembly port), an ESP32-S3 with an
+800x480 RGB panel, and CPython on Linux with SDL2.
 """
 
 from board_config import display_drv
