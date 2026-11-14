@@ -67,7 +67,7 @@ def _paint_once(hub, audio, state, prev):
                 state["touch"] = time.ticks_ms()
                 tv = state["tv"]
                 if tv is None:
-                    from roku_cast import RokuScreen
+                    from castdisplay.roku_cast import RokuScreen
                     tv = state["tv"] = RokuScreen(hp.TV, name="PyDevices House", log=lambda *a: None)
                     tv.on()
                 if state["casting"]:
