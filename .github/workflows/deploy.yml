@@ -7,8 +7,8 @@ on:
     paths:
       - '.site/**'
       - '.github/workflows/deploy.yml'
-      - 'synthstation.lock'
-      - 'scripts/build_synthstation.py'
+      - '*.lock'
+      - 'scripts/build_app_page.py'
       - 'lib/**'
       - 'packages/**'
       - 'gallery.toml'
@@ -64,7 +64,8 @@ jobs:
           python scripts/gallery_generator.py --copy-examples _site/gallery/lib/examples
           cp -r packages/* _site/gallery/packages/
           cp gallery.toml _site/gallery.toml
-          python scripts/build_synthstation.py _site/synthstation
+          python scripts/build_app_page.py synthstation _site/synthstation
+          python scripts/build_app_page.py bit_world _site/bit_world
           touch _site/.nojekyll
 
       - name: Deploy to gh-pages
