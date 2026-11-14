@@ -1,10 +1,6 @@
 {
   "urls": [
     [
-      "cast_target.py",
-      "github:PyDevices/gallery/lib/utils/cast_target.py"
-    ],
-    [
       "color_setup.py",
       "github:PyDevices/gallery/lib/utils/color_setup.py"
     ],
@@ -31,10 +27,6 @@
     [
       "ps_loader.py",
       "github:PyDevices/gallery/lib/utils/ps_loader.py"
-    ],
-    [
-      "roku_companion.py",
-      "github:PyDevices/gallery/lib/utils/roku_companion.py"
     ],
     [
       "tft_bitmap.py",
