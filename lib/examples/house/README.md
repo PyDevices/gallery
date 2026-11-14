@@ -14,9 +14,10 @@ fills the other rooms.
 
 ## Run it
 
-Install this example with `cast`, `roku_remote` and `sensor_hub` beside it. It
-needs the P4 firmware that carries `castif` (micropython-pydevices' default
-P4 build). Set `TV` in [`house_panel.py`](house_panel.py) to your Roku's address, then:
+Install this example with `roku_remote` and `sensor_hub` beside it, and the
+[`castdisplay`](https://github.com/PyDevices/pydevices/tree/main/packages/castdisplay)
+package (`mip.install("castdisplay")`). It needs the P4 firmware that carries
+`castif` (micropython-pydevices' default P4 build). Set `TV` in [`house_panel.py`](house_panel.py) to your Roku's address, then:
 
 ```python
 import house.house_app as a; a.run()
@@ -28,4 +29,4 @@ stops it.
 [`house_server.py`](house_server.py) serves the dashboard alone, without the panel.
 
 The app writes nothing to flash while it runs: a flash write stalls a running
-cast (see the [`cast` example's README](../cast/README.md)).
+cast (see [how casting works](https://github.com/PyDevices/pydevices/blob/main/docs/how-it-works/casting.md#limits)).

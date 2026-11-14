@@ -7,15 +7,15 @@
 # The P4 is the house panel: it shows every room's sensor node from the
 # sensor hub, flags thresholds (a damp bathroom, a warm room, motion), and casts
 # itself to the 65" TV on request -- video and audio by Miracast, the ECP
-# controls (power, volume, mute, input) from roku_cast. An alert chimes through
-# the shared pump-and-cast producer, so it sounds on the P4 and on the TV.
+# controls (power, volume, mute, input) from castdisplay's roku_cast. An alert
+# chimes through the shared pump-and-cast producer, so it sounds on the P4 and
+# on the TV.
 #
 # Data: real nodes that publish to the hub (the FunHouse, from the sensor hub's
 # funhouse_node) take the first cards; a small simulator fills the other rooms
 # with the same readings a node would publish.
 #
-# Needs the cast example beside this one (roku_cast, castfast, micecast) and
-# the sensor_hub example.
+# Needs the castdisplay package and the sensor_hub example.
 import time, math, framebuf, random
 
 _f = __file__.replace("\\", "/")
@@ -23,7 +23,7 @@ HERE = _f.rsplit("/", 1)[0] if "/" in _f else "."
 
 from board_config import fb, display_drv, touch_read
 from sensor_hub.hub import Hub
-from roku_cast import RokuScreen
+from castdisplay.roku_cast import RokuScreen
 from audiodev import AudioFormat
 
 TV = "192.168.1.129"      # your Roku's IP address
@@ -177,7 +177,7 @@ class HouseAudio:
         self.pos = -1
         self.stream = None
         try:
-            from castfast import pump_stream
+            from castdisplay.castfast import pump_stream
             self.stream = pump_stream(AudioFormat(RATE, 2, 16), volume=85, log=log)
         except Exception as e:
             log("house audio: no pump output (%r)" % (e,))
@@ -186,7 +186,7 @@ class HouseAudio:
     def cast_feed(self, log=print):
         """The cast's audio producer: block() paced by the clock, into this
         stream (the speaker) and the cast alike. One producer, two listeners."""
-        from castfast import PumpFeed
+        from castdisplay.castfast import PumpFeed
         return PumpFeed(self.block, stream=self.stream, log=log)
 
     def chime_now(self, feeding=False):
