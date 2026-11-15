@@ -570,6 +570,56 @@ def _apply_patches(which):
         _prime_primitives()
 
 
+_MARKER_ATTEMPTS = 4
+
+
+def _install_with_empty_markers(mip, package):
+    """``mip.install`` that tolerates raw.githubusercontent.com's HTTP 501.
+
+    The host sometimes answers a request for an empty file (the packages'
+    empty ``__init__.py`` markers) with 501 instead of 200, in bursts of a few
+    seconds. mip takes that for a missing file and stops, so the demos that
+    come after it in the package were never installed. Here a marker that
+    fails is fetched again a few times, and if it still answers 501 it is
+    written empty. Any other failure still stops the install.
+    """
+    download = mip._download_file
+
+    def download_file(url, dest):
+        if download(url, dest):
+            return True
+        if not dest.endswith("/__init__.py"):
+            return False
+        import time
+
+        import requests
+
+        for attempt in range(_MARKER_ATTEMPTS):
+            response = requests.get(url)
+            try:
+                status = response.status_code
+                if status == 200:
+                    break
+                if status != 501:
+                    return False
+            finally:
+                response.close()
+            time.sleep(0.3 * (attempt + 1))
+        else:
+            print("501 for", url, "- creating", dest, "empty")
+            mip._ensure_path_exists(dest)
+            with open(dest, "wb"):
+                pass
+            return True
+        return download(url, dest)
+
+    mip._download_file = download_file
+    try:
+        mip.install(package, target=_utils_dir(), mpy=False)
+    finally:
+        mip._download_file = download
+
+
 def fetch_ph_gui(which, apply_patches=True):
     """Ensure ``which`` GUI is in utils/gui/ and optionally patched.
 
@@ -630,7 +680,7 @@ def fetch_ph_gui(which, apply_patches=True):
             if installer.__name__ == "omip":
                 installer.install(_PACKAGES[which], target=_utils_dir(), mpy=False, prompt=False)
             else:
-                installer.install(_PACKAGES[which], target=_utils_dir(), mpy=False)
+                _install_with_empty_markers(installer, _PACKAGES[which])
         except Exception:
             return False
 
