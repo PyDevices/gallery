@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "Huey's Perch",
+  "short_name": "Huey's Perch",
+  "description": "Huey the chameleon at the coast, a workbench and a desk: vector art drawn in Python, running in your browser.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0b2a4a",
+  "theme_color": "#0b2a4a",
+  "icons": [
+    {"src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
