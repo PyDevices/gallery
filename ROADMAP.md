@@ -11,8 +11,7 @@ go to [issues](https://github.com/PyDevices/gallery/issues).
   display, with its frame rate measured on an S3 with an SPI panel and on the
   P4's hardware decoder, and the ffmpeg line that makes the file.
 - car_cluster: redraw the ring gauges and the hood with real radial gradients
-  and vector art, once vector graphics are in the build
-  ([omnipython-lvgl's roadmap](https://github.com/PyDevices/omnipython-lvgl/blob/main/ROADMAP.md)).
+  and vector art.
 
 ## Site
 
