@@ -160,13 +160,14 @@ async function installPackages(mp, plan) {
     // The PyDevices stack and the desktop board config are frozen into the
     // runtime, and nothing here installs any of it: ?deps= is not acted on.
     // A runtime built without the stack fails at the example's own import,
-    // loudly. What is installed is the example's own code (?manifests=).
-    const index = "https://PyDevices.github.io/mip";
+    // loudly. What is installed is the example's own code (?manifests=), by
+    // omip: it takes a package's dependencies from lib.omnipython.org, then
+    // from micropython-lib, which the library index doesn't mirror.
     for (const manifest of plan.manifests) {
         setStatus(`Installing ${readable(manifest)}…`);
         const url = new URL(`./packages/${manifest}.json`, location.href).href;
         await mp.runPythonAsync(
-            `import mip; mip.install(${pythonLiteral(url)}, index=${pythonLiteral(index)}, target="lib")`
+            `import omip; omip.install(${pythonLiteral(url)}, target="lib")`
         );
     }
 }

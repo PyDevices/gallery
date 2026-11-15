@@ -226,9 +226,9 @@
           id: "mip",
           name: "mip",
           path: "/mip",
-          url: "https://PyDevices.github.io/mip",
-          tag: "MIP Index",
-          desc: "Single source of truth for .mpy package distributions",
+          url: "https://lib.omnipython.org",
+          tag: "Library index",
+          desc: "The package index omip and mip install PyDevices packages from",
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg>'
         },
         {
@@ -326,7 +326,7 @@
     // Footer Links
     html += '  <div class="pydevices-nav-footer">';
     html += '    <a href="' + ROOT + '/gallery/gallery/" class="nav-foot-link">Interactive Gallery</a> &middot; ';
-    html += '    <a href="https://PyDevices.github.io/mip" class="nav-foot-link">MIP Index</a> &middot; ';
+    html += '    <a href="https://lib.omnipython.org" class="nav-foot-link">Library index</a> &middot; ';
     html += '    <a href="https://github.com/PyDevices" class="nav-foot-link">GitHub</a>';
     html += '  </div>';
 

@@ -30,7 +30,7 @@ browser window; other resolutions lay out proportionally.
 Needs: a board or computer with LVGL, ``board_config`` and
 ``board_peripherals`` (a speaker or other audio output), and the
 ``audioinstruments`` package (``mip.install("audioinstruments",
-index="https://PyDevices.github.io/mip")`` on a board, pip on a computer).
+index="https://lib.omnipython.org")`` on a board, pip on a computer).
 
 Run it: ``import drum_machine``, then press PLAY.
 
