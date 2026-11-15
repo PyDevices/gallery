@@ -47,7 +47,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 WIFI_POLL_S = 15
 BLE_POLL_S = 60
 INDEXES = {
-    "PyDevices": "https://pydevices.github.io/mip",
+    "PyDevices": "https://lib.omnipython.org",
     "micropython-lib": "https://micropython.org/pi/v2",
 }
 # Services a board running bledev advertises: Nordic UART (bledev.repl),
