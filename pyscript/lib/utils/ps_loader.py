@@ -5,12 +5,13 @@
 
 Consolidates loader install logic for ``micropython.html``, ``pyodide.html``,
 ``mp.html``, and ``py.html``. Gallery pages call ``_ps_loader()`` on
-Run only (``import utils.path`` then ``import ps_loader``). MicroPython WASM uses
-firmware ``mip`` after ``utils.path``; Pyodide installs every library with
-micropip, and manifests with ``omip``, which comes in the ``pydevices`` wheel.
+Run only (``import utils.path`` then ``import ps_loader``). MicroPython WASM
+installs with the ``omip`` frozen into the runtime; Pyodide installs every
+library with micropip, and manifests with ``omip``, which comes in the
+``pydevices`` wheel. ``omip`` looks on lib.omnipython.org, then on
+micropython-lib.
 """
 
-MIP_LIB_INDEX = "https://PyDevices.github.io/mip"
 # Install modules and manifests into cwd so ``import name`` / ``import pkg`` work
 # with ``/`` (or ``.``) on ``sys.path`` — same as desktop ``cd lib``.
 MANIFEST_MIP_TARGET = "."
@@ -246,7 +247,7 @@ def _install_index_deps_micropython(mip_mod, names, status):
     for which in names:
         if status:
             status("Installing " + which + "…")
-        _quiet_install(mip_mod, which, index=MIP_LIB_INDEX)
+        _quiet_install(mip_mod, which)
 
 
 def _ensure_cwd():
@@ -258,49 +259,8 @@ def _ensure_cwd():
         pass
 
 
-def _import_firmware_mip():
-    """Firmware ``mip`` on MicroPython WASM (not portable ``mip.py``).
-
-    ``utils.path`` must run first so ``utils`` is appended, not prepended.
-
-    Guarded because the failure mode is otherwise unreadable: if ``sys.path``
-    puts ``lib`` before ``.frozen``, ``import mip`` silently resolves to the
-    mounted portable ``/lib/mip.py`` (CPython/Pyodide only) instead of frozen
-    ``mip``, and the loader dies with ``no module named '__future__'``.
-    """
-    import sys
-
-    try:
-        import mip
-    except ImportError as exc:
-        # "__future__" is the pre-guard message from older mounted copies of
-        # utils/mip.py; "portable mip.py" is the guard it now raises itself.
-        detail = str(exc)
-        if "__future__" in detail or "portable mip.py" in detail:
-            # No `from exc`: MicroPython prints "exception chaining not
-            # supported" to the console, which is the opposite of helpful here.
-            raise ImportError(  # noqa: B904
-                "`import mip` resolved to the portable /lib/mip.py (CPython/Pyodide "
-                "only) instead of MicroPython's frozen `mip`. `.frozen` must precede "
-                "`lib` on sys.path — see utils/path.py. sys.path={}".format(sys.path)
-            )
-        raise
-    import utils.path  # noqa: F401
-
-    # Same shadowing, but reachable whenever portable mip.py becomes importable
-    # on MicroPython: it has no WASM transport, so installs would fail later and
-    # much less legibly than they do here.
-    if getattr(mip, "PORTABLE", False) and sys.implementation.name == "micropython":
-        raise ImportError(
-            "`import mip` resolved to the portable /lib/mip.py, which has no HTTP "
-            "transport on MicroPython WASM. `.frozen` must precede `lib` on "
-            "sys.path — see utils/path.py. sys.path={}".format(sys.path)
-        )
-    return mip
-
-
 def _import_omip():
-    """``omip`` for Pyodide, which has no firmware ``mip``."""
+    """``omip``: frozen into the MicroPython WASM runtime, in the ``pydevices`` wheel on Pyodide."""
     _ensure_cwd()
     import omip
     import utils.path  # noqa: F401
@@ -335,7 +295,7 @@ def _ensure_board_config(mip_mod, status=None):
         return
     if status:
         status("Installing board_config (desktop)…")
-    kwargs = {"target": MANIFEST_MIP_TARGET, "index": MIP_LIB_INDEX}
+    kwargs = {"target": MANIFEST_MIP_TARGET}
     _quiet_install(mip_mod, DESKTOP_BOARD_CONFIG_PACKAGE, **kwargs)
     _refresh_path_after_install()
 
@@ -351,14 +311,14 @@ def ensure_board_config(status=None):
     Same package as ``harness.html`` / gallery ``install_micropython``.
     """
     _ensure_cwd()
-    mip = _import_firmware_mip()
+    mip = _import_omip()
     _ensure_board_config(mip, status)
 
 
 def install_micropython(modules, manifests, index_deps, status=None):
-    """Sync install plan for MicroPython WASM (firmware ``mip``)."""
+    """Sync install plan for MicroPython WASM (``omip``)."""
     _ensure_cwd()
-    mip = _import_firmware_mip()
+    mip = _import_omip()
     _ensure_board_config(mip, status)
     _install_manifests_and_modules(mip, modules, manifests, status)
     _refresh_path_after_install()
