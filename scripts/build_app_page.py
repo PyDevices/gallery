@@ -7,6 +7,7 @@
 
     python scripts/build_app_page.py synthstation _site/synthstation
     python scripts/build_app_page.py bit_world _site/bit_world
+    python scripts/build_app_page.py perch _site/perch
 
 An installed copy has to keep working when the rest of the site moves on, so
 each page pins what it runs in ``<app>.lock``: a commit of the apps repo, of
@@ -39,6 +40,10 @@ PAGES = {
         ),
         # Only the pieces of midiports a browser reads.
         "pydevices": (("packages/midiports/midiports/", ("__init__.py", "webmidi.py"), "lib/midiports/"),),
+    },
+    "perch": {
+        "apps": ("lib/appkit", "lib/touchkit", "apps/__init__.py", "apps/perch/*.py", "apps/perch/app.json"),
+        "pydevices": (),
     },
     "bit_world": {
         "apps": ("apps/bit_world/*.py", "apps/bit_world/app.json"),

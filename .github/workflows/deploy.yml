@@ -66,6 +66,7 @@ jobs:
           cp gallery.toml _site/gallery.toml
           python scripts/build_app_page.py synthstation _site/synthstation
           python scripts/build_app_page.py bit_world _site/bit_world
+          python scripts/build_app_page.py perch _site/perch
           touch _site/.nojekyll
 
       - name: Deploy to gh-pages
