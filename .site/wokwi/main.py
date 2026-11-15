@@ -14,19 +14,19 @@ if WOKWI:
 
 import mip  # noqa: E402
 
-MICROPYTHON_LIB = "https://PyDevices.github.io/mip"
+OMNIPYTHON_LIB = "https://lib.omnipython.org"
 PYDEVICES = "github:PyDevices/pydevices"
 PYDEVICES_EXAMPLES = "github:PyDevices/gallery"
 
-# index= is required so bare deps like "displaydev" resolve from PyDevices MIP
+# index= is required so bare deps like "displaydev" resolve from lib.omnipython.org
 # (not micropython.org). The application installs optional appdev explicitly
 # when it needs the non-LVGL event traffic controller.
 mip.install(
     PYDEVICES + "/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/",
-    index=MICROPYTHON_LIB,
+    index=OMNIPYTHON_LIB,
     target=TARGET,
 )
-mip.install("pygraphics", index=MICROPYTHON_LIB, target=TARGET)
+mip.install("pygraphics", index=OMNIPYTHON_LIB, target=TARGET)
 mip.install(PYDEVICES_EXAMPLES + "/lib/examples/testris.py", target=TARGET)
 
 # isort: off
