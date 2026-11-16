@@ -37,10 +37,10 @@ example that imports a firmware module Pyodide has no build of.
 
 Then:
 
-  - Updates gallery cards in ``.site/gallery/index.html`` (``GEN:demos`` markers)
-  - Writes ``.site/gallery/python-files.json`` for explicit Python-only staging
+  - Updates gallery cards in ``.site/index.html`` (``GEN:demos`` markers)
+  - Writes ``.site/python-files.json`` for explicit Python-only staging
   - Enforces shared org chrome mounts via ``ensure_site_chrome``
-  - Deletes stale ``.site/gallery/*.html`` from the old per-demo page generator
+  - Deletes stale ``.site/*.html`` from the old per-demo page generator
 
 Each card links direct MicroPython only (the gallery's one supported runtime)
 with queries from pydevices' shared private URL policy. Hinch GUIs are not listed in headers — ``fetch_ph_gui``
@@ -89,7 +89,7 @@ sys.path.insert(0, str(_browser_tools))
 from _browser_url import query as browser_query  # noqa: E402
 
 EXAMPLES_DIR = REPO_ROOT / "lib" / "examples"
-GALLERY_DIR = REPO_ROOT / ".site" / "gallery"
+GALLERY_DIR = REPO_ROOT / ".site"
 INDEX = GALLERY_DIR / "index.html"
 PYSCRIPT_DIR = REPO_ROOT / ".site" / "pyscript"
 PYSCRIPT_INDEX = PYSCRIPT_DIR / "index.html"
@@ -206,16 +206,17 @@ class Example:
             "pyodide": browser_query(runtime="pyodide", **values),
         }
 
-    def loader_hrefs(self) -> dict[str, str]:
+    def loader_hrefs(self, pyscript: str = "pyscript/") -> dict[str, str]:
+        """Card links. ``pyscript`` is the path from the page to ``.site/pyscript/``."""
         queries = self.loader_queries()
         if self.nochrome:
             return {
                 "micropython": f"mp.html{queries['wasm']}",
-                "pyodide": f"../pyscript/py.html{queries['pyodide']}",
+                "pyodide": f"{pyscript}py.html{queries['pyodide']}",
             }
         return {
             "micropython": f"micropython.html{queries['wasm']}",
-            "pyodide": f"../pyscript/pyodide.html{queries['pyodide']}",
+            "pyodide": f"{pyscript}pyodide.html{queries['pyodide']}",
         }
 
 
@@ -598,9 +599,18 @@ def generate_missing_thumbnails(examples: list[Example]) -> tuple[int, int]:
     return created, failed
 
 
-def render_card_icon(ex: Example) -> str:
+def pyscript_prefix(runtime: str) -> str:
+    """Path to ``.site/pyscript/`` from the page that shows ``runtime`` cards.
+
+    The direct-MicroPython list is the site root; the Pyodide list is inside
+    ``pyscript/`` itself.
+    """
+    return "pyscript/" if runtime == "micropython" else "../pyscript/"
+
+
+def render_card_icon(ex: Example, prefix: str = "pyscript/") -> str:
     if thumbnail_path(ex).exists():
-        return f'<img src="../pyscript/thumbnails/{ex.name}.png" alt="" loading="lazy">'
+        return f'<img src="{prefix}thumbnails/{ex.name}.png" alt="" loading="lazy">'
     return GENERIC_ICON
 
 
@@ -614,8 +624,9 @@ def render_card(ex: Example, *, runtime: str = "micropython") -> str:
     else:
         tag = ""
     badges = _render_badges(ex)
-    hrefs = ex.loader_hrefs()
-    icon = render_card_icon(ex)
+    prefix = pyscript_prefix(runtime)
+    hrefs = ex.loader_hrefs(prefix)
+    icon = render_card_icon(ex, prefix)
     link_attrs = ' target="_blank" rel="noopener"' if ex.new_window else ""
     return f'''                <a class="card" href="{hrefs[runtime]}"{link_attrs}>
                     <div class="card-top">
@@ -656,7 +667,7 @@ def remove_stale_demo_html(stale: list[str], check: bool) -> None:
 
 
 def remove_stale_example_json(stale: list[str], check: bool) -> None:
-    """Remove leftover .site/gallery/<example>.json (now generated under packages/)."""
+    """Remove leftover .site/<example>.json (now generated under packages/)."""
     keep = {"manifest"}  # PWA web app manifest
     for path in GALLERY_DIR.glob("*.json"):
         if path.stem in keep:
@@ -765,13 +776,14 @@ _PRODUCT_MARK = (
     '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/><circle cx="17" cy="15" r="1.5"/></svg>'
     "</div>"
 )
-_CHROME_SCRIPTS = (
-    '    <script src="../pyscript/site-chrome.js"></script>\n'
-    '    <script src="../pyscript/theme-toggle.js"></script>\n'
-)
+def chrome_scripts(prefix: str) -> str:
+    return (
+        f'    <script src="{prefix}site-chrome.js"></script>\n'
+        f'    <script src="{prefix}theme-toggle.js"></script>\n'
+    )
 
 
-def ensure_site_chrome(index_text: str) -> str:
+def ensure_site_chrome(index_text: str, prefix: str = "pyscript/") -> str:
     """Enforce shared org header/footer mounts + canonical chrome scripts."""
     text = index_text
     # Drop deferred theme script from <head> only (body scripts are managed below).
@@ -828,7 +840,7 @@ def ensure_site_chrome(index_text: str) -> str:
         "\n",
         text,
     )
-    text = text.replace("</body>", _CHROME_SCRIPTS + "</body>", 1)
+    text = text.replace("</body>", chrome_scripts(prefix) + "</body>", 1)
     if 'id="pydevices-site-header"' not in text:
         raise SystemExit("ensure_site_chrome failed to install header mount")
     if 'id="pydevices-site-footer"' not in text:
@@ -888,7 +900,7 @@ def main(argv: list[str] | None = None) -> int:
                 "(collapse async/all sections before regenerating)"
             )
         index_text = ensure_card_interpreter_css(index_text)
-        index_text = ensure_site_chrome(index_text)
+        index_text = ensure_site_chrome(index_text, pyscript_prefix(runtime))
         # Update hint text for new headers.
         index_text = index_text.replace(
             "# pyscript skip: gallery",

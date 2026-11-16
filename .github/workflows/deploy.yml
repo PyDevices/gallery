@@ -34,6 +34,16 @@ jobs:
           sparse-checkout: tools/_browser_url.py
           sparse-checkout-cone-mode: false
 
+      - name: Checkout the portal's shared assets
+        uses: actions/checkout@v7
+        with:
+          repository: PyDevices/PyDevices.github.io
+          path: portal
+          sparse-checkout: |
+            assets/chrome
+            assets/img
+            vendor/micropython
+
       - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
@@ -57,13 +67,18 @@ jobs:
           cp gallery.toml _site/pyscript/gallery.toml
           # Direct MicroPython stages only generated Python paths. Additional
           # assets are fetched through the declared package manifests.
-          # Replace symlinks inside _site/gallery with real trees for GitHub Pages.
-          rm -rf _site/gallery/lib _site/gallery/packages
-          mkdir -p _site/gallery/lib _site/gallery/packages
-          cp -r lib/utils _site/gallery/lib/
-          python scripts/gallery_generator.py --copy-examples _site/gallery/lib/examples
-          cp -r packages/* _site/gallery/packages/
+          # The app list is the site root: replace its symlinks with real trees too.
+          rm -rf _site/lib _site/packages
+          mkdir -p _site/lib _site/packages
+          cp -r lib/utils _site/lib/
+          python scripts/gallery_generator.py --copy-examples _site/lib/examples
+          cp -r packages/* _site/packages/
           cp gallery.toml _site/gallery.toml
+          # The pages load the shared stylesheet, icons and the MicroPython
+          # runtime from their own origin, which the isolated pages need.
+          cp -r portal/assets _site/assets
+          mkdir -p _site/vendor
+          cp -r portal/vendor/micropython _site/vendor/micropython
           python scripts/build_app_page.py synthstation _site/synthstation
           python scripts/build_app_page.py bit_world _site/bit_world
           python scripts/build_app_page.py perch _site/perch
@@ -75,6 +90,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: _site
           publish_branch: gh-pages
+          cname: gallery.omnipython.org
 
       - name: Wait for GitHub Pages to publish
         run: sleep 60

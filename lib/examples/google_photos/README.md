@@ -16,7 +16,7 @@ micropython -m examples.google_photos      # or python / circuitpython
 
 Without a tokens file (below) the launcher runs a **simulator** with sample
 photos, so the UI can be explored anywhere — including the
-[PyScript gallery](https://pydevices.github.io/gallery/pyscript/).
+[PyScript gallery](https://gallery.omnipython.org/pyscript/).
 Set `GPHOTOS_SIM=1` to force it, `GPHOTOS_SIM=0` to force the real client.
 
 ## How it works

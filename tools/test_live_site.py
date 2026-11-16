@@ -9,7 +9,7 @@ import sys
 
 from playwright.async_api import async_playwright
 
-SITE_BASE_URL = "https://pydevices.github.io/gallery"
+SITE_BASE_URL = "https://gallery.omnipython.org"
 
 # (title, relative path from SITE_BASE_URL)
 PAGES = [
@@ -17,10 +17,10 @@ PAGES = [
     ("DOM Event Test", "pyscript/dom.html"),
     ("Pyodide Paint", "pyscript/pyodide.html?modules=paint"),
     ("Compact Pyodide Runner", "pyscript/py.html?manifests=car_cluster&deps=pydevices-lvgl"),
-    ("Gallery Landing Page", "gallery/index.html"),
-    ("MicroPython Paint", "gallery/micropython.html?modules=paint"),
-    ("Compact MP Runner", "gallery/mp.html?manifests=car_cluster"),
-    ("Peter Hinch GUI Demos", "gallery/peterhinch.html?touch"),
+    ("Gallery app list", "index.html"),
+    ("MicroPython Paint", "micropython.html?modules=paint"),
+    ("Compact MP Runner", "mp.html?manifests=car_cluster"),
+    ("Peter Hinch GUI Demos", "peterhinch.html?touch"),
 ]
 
 
