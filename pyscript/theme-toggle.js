@@ -1,6 +1,6 @@
 /*! PyDevices shared dark/light theme toggle */
 (function () {
-  var STORAGE_KEY = "pydevices-theme";
+  var STORAGE_KEY = "omnipython-theme";
   var root = document.documentElement;
 
   function currentTheme() {

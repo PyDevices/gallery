@@ -7,9 +7,14 @@ self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
 self.addEventListener("fetch", (event) => {
-  const { request } = event;
+  let { request } = event;
   if (request.cache === "only-if-cached" && request.mode !== "same-origin") {
     return;
+  }
+  // Under COEP credentialless a cross-origin no-cors load (an <img> from
+  // another site) must go without credentials, or the browser refuses it.
+  if (request.mode === "no-cors") {
+    request = new Request(request, { credentials: "omit" });
   }
 
   event.respondWith(
