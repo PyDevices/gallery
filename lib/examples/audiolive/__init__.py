@@ -282,6 +282,44 @@ TURN_MS = 10
 BUILDER_STACK = 32 * 1024
 
 
+class _Lock:
+    """The builder's lock, which the handover can't wait on for ever.
+
+    The handover is a scheduled call, so it can run between two bytecodes of
+    play() or prefetch() on the same thread, while that call holds this lock.
+    A plain lock would have it wait for its own thread. It asks `mine` first
+    and leaves itself in `after`, which runs as the lock is let go.
+    """
+
+    def __init__(self):
+        self._lock = _thread.allocate_lock()
+        self._holder = None
+        self.after = None
+
+    def mine(self):
+        return self._holder is not None and self._holder == _thread.get_ident()
+
+    def acquire(self):
+        self._lock.acquire()
+        self._holder = _thread.get_ident()
+
+    def release(self):
+        self._holder = None
+        self._lock.release()
+        after = self.after
+        if after is not None:
+            self.after = None
+            after()
+
+    def __enter__(self):
+        self.acquire()
+        return self
+
+    def __exit__(self, *exc):
+        self.release()
+        return False
+
+
 def _key(chain):
     """A chain as something a dict can key on: options are dicts."""
     return repr(tuple(chain))
@@ -411,7 +449,7 @@ class LiveAudio:
         self._want = None
         self._ready = None
         self._building = False
-        self._lock = _thread.allocate_lock() if _thread is not None else None
+        self._lock = _Lock() if _thread is not None else None
         # Chains already built, by `_key(chain)`, for the source they were
         # built on; and chains to build ahead, when nothing is asked for.
         self._kept = {}
@@ -981,6 +1019,11 @@ class LiveAudio:
                 time.sleep_ms(1)
 
     def _adopt(self, _arg=None):
+        lock = self._lock
+        if lock is not None and lock.mine():
+            # Inside this thread's own play() or prefetch(): swap when it lets go.
+            lock.after = self._adopt
+            return
         ready, self._ready = self._ready, None
         if ready is None:
             return
