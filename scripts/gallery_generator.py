@@ -513,7 +513,7 @@ def validate_example_deps(examples: list[Example]) -> None:
 
 
 # Package deps that are also top-level PyDevices org repos get that repo's
-# real ecosystem tier (see .site/pyscript/site-chrome.js ECOSYSTEM_DATA).
+# real ecosystem tier (see ECOSYSTEM_DATA in the portal's assets/chrome/site-chrome.js).
 # appdev and multimer ship inside omnipython's own lib/, so they take its tier.
 _DEP_TIER = {
     "audiodsp": 2,
@@ -776,14 +776,13 @@ _PRODUCT_MARK = (
     '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/><circle cx="17" cy="15" r="1.5"/></svg>'
     "</div>"
 )
-def chrome_scripts(prefix: str) -> str:
-    return (
-        f'    <script src="{prefix}site-chrome.js"></script>\n'
-        f'    <script src="{prefix}theme-toggle.js"></script>\n'
-    )
+#: The portal's header, footer, navigation drawer and theme toggle, styled by
+#: the same portal's site.css. A copy kept here falls out of step with that
+#: stylesheet, so the page loads the portal's own.
+CHROME_SCRIPT = '    <script src="https://omnipython.org/assets/chrome/site-chrome.js"></script>\n'
 
 
-def ensure_site_chrome(index_text: str, prefix: str = "pyscript/") -> str:
+def ensure_site_chrome(index_text: str) -> str:
     """Enforce shared org header/footer mounts + canonical chrome scripts."""
     text = index_text
     # Drop deferred theme script from <head> only (body scripts are managed below).
@@ -829,9 +828,9 @@ def ensure_site_chrome(index_text: str, prefix: str = "pyscript/") -> str:
         count=1,
         flags=re.DOTALL,
     )
-    # Normalize trailing chrome scripts to single /assets/chrome/site-chrome.js
+    # Normalize trailing chrome scripts to the portal's one site-chrome.js
     text = re.sub(
-        r'\s*<script src="[./a-zA-Z_-]*site-chrome\.js"></script>\s*',
+        r'\s*<script src="[:./a-zA-Z_-]*site-chrome\.js"></script>\s*',
         "\n",
         text,
     )
@@ -840,7 +839,7 @@ def ensure_site_chrome(index_text: str, prefix: str = "pyscript/") -> str:
         "\n",
         text,
     )
-    text = text.replace("</body>", chrome_scripts(prefix) + "</body>", 1)
+    text = text.replace("</body>", CHROME_SCRIPT + "</body>", 1)
     if 'id="pydevices-site-header"' not in text:
         raise SystemExit("ensure_site_chrome failed to install header mount")
     if 'id="pydevices-site-footer"' not in text:
@@ -900,7 +899,7 @@ def main(argv: list[str] | None = None) -> int:
                 "(collapse async/all sections before regenerating)"
             )
         index_text = ensure_card_interpreter_css(index_text)
-        index_text = ensure_site_chrome(index_text, pyscript_prefix(runtime))
+        index_text = ensure_site_chrome(index_text)
         # Update hint text for new headers.
         index_text = index_text.replace(
             "# pyscript skip: gallery",
