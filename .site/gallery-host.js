@@ -247,9 +247,9 @@ state.reset = async () => {
     await boot();
 };
 state.enableAudio = async (microphone = false) => {
-    if (!globalThis.Module?.pydevicesBridge) throw new Error("bridge is not ready");
+    if (!globalThis.Module?.omnipythonBridge) throw new Error("bridge is not ready");
     const permission = await Promise.race([
-        Module.pydevicesBridge.enableAudio(microphone),
+        Module.omnipythonBridge.enableAudio(microphone),
         new Promise((_, reject) => setTimeout(() => reject(new Error("browser audio permission timed out")), 5000)),
     ]);
     if (!permission.audio || (microphone && !permission.microphone)) {
