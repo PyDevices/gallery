@@ -12,8 +12,3 @@ go to [issues](https://github.com/PyDevices/gallery/issues).
   P4's hardware decoder, and the ffmpeg line that makes the file.
 - car_cluster: redraw the ring gauges and the hood with real radial gradients
   and vector art.
-
-## Site
-
-- The gallery moves to its own address, gallery.omnipython.org, beside the
-  site, the docs and the package index.
