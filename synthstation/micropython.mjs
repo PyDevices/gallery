@@ -4385,7 +4385,7 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
 
   var _mp_js_time_ms = () => Date.now();
 
-  var pydevices_state = {
+  var omnipython_state = {
   displays:new Map,
   animation:0,
   timers:new Map,
@@ -4394,6 +4394,7 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
   timerDeliveries:[],
   audioContext:null,
   audioEnabled:false,
+  audioUnlock:null,
   microphoneEnabled:false,
   audioEnd:0,
   audioSources:new Set,
@@ -4403,26 +4404,26 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
   mediaNode:null,
   processor:null,
   };
-  var _pydevices_audio_clear = (input) => { const s=pydevices_state; if(input)s.inputFrames.length=0; else { for(const x of s.audioSources)x.stop(); s.audioSources.clear(); s.audioQueuedBytes=0; s.audioEnd=s.audioContext?.currentTime||0; } };
+  var _omnipython_audio_clear = (input) => { const s=omnipython_state; if(input)s.inputFrames.length=0; else { for(const x of s.audioSources)x.stop(); s.audioSources.clear(); s.audioQueuedBytes=0; s.audioEnd=s.audioContext?.currentTime||0; } };
 
-  var _pydevices_audio_queued = (input) => input ? pydevices_state.inputFrames.reduce((n,f)=>n+(f.channels[0].length-f.offset)*f.channels.length*4,0) : pydevices_state.audioQueuedBytes;
+  var _omnipython_audio_queued = (input) => input ? omnipython_state.inputFrames.reduce((n,f)=>n+(f.channels[0].length-f.offset)*f.channels.length*4,0) : omnipython_state.audioQueuedBytes;
 
   
-  var pydevices_encode_sample = (view, p, value, bits, signed, bigEndian) => {
+  var omnipython_encode_sample = (view, p, value, bits, signed, bigEndian) => {
           const little=!bigEndian, clamped=Math.max(-1,Math.min(1,value));
           if(bits===8) signed?view.setInt8(p,Math.round(clamped*127)):view.setUint8(p,Math.round((clamped+1)*127.5));
           else if(bits===16) signed?view.setInt16(p,Math.round(clamped*32767),little):view.setUint16(p,Math.round((clamped+1)*32767.5),little);
           else signed?view.setInt32(p,Math.round(clamped*2147483647),little):view.setUint32(p,Math.round((clamped+1)*2147483647.5),little);
       };
-  var _pydevices_audio_read = (ptr, len, rate, channels, bits, signed, bigEndian) => {
-          const state=pydevices_state; if(!state.microphoneEnabled) return -1;
+  var _omnipython_audio_read = (ptr, len, rate, channels, bits, signed, bigEndian) => {
+          const state=omnipython_state; if(!state.microphoneEnabled) return -1;
           const width=bits>>3, capacity=Math.floor(len/(width*channels)); let written=0;
           const view=new DataView(HEAPU8.buffer,ptr,len);
           while(written<capacity && state.inputFrames.length){
               const frame=state.inputFrames[0];
               while(written<capacity && frame.offset<frame.channels[0].length){
                   const sourceIndex=Math.min(frame.channels[0].length-1,Math.floor(frame.offset));
-                  for(let c=0;c<channels;c++) pydevices_encode_sample(view,(written*channels+c)*width,frame.channels[Math.min(c,frame.channels.length-1)][sourceIndex],bits,signed,bigEndian);
+                  for(let c=0;c<channels;c++) omnipython_encode_sample(view,(written*channels+c)*width,frame.channels[Math.min(c,frame.channels.length-1)][sourceIndex],bits,signed,bigEndian);
                   written++; frame.offset += frame.rate/rate;
               }
               if(frame.offset>=frame.channels[0].length) state.inputFrames.shift();
@@ -4430,10 +4431,59 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
           return written*channels*width;
       };
 
-  var _pydevices_audio_state = (input) => input ? +pydevices_state.microphoneEnabled : +pydevices_state.audioEnabled;
+  
+  
+  var omnipython_disarm_audio_unlock = () => {
+          const state = omnipython_state;
+          if (!state.audioUnlock) return;
+          for (const name of state.audioUnlock.names) document.removeEventListener(name, state.audioUnlock.handler, true);
+          state.audioUnlock = null;
+      };
+  
+  var omnipython_enable_audio = async (microphone=false) => {
+          const state = omnipython_state;
+          const AudioContext = globalThis.AudioContext || globalThis.webkitAudioContext;
+          if (!AudioContext) throw new Error('Web Audio is unavailable');
+          state.audioContext ||= new AudioContext();
+          await state.audioContext.resume();
+          state.audioEnabled = state.audioContext.state === 'running';
+          if (microphone) {
+              state.mediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
+              state.mediaNode = state.audioContext.createMediaStreamSource(state.mediaStream);
+              state.processor = state.audioContext.createScriptProcessor(1024, 2, 2);
+              state.processor.onaudioprocess = (event) => {
+                  const channels = [];
+                  for (let c = 0; c < event.inputBuffer.numberOfChannels; c++) channels.push(new Float32Array(event.inputBuffer.getChannelData(c)));
+                  state.inputFrames.push({channels, rate:event.inputBuffer.sampleRate, offset:0});
+                  if (state.inputFrames.length > 64) state.inputFrames.shift();
+              };
+              state.mediaNode.connect(state.processor);
+              state.processor.connect(state.audioContext.destination);
+              state.microphoneEnabled = true;
+          }
+          return {audio:state.audioEnabled, microphone:state.microphoneEnabled};
+      };
+  var omnipython_arm_audio_unlock = () => {
+          const state = omnipython_state;
+          if (state.audioUnlock || typeof document === 'undefined') return;
+          const names = ['pointerdown', 'pointerup', 'keydown'];
+          const handler = () => {
+              if (state.audioEnabled) { omnipython_disarm_audio_unlock(); return; }
+              omnipython_enable_audio(false).then(
+                  () => { if (state.audioEnabled) omnipython_disarm_audio_unlock(); },
+                  () => {});
+          };
+          state.audioUnlock = {names, handler};
+          for (const name of names) document.addEventListener(name, handler, true);
+      };
+  var _omnipython_audio_state = (input) => {
+          if (input) return +omnipython_state.microphoneEnabled;
+          if (!omnipython_state.audioEnabled) omnipython_arm_audio_unlock();
+          return +omnipython_state.audioEnabled;
+      };
 
   
-  var pydevices_decode_pcm = (bytes, frames, channels, bits, signed, bigEndian) => {
+  var omnipython_decode_pcm = (bytes, frames, channels, bits, signed, bigEndian) => {
           const result = Array.from({length:channels}, () => new Float32Array(frames));
           const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
           const width = bits >> 3, little = !bigEndian;
@@ -4446,11 +4496,11 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
           }
           return result;
       };
-  var _pydevices_audio_write = (ptr, len, rate, channels, bits, signed, bigEndian) => {
-          const state=pydevices_state, ctx=state.audioContext;
+  var _omnipython_audio_write = (ptr, len, rate, channels, bits, signed, bigEndian) => {
+          const state=omnipython_state, ctx=state.audioContext;
           if (!state.audioEnabled || !ctx) return -1;
           const width=bits>>3, frames=Math.floor(len/(width*channels));
-          const decoded=pydevices_decode_pcm(HEAPU8.subarray(ptr, ptr+frames*width*channels),frames,channels,bits,signed,bigEndian);
+          const decoded=omnipython_decode_pcm(HEAPU8.subarray(ptr, ptr+frames*width*channels),frames,channels,bits,signed,bigEndian);
           const buffer=ctx.createBuffer(channels,frames,rate);
           for(let c=0;c<channels;c++) buffer.copyToChannel(decoded[c],c);
           const source=ctx.createBufferSource(); source.buffer=buffer; source.connect(ctx.destination);
@@ -4465,18 +4515,18 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
           return byteLength;
       };
 
-  var pydevices_get_display = (canvasId) => {
-          let display = pydevices_state.displays.get(canvasId);
+  var omnipython_get_display = (canvasId) => {
+          let display = omnipython_state.displays.get(canvasId);
           if (!display) {
               display = {framebuffer:null, canvas:null, context:null, image:null, framesPainted:0, eventRing:null, events:[]};
-              pydevices_state.displays.set(canvasId, display);
+              omnipython_state.displays.set(canvasId, display);
           }
           return display;
       };
   
   
   
-  var pydevices_write_event = (ptr, event) => {
+  var omnipython_write_event = (ptr, event) => {
           const types={pointerdown:1,pointermove:2,pointerup:3,pointercancel:4,wheel:5,keydown:6,keyup:7,focus:8,blur:9};
           const pointerTypes={mouse:0,touch:1,pen:2};
           const ints=new Int32Array(HEAPU8.buffer,ptr,18);
@@ -4495,8 +4545,8 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
           stringToUTF8(event.code||'',ptr+136,64);
           return ints[0];
       };
-  var pydevices_push_event = (canvasId, event) => {
-          const display = pydevices_get_display(canvasId);
+  var omnipython_push_event = (canvasId, event) => {
+          const display = omnipython_get_display(canvasId);
           const ring = display.eventRing;
           if(ring && event.type!=='gamepad') {
               const base=ring.ptr, head=HEAPU32[base>>2], tail=HEAPU32[(base>>2)+1];
@@ -4504,11 +4554,11 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
                   const last=(head+ring.capacity-1)%ring.capacity;
                   const lastPtr=base+8+last*ring.stride;
                   if(HEAP32[lastPtr>>2]===2 && HEAP32[(lastPtr>>2)+8]===(event.pointerId||0)) {
-                      pydevices_write_event(lastPtr,event); return;
+                      omnipython_write_event(lastPtr,event); return;
                   }
               }
               const recordPtr=base+8+head*ring.stride;
-              if(pydevices_write_event(recordPtr,event)) {
+              if(omnipython_write_event(recordPtr,event)) {
                   const next=(head+1)%ring.capacity;
                   if(next===tail) HEAPU32[(base>>2)+1]=(tail+1)%ring.capacity;
                   HEAPU32[base>>2]=next;
@@ -4531,21 +4581,21 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
           }
       };
   
-  var pydevices_relative_point = (canvas, event) => {
+  var omnipython_relative_point = (canvas, event) => {
           const rect = canvas.getBoundingClientRect();
           return {
               x: Math.round((event.clientX - rect.left) * canvas.width / rect.width),
               y: Math.round((event.clientY - rect.top) * canvas.height / rect.height),
           };
       };
-  var pydevices_install_input = (canvas, canvasId) => {
-          if (canvas.__pydevicesInputInstalled) return;
-          canvas.__pydevicesInputInstalled = true;
+  var omnipython_install_input = (canvas, canvasId) => {
+          if (canvas.__omnipythonInputInstalled) return;
+          canvas.__omnipythonInputInstalled = true;
           canvas.tabIndex = canvas.tabIndex >= 0 ? canvas.tabIndex : 0;
           const modifiers = (e) => ({altKey:e.altKey, ctrlKey:e.ctrlKey, metaKey:e.metaKey, shiftKey:e.shiftKey});
           // Named and tracked on the element (rather than anonymous closures) so a
           // future register on this same canvas - a new WASM instance after a VM
-          // restart, most likely - can strip them via pydevices_release_canvas
+          // restart, most likely - can strip them via omnipython_release_canvas
           // before installing its own. Without that, events from a second
           // instance would keep calling into the first instance's closures - and
           // with them, its whole WASM heap - forever.
@@ -4554,11 +4604,11 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
               canvas.addEventListener(name, handler, opts);
               listeners.push([name, handler, opts]);
           };
-          canvas.__pydevicesListeners = listeners;
+          canvas.__omnipythonListeners = listeners;
           for (const name of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel']) {
               on(name, (e) => {
-                  const p = pydevices_relative_point(canvas, e);
-                  pydevices_push_event(canvasId, Object.assign({type:name, x:p.x, y:p.y, movementX:e.movementX||0, movementY:e.movementY||0, button:e.button, buttons:e.buttons, pressure:e.pressure, pointerId:e.pointerId, pointerType:e.pointerType, primary:e.isPrimary}, modifiers(e)));
+                  const p = omnipython_relative_point(canvas, e);
+                  omnipython_push_event(canvasId, Object.assign({type:name, x:p.x, y:p.y, movementX:e.movementX||0, movementY:e.movementY||0, button:e.button, buttons:e.buttons, pressure:e.pressure, pointerId:e.pointerId, pointerType:e.pointerType, primary:e.isPrimary}, modifiers(e)));
                   if (name === 'pointerdown') {
                       canvas.focus();
                       try { canvas.setPointerCapture(e.pointerId); } catch (_) { /* Synthetic events have no active pointer. */ }
@@ -4567,26 +4617,26 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
               });
           }
           on('wheel', (e) => {
-              const p = pydevices_relative_point(canvas, e);
-              pydevices_push_event(canvasId, Object.assign({type:'wheel', x:p.x, y:p.y, deltaX:e.deltaX, deltaY:e.deltaY, deltaZ:e.deltaZ, deltaMode:e.deltaMode}, modifiers(e)));
+              const p = omnipython_relative_point(canvas, e);
+              omnipython_push_event(canvasId, Object.assign({type:'wheel', x:p.x, y:p.y, deltaX:e.deltaX, deltaY:e.deltaY, deltaZ:e.deltaZ, deltaMode:e.deltaMode}, modifiers(e)));
               e.preventDefault();
           }, {passive:false});
           for (const name of ['keydown', 'keyup']) {
               on(name, (e) => {
-                  pydevices_push_event(canvasId, Object.assign({type:name, key:e.key, code:e.code, repeat:e.repeat, location:e.location}, modifiers(e)));
+                  omnipython_push_event(canvasId, Object.assign({type:name, key:e.key, code:e.code, repeat:e.repeat, location:e.location}, modifiers(e)));
                   if (e.key === 'Backspace' || e.key === 'Escape' || e.key === 'BrowserBack') e.preventDefault();
               });
           }
-          on('focus', () => pydevices_push_event(canvasId, {type:'focus'}));
-          on('blur', () => pydevices_push_event(canvasId, {type:'blur'}));
+          on('focus', () => omnipython_push_event(canvasId, {type:'focus'}));
+          on('blur', () => omnipython_push_event(canvasId, {type:'blur'}));
           canvas.focus();
       };
   
   
   
-  var pydevices_rgba = () => {
-          if (!pydevices_state.rgba) {
-              const table = pydevices_state.rgba = new Uint32Array(65536);
+  var omnipython_rgba = () => {
+          if (!omnipython_state.rgba) {
+              const table = omnipython_state.rgba = new Uint32Array(65536);
               const color = new Uint8ClampedArray(4);
               const word = new Uint32Array(color.buffer);
               for (let value = 0; value < 65536; value++) {
@@ -4597,10 +4647,10 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
                   table[value] = word[0];
               }
           }
-          return pydevices_state.rgba;
+          return omnipython_state.rgba;
       };
-  var pydevices_paint = () => {
-          const state = pydevices_state;
+  var omnipython_paint = () => {
+          const state = omnipython_state;
           let active = false;
           for (const display of state.displays.values()) {
               const fb = display.framebuffer;
@@ -4613,7 +4663,7 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
               const src = fb.ptr & 1 ? new Uint16Array(HEAPU8.slice(fb.ptr, fb.ptr + count * 2).buffer)
                                      : new Uint16Array(HEAPU8.buffer, fb.ptr, count);
               const {shown, pixels} = display;
-              const rgba = pydevices_rgba();
+              const rgba = omnipython_rgba();
               let changed = !display.painted;
               for (let i = 0; i < count; i++) {
                   const value = src[i];
@@ -4633,25 +4683,27 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
           if (navigator.getGamepads) {
               for (const pad of navigator.getGamepads()) if (pad) {
                   for (const canvasId of state.displays.keys()) {
-                      pydevices_push_event(canvasId, {type:'gamepad', index:pad.index, connected:pad.connected, buttons:pad.buttons.map(b => ({pressed:b.pressed, touched:b.touched, value:b.value})), axes:Array.from(pad.axes)});
+                      omnipython_push_event(canvasId, {type:'gamepad', index:pad.index, connected:pad.connected, buttons:pad.buttons.map(b => ({pressed:b.pressed, touched:b.touched, value:b.value})), axes:Array.from(pad.axes)});
                   }
                   break;
               }
           }
-          state.animation = requestAnimationFrame(pydevices_paint);
+          state.animation = requestAnimationFrame(omnipython_paint);
       };
   
   
-  var pydevices_release_canvas = (canvas) => {
-          for (const [name, handler, opts] of canvas.__pydevicesListeners || []) {
+  var omnipython_release_canvas = (canvas) => {
+          for (const [name, handler, opts] of canvas.__omnipythonListeners || []) {
               canvas.removeEventListener(name, handler, opts);
           }
-          canvas.__pydevicesListeners = null;
-          canvas.__pydevicesInputInstalled = false;
+          canvas.__omnipythonListeners = null;
+          canvas.__omnipythonInputInstalled = false;
       };
-  var pydevices_export_host = () => {
-          if (Module.pydevicesBridge) return;
-          Module.pydevicesBridge = {
+  
+  
+  var omnipython_export_host = () => {
+          if (Module.omnipythonBridge) return;
+          Module.omnipythonBridge = {
               /*
              * Releases everything this instance holds in the host page: the
              * paint loop, the canvas listeners, pending timers, and any audio
@@ -4667,13 +4719,13 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
              * registered a display, does nothing harmful.
              */
               shutdown: () => {
-                  const state = pydevices_state;
+                  const state = omnipython_state;
                   if (state.animation) {
                       cancelAnimationFrame(state.animation);
                       state.animation = 0;
                   }
                   for (const display of state.displays.values()) {
-                      if (display.canvas) pydevices_release_canvas(display.canvas);
+                      if (display.canvas) omnipython_release_canvas(display.canvas);
                   }
                   state.displays.clear();
                   for (const timer of state.timers.values()) {
@@ -4685,6 +4737,7 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
                       try { source.stop(); } catch (_) { /* already finished */ }
                   }
                   state.audioSources.clear();
+                  omnipython_disarm_audio_unlock();
                   state.audioQueuedBytes = 0;
                   state.inputFrames.length = 0;
                   if (state.processor) { try { state.processor.disconnect(); } catch (_) {} }
@@ -4700,59 +4753,37 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
                   }
                   state.audioEnabled = false;
               },
-              enableAudio: async (microphone=false) => {
-                  const state = pydevices_state;
-                  const AudioContext = globalThis.AudioContext || globalThis.webkitAudioContext;
-                  if (!AudioContext) throw new Error('Web Audio is unavailable');
-                  state.audioContext ||= new AudioContext();
-                  await state.audioContext.resume();
-                  state.audioEnabled = state.audioContext.state === 'running';
-                  if (microphone) {
-                      state.mediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
-                      state.mediaNode = state.audioContext.createMediaStreamSource(state.mediaStream);
-                      state.processor = state.audioContext.createScriptProcessor(1024, 2, 2);
-                      state.processor.onaudioprocess = (event) => {
-                          const channels = [];
-                          for (let c = 0; c < event.inputBuffer.numberOfChannels; c++) channels.push(new Float32Array(event.inputBuffer.getChannelData(c)));
-                          state.inputFrames.push({channels, rate:event.inputBuffer.sampleRate, offset:0});
-                          if (state.inputFrames.length > 64) state.inputFrames.shift();
-                      };
-                      state.mediaNode.connect(state.processor);
-                      state.processor.connect(state.audioContext.destination);
-                      state.microphoneEnabled = true;
-                  }
-                  return {audio:state.audioEnabled, microphone:state.microphoneEnabled};
-              },
-              permissions: () => ({audio:pydevices_state.audioEnabled, microphone:pydevices_state.microphoneEnabled}),
+              enableAudio: (microphone=false) => omnipython_enable_audio(microphone),
+              permissions: () => ({audio:omnipython_state.audioEnabled, microphone:omnipython_state.microphoneEnabled}),
               stats: () => ({
-                  events:Array.from(pydevices_state.displays.values()).reduce((n,d)=>n+d.events.length,0),
-                  timers:pydevices_state.timers.size,
-                  frames:Array.from(pydevices_state.displays.values()).reduce((n,d)=>n+d.framesPainted,0),
-                  queuedAudioBytes:pydevices_state.audioQueuedBytes,
-                  queuedAudioMs:Math.max(0, (pydevices_state.audioEnd - (pydevices_state.audioContext?.currentTime || 0)) * 1000),
-                  timerFirings:pydevices_state.timerFirings.slice(),
-                  timerDeliveries:pydevices_state.timerDeliveries.slice(),
+                  events:Array.from(omnipython_state.displays.values()).reduce((n,d)=>n+d.events.length,0),
+                  timers:omnipython_state.timers.size,
+                  frames:Array.from(omnipython_state.displays.values()).reduce((n,d)=>n+d.framesPainted,0),
+                  queuedAudioBytes:omnipython_state.audioQueuedBytes,
+                  queuedAudioMs:Math.max(0, (omnipython_state.audioEnd - (omnipython_state.audioContext?.currentTime || 0)) * 1000),
+                  timerFirings:omnipython_state.timerFirings.slice(),
+                  timerDeliveries:omnipython_state.timerDeliveries.slice(),
               }),
               resetTimerFirings: () => {
-                  pydevices_state.timerFirings.length = 0;
-                  pydevices_state.timerDeliveries.length = 0;
+                  omnipython_state.timerFirings.length = 0;
+                  omnipython_state.timerDeliveries.length = 0;
               },
               injectMicrophone: (channels, rate=48000) => {
-                  pydevices_state.microphoneEnabled = true;
-                  pydevices_state.inputFrames.push({channels:channels.map(x => Float32Array.from(x)), rate, offset:0});
+                  omnipython_state.microphoneEnabled = true;
+                  omnipython_state.inputFrames.push({channels:channels.map(x => Float32Array.from(x)), rate, offset:0});
               },
           };
       };
   
   
-  var _pydevices_display_register = (ptr, len, width, height, canvasPtr) => {
+  var _omnipython_display_register = (ptr, len, width, height, canvasPtr) => {
           if (typeof document === 'undefined') return 0;
           const canvasId = UTF8ToString(canvasPtr);
           const canvas = document.getElementById(canvasId);
           if (!canvas) return 0;
           canvas.width = width; canvas.height = height;
           const context = canvas.getContext('2d', {alpha:false});
-          const display = pydevices_get_display(canvasId);
+          const display = omnipython_get_display(canvasId);
           display.framebuffer = {ptr, len, width, height};
           display.canvas = canvas;
           display.context = context;
@@ -4761,31 +4792,31 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
           // the image: both start black, to match the framebuffer's zeros.
           display.shown = new Uint16Array(width * height);
           display.pixels = new Uint32Array(display.image.data.buffer);
-          display.pixels.fill(pydevices_rgba()[0]);
+          display.pixels.fill(omnipython_rgba()[0]);
           display.painted = false;
           display.framesPainted = 0;
-          pydevices_install_input(canvas, canvasId);
-          pydevices_export_host();
-          if (!pydevices_state.animation) pydevices_state.animation = requestAnimationFrame(pydevices_paint);
+          omnipython_install_input(canvas, canvasId);
+          omnipython_export_host();
+          if (!omnipython_state.animation) omnipython_state.animation = requestAnimationFrame(omnipython_paint);
           return 1;
       };
 
   
-  var _pydevices_display_unregister = (canvasPtr) => {
-          pydevices_state.displays.delete(UTF8ToString(canvasPtr));
+  var _omnipython_display_unregister = (canvasPtr) => {
+          omnipython_state.displays.delete(UTF8ToString(canvasPtr));
       };
 
   
-  var _pydevices_event_clear = (canvasPtr) => {
-          const display = pydevices_get_display(UTF8ToString(canvasPtr));
+  var _omnipython_event_clear = (canvasPtr) => {
+          const display = omnipython_get_display(UTF8ToString(canvasPtr));
           display.events.length = 0;
           const ring = display.eventRing;
           if(ring) { HEAPU32[ring.ptr>>2]=0; HEAPU32[(ring.ptr>>2)+1]=0; }
       };
 
   
-  var _pydevices_event_poll = (canvasPtr, lenPtr) => {
-          const display = pydevices_get_display(UTF8ToString(canvasPtr));
+  var _omnipython_event_poll = (canvasPtr, lenPtr) => {
+          const display = omnipython_get_display(UTF8ToString(canvasPtr));
           if (!display.events.length) return 0;
           const text = JSON.stringify(display.events.shift());
           const len = lengthBytesUTF8(text);
@@ -4796,19 +4827,19 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
       };
 
   
-  var _pydevices_event_set_buffer = (canvasPtr, ptr, capacity, stride) => {
-          pydevices_get_display(UTF8ToString(canvasPtr)).eventRing = ptr ? {ptr,capacity,stride} : null;
+  var _omnipython_event_set_buffer = (canvasPtr, ptr, capacity, stride) => {
+          omnipython_get_display(UTF8ToString(canvasPtr)).eventRing = ptr ? {ptr,capacity,stride} : null;
       };
 
   
-  var _pydevices_host_reset = () => {
-          const state = pydevices_state;
+  var _omnipython_host_reset = () => {
+          const state = omnipython_state;
           if (state.animation) {
               cancelAnimationFrame(state.animation);
               state.animation = 0;
           }
           for (const display of state.displays.values()) {
-              if (display.canvas) pydevices_release_canvas(display.canvas);
+              if (display.canvas) omnipython_release_canvas(display.canvas);
           }
           state.displays.clear();
           state.firedTimers.length = 0;
@@ -4916,7 +4947,7 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
   
   var Asyncify = {
   instrumentWasmImports(imports) {
-        var importPattern = /^(pydevices_http_get|pydevices_sleep_ms|invoke_.*|__asyncjs__.*)$/;
+        var importPattern = /^(omnipython_http_get|omnipython_sleep_ms|invoke_.*|__asyncjs__.*)$/;
   
         for (let [x, original] of Object.entries(imports)) {
           if (typeof original == 'function') {
@@ -5166,31 +5197,31 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
       }),
   };
   
-  var _pydevices_http_get = (urlPtr, statusPtr, lenPtr, finalUrlPtr) => Asyncify.handleSleep(async (wakeUp) => {
+  var _omnipython_http_get = (urlPtr, statusPtr, lenPtr, finalUrlPtr) => Asyncify.handleSleep(async (wakeUp) => {
           try {
               const response=await fetch(UTF8ToString(urlPtr)); const bytes=new Uint8Array(await response.arrayBuffer());
               const ptr=_malloc(bytes.length || 1); HEAPU8.set(bytes,ptr);
               const urlLen=lengthBytesUTF8(response.url), outUrl=_malloc(urlLen+1); stringToUTF8(response.url,outUrl,urlLen+1);
               HEAP32[statusPtr>>2]=response.status; HEAPU32[lenPtr>>2]=bytes.length; HEAPU32[finalUrlPtr>>2]=outUrl; wakeUp(ptr);
           } catch(error) {
-              console.error('PyDevices Fetch failed',error); HEAP32[statusPtr>>2]=0; HEAPU32[lenPtr>>2]=0; HEAPU32[finalUrlPtr>>2]=0; wakeUp(0);
+              console.error('OmniPython fetch failed',error); HEAP32[statusPtr>>2]=0; HEAPU32[lenPtr>>2]=0; HEAPU32[finalUrlPtr>>2]=0; wakeUp(0);
           }
       });
 
-  var _pydevices_sleep_ms = (ms) => Asyncify.handleSleep((wakeUp) => setTimeout(wakeUp, Math.max(0, ms)));
+  var _omnipython_sleep_ms = (ms) => Asyncify.handleSleep((wakeUp) => setTimeout(wakeUp, Math.max(0, ms)));
 
-  var _pydevices_timer_cancel = (id) => { const t=pydevices_state.timers.get(id); if (t) { t.periodic ? clearInterval(t.handle) : clearTimeout(t.handle); pydevices_state.timers.delete(id); } };
+  var _omnipython_timer_cancel = (id) => { const t=omnipython_state.timers.get(id); if (t) { t.periodic ? clearInterval(t.handle) : clearTimeout(t.handle); omnipython_state.timers.delete(id); } };
 
-  var _pydevices_timer_poll = () => pydevices_state.firedTimers.length ? pydevices_state.firedTimers.shift() : -1;
+  var _omnipython_timer_poll = () => omnipython_state.firedTimers.length ? omnipython_state.firedTimers.shift() : -1;
 
-  var _pydevices_timer_start = (id, delay, periodic) => {
-          const state = pydevices_state;
+  var _omnipython_timer_start = (id, delay, periodic) => {
+          const state = omnipython_state;
           const old = state.timers.get(id); if (old) clearTimeout(old.handle);
           const fire = () => {
               state.timerFirings.push({id, at:performance.now()});
               if (state.timerFirings.length > 512) state.timerFirings.shift();
-              if((typeof Asyncify==='undefined' || !Asyncify.currData) && Module._pydevices_timer_dispatch) {
-                  Module._pydevices_timer_dispatch(id);
+              if((typeof Asyncify==='undefined' || !Asyncify.currData) && Module._omnipython_timer_dispatch) {
+                  Module._omnipython_timer_dispatch(id);
                   state.timerDeliveries.push({id, at:performance.now()});
                   if (state.timerDeliveries.length > 512) state.timerDeliveries.shift();
               } else if (state.firedTimers.length < 256) {
@@ -5798,18 +5829,21 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'print',
   'printErr',
   'jstoi_s',
-  'pydevices_state',
-  'pydevices_write_event',
-  'pydevices_get_display',
-  'pydevices_push_event',
-  'pydevices_relative_point',
-  'pydevices_install_input',
-  'pydevices_release_canvas',
-  'pydevices_rgba',
-  'pydevices_paint',
-  'pydevices_export_host',
-  'pydevices_decode_pcm',
-  'pydevices_encode_sample',
+  'omnipython_state',
+  'omnipython_write_event',
+  'omnipython_get_display',
+  'omnipython_push_event',
+  'omnipython_relative_point',
+  'omnipython_install_input',
+  'omnipython_release_canvas',
+  'omnipython_rgba',
+  'omnipython_paint',
+  'omnipython_export_host',
+  'omnipython_enable_audio',
+  'omnipython_disarm_audio_unlock',
+  'omnipython_arm_audio_unlock',
+  'omnipython_decode_pcm',
+  'omnipython_encode_sample',
 ];
 unexportedSymbols.forEach(unexportedRuntimeSymbol);
 
@@ -5859,7 +5893,7 @@ function create_promise(out_set,out_promise) { const out_set_js = proxy_convert_
 // Imports from the Wasm binary.
 var _malloc = Module['_malloc'] = makeInvalidEarlyAccess('_malloc');
 var _free = Module['_free'] = makeInvalidEarlyAccess('_free');
-var _pydevices_timer_dispatch = Module['_pydevices_timer_dispatch'] = makeInvalidEarlyAccess('_pydevices_timer_dispatch');
+var _omnipython_timer_dispatch = Module['_omnipython_timer_dispatch'] = makeInvalidEarlyAccess('_omnipython_timer_dispatch');
 var _mp_sched_keyboard_interrupt = Module['_mp_sched_keyboard_interrupt'] = makeInvalidEarlyAccess('_mp_sched_keyboard_interrupt');
 var _mp_js_init = Module['_mp_js_init'] = makeInvalidEarlyAccess('_mp_js_init');
 var _mp_js_deinit = Module['_mp_js_deinit'] = makeInvalidEarlyAccess('_mp_js_deinit');
@@ -5900,22 +5934,22 @@ var dynCall_iii = makeInvalidEarlyAccess('dynCall_iii');
 var dynCall_ii = makeInvalidEarlyAccess('dynCall_ii');
 var dynCall_v = makeInvalidEarlyAccess('dynCall_v');
 var dynCall_vii = makeInvalidEarlyAccess('dynCall_vii');
+var dynCall_vif = makeInvalidEarlyAccess('dynCall_vif');
 var dynCall_iiiiii = makeInvalidEarlyAccess('dynCall_iiiiii');
-var dynCall_viiii = makeInvalidEarlyAccess('dynCall_viiii');
 var dynCall_viii = makeInvalidEarlyAccess('dynCall_viii');
+var dynCall_viiii = makeInvalidEarlyAccess('dynCall_viiii');
 var dynCall_i = makeInvalidEarlyAccess('dynCall_i');
+var dynCall_viiiiiii = makeInvalidEarlyAccess('dynCall_viiiiiii');
+var dynCall_viiiii = makeInvalidEarlyAccess('dynCall_viiiii');
+var dynCall_viiiiii = makeInvalidEarlyAccess('dynCall_viiiiii');
+var dynCall_viiif = makeInvalidEarlyAccess('dynCall_viiif');
+var dynCall_viff = makeInvalidEarlyAccess('dynCall_viff');
+var dynCall_fi = makeInvalidEarlyAccess('dynCall_fi');
 var dynCall_iiiiiii = makeInvalidEarlyAccess('dynCall_iiiiiii');
 var dynCall_jji = makeInvalidEarlyAccess('dynCall_jji');
-var dynCall_viiiii = makeInvalidEarlyAccess('dynCall_viiiii');
-var dynCall_viiiiiii = makeInvalidEarlyAccess('dynCall_viiiiiii');
 var dynCall_viiiffiii = makeInvalidEarlyAccess('dynCall_viiiffiii');
 var dynCall_viiiiiiii = makeInvalidEarlyAccess('dynCall_viiiiiiii');
 var dynCall_viiiiiiiii = makeInvalidEarlyAccess('dynCall_viiiiiiiii');
-var dynCall_viiiiii = makeInvalidEarlyAccess('dynCall_viiiiii');
-var dynCall_viiif = makeInvalidEarlyAccess('dynCall_viiif');
-var dynCall_vif = makeInvalidEarlyAccess('dynCall_vif');
-var dynCall_viff = makeInvalidEarlyAccess('dynCall_viff');
-var dynCall_fi = makeInvalidEarlyAccess('dynCall_fi');
 var dynCall_iiiiiiii = makeInvalidEarlyAccess('dynCall_iiiiiiii');
 var dynCall_di = makeInvalidEarlyAccess('dynCall_di');
 var dynCall_iiji = makeInvalidEarlyAccess('dynCall_iiji');
@@ -5936,7 +5970,7 @@ var wasmTable = makeInvalidEarlyAccess('wasmTable');
 function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['malloc'] != 'undefined', 'missing Wasm export: malloc');
   assert(typeof wasmExports['free'] != 'undefined', 'missing Wasm export: free');
-  assert(typeof wasmExports['pydevices_timer_dispatch'] != 'undefined', 'missing Wasm export: pydevices_timer_dispatch');
+  assert(typeof wasmExports['omnipython_timer_dispatch'] != 'undefined', 'missing Wasm export: omnipython_timer_dispatch');
   assert(typeof wasmExports['mp_sched_keyboard_interrupt'] != 'undefined', 'missing Wasm export: mp_sched_keyboard_interrupt');
   assert(typeof wasmExports['mp_js_init'] != 'undefined', 'missing Wasm export: mp_js_init');
   assert(typeof wasmExports['mp_js_deinit'] != 'undefined', 'missing Wasm export: mp_js_deinit');
@@ -5977,22 +6011,22 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['dynCall_ii'] != 'undefined', 'missing Wasm export: dynCall_ii');
   assert(typeof wasmExports['dynCall_v'] != 'undefined', 'missing Wasm export: dynCall_v');
   assert(typeof wasmExports['dynCall_vii'] != 'undefined', 'missing Wasm export: dynCall_vii');
+  assert(typeof wasmExports['dynCall_vif'] != 'undefined', 'missing Wasm export: dynCall_vif');
   assert(typeof wasmExports['dynCall_iiiiii'] != 'undefined', 'missing Wasm export: dynCall_iiiiii');
-  assert(typeof wasmExports['dynCall_viiii'] != 'undefined', 'missing Wasm export: dynCall_viiii');
   assert(typeof wasmExports['dynCall_viii'] != 'undefined', 'missing Wasm export: dynCall_viii');
+  assert(typeof wasmExports['dynCall_viiii'] != 'undefined', 'missing Wasm export: dynCall_viiii');
   assert(typeof wasmExports['dynCall_i'] != 'undefined', 'missing Wasm export: dynCall_i');
+  assert(typeof wasmExports['dynCall_viiiiiii'] != 'undefined', 'missing Wasm export: dynCall_viiiiiii');
+  assert(typeof wasmExports['dynCall_viiiii'] != 'undefined', 'missing Wasm export: dynCall_viiiii');
+  assert(typeof wasmExports['dynCall_viiiiii'] != 'undefined', 'missing Wasm export: dynCall_viiiiii');
+  assert(typeof wasmExports['dynCall_viiif'] != 'undefined', 'missing Wasm export: dynCall_viiif');
+  assert(typeof wasmExports['dynCall_viff'] != 'undefined', 'missing Wasm export: dynCall_viff');
+  assert(typeof wasmExports['dynCall_fi'] != 'undefined', 'missing Wasm export: dynCall_fi');
   assert(typeof wasmExports['dynCall_iiiiiii'] != 'undefined', 'missing Wasm export: dynCall_iiiiiii');
   assert(typeof wasmExports['dynCall_jji'] != 'undefined', 'missing Wasm export: dynCall_jji');
-  assert(typeof wasmExports['dynCall_viiiii'] != 'undefined', 'missing Wasm export: dynCall_viiiii');
-  assert(typeof wasmExports['dynCall_viiiiiii'] != 'undefined', 'missing Wasm export: dynCall_viiiiiii');
   assert(typeof wasmExports['dynCall_viiiffiii'] != 'undefined', 'missing Wasm export: dynCall_viiiffiii');
   assert(typeof wasmExports['dynCall_viiiiiiii'] != 'undefined', 'missing Wasm export: dynCall_viiiiiiii');
   assert(typeof wasmExports['dynCall_viiiiiiiii'] != 'undefined', 'missing Wasm export: dynCall_viiiiiiiii');
-  assert(typeof wasmExports['dynCall_viiiiii'] != 'undefined', 'missing Wasm export: dynCall_viiiiii');
-  assert(typeof wasmExports['dynCall_viiif'] != 'undefined', 'missing Wasm export: dynCall_viiif');
-  assert(typeof wasmExports['dynCall_vif'] != 'undefined', 'missing Wasm export: dynCall_vif');
-  assert(typeof wasmExports['dynCall_viff'] != 'undefined', 'missing Wasm export: dynCall_viff');
-  assert(typeof wasmExports['dynCall_fi'] != 'undefined', 'missing Wasm export: dynCall_fi');
   assert(typeof wasmExports['dynCall_iiiiiiii'] != 'undefined', 'missing Wasm export: dynCall_iiiiiiii');
   assert(typeof wasmExports['dynCall_di'] != 'undefined', 'missing Wasm export: dynCall_di');
   assert(typeof wasmExports['dynCall_iiji'] != 'undefined', 'missing Wasm export: dynCall_iiji');
@@ -6009,7 +6043,7 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['__indirect_function_table'] != 'undefined', 'missing Wasm export: __indirect_function_table');
   _malloc = Module['_malloc'] = createExportWrapper('malloc', 1);
   _free = Module['_free'] = createExportWrapper('free', 1);
-  _pydevices_timer_dispatch = Module['_pydevices_timer_dispatch'] = createExportWrapper('pydevices_timer_dispatch', 1);
+  _omnipython_timer_dispatch = Module['_omnipython_timer_dispatch'] = createExportWrapper('omnipython_timer_dispatch', 1);
   _mp_sched_keyboard_interrupt = Module['_mp_sched_keyboard_interrupt'] = createExportWrapper('mp_sched_keyboard_interrupt', 0);
   _mp_js_init = Module['_mp_js_init'] = createExportWrapper('mp_js_init', 2);
   _mp_js_deinit = Module['_mp_js_deinit'] = createExportWrapper('mp_js_deinit', 0);
@@ -6050,22 +6084,22 @@ function assignWasmExports(wasmExports) {
   dynCall_ii = dynCalls['ii'] = createExportWrapper('dynCall_ii', 2);
   dynCall_v = dynCalls['v'] = createExportWrapper('dynCall_v', 1);
   dynCall_vii = dynCalls['vii'] = createExportWrapper('dynCall_vii', 3);
+  dynCall_vif = dynCalls['vif'] = createExportWrapper('dynCall_vif', 3);
   dynCall_iiiiii = dynCalls['iiiiii'] = createExportWrapper('dynCall_iiiiii', 6);
-  dynCall_viiii = dynCalls['viiii'] = createExportWrapper('dynCall_viiii', 5);
   dynCall_viii = dynCalls['viii'] = createExportWrapper('dynCall_viii', 4);
+  dynCall_viiii = dynCalls['viiii'] = createExportWrapper('dynCall_viiii', 5);
   dynCall_i = dynCalls['i'] = createExportWrapper('dynCall_i', 1);
+  dynCall_viiiiiii = dynCalls['viiiiiii'] = createExportWrapper('dynCall_viiiiiii', 8);
+  dynCall_viiiii = dynCalls['viiiii'] = createExportWrapper('dynCall_viiiii', 6);
+  dynCall_viiiiii = dynCalls['viiiiii'] = createExportWrapper('dynCall_viiiiii', 7);
+  dynCall_viiif = dynCalls['viiif'] = createExportWrapper('dynCall_viiif', 5);
+  dynCall_viff = dynCalls['viff'] = createExportWrapper('dynCall_viff', 4);
+  dynCall_fi = dynCalls['fi'] = createExportWrapper('dynCall_fi', 2);
   dynCall_iiiiiii = dynCalls['iiiiiii'] = createExportWrapper('dynCall_iiiiiii', 7);
   dynCall_jji = dynCalls['jji'] = createExportWrapper('dynCall_jji', 3);
-  dynCall_viiiii = dynCalls['viiiii'] = createExportWrapper('dynCall_viiiii', 6);
-  dynCall_viiiiiii = dynCalls['viiiiiii'] = createExportWrapper('dynCall_viiiiiii', 8);
   dynCall_viiiffiii = dynCalls['viiiffiii'] = createExportWrapper('dynCall_viiiffiii', 9);
   dynCall_viiiiiiii = dynCalls['viiiiiiii'] = createExportWrapper('dynCall_viiiiiiii', 9);
   dynCall_viiiiiiiii = dynCalls['viiiiiiiii'] = createExportWrapper('dynCall_viiiiiiiii', 10);
-  dynCall_viiiiii = dynCalls['viiiiii'] = createExportWrapper('dynCall_viiiiii', 7);
-  dynCall_viiif = dynCalls['viiif'] = createExportWrapper('dynCall_viiif', 5);
-  dynCall_vif = dynCalls['vif'] = createExportWrapper('dynCall_vif', 3);
-  dynCall_viff = dynCalls['viff'] = createExportWrapper('dynCall_viff', 4);
-  dynCall_fi = dynCalls['fi'] = createExportWrapper('dynCall_fi', 2);
   dynCall_iiiiiiii = dynCalls['iiiiiiii'] = createExportWrapper('dynCall_iiiiiiii', 8);
   dynCall_di = dynCalls['di'] = createExportWrapper('dynCall_di', 2);
   dynCall_iiji = dynCalls['iiji'] = createExportWrapper('dynCall_iiji', 4);
@@ -6206,43 +6240,43 @@ var wasmImports = {
   /** @export */
   mp_js_time_ms: _mp_js_time_ms,
   /** @export */
+  omnipython_audio_clear: _omnipython_audio_clear,
+  /** @export */
+  omnipython_audio_queued: _omnipython_audio_queued,
+  /** @export */
+  omnipython_audio_read: _omnipython_audio_read,
+  /** @export */
+  omnipython_audio_state: _omnipython_audio_state,
+  /** @export */
+  omnipython_audio_write: _omnipython_audio_write,
+  /** @export */
+  omnipython_display_register: _omnipython_display_register,
+  /** @export */
+  omnipython_display_unregister: _omnipython_display_unregister,
+  /** @export */
+  omnipython_event_clear: _omnipython_event_clear,
+  /** @export */
+  omnipython_event_poll: _omnipython_event_poll,
+  /** @export */
+  omnipython_event_set_buffer: _omnipython_event_set_buffer,
+  /** @export */
+  omnipython_host_reset: _omnipython_host_reset,
+  /** @export */
+  omnipython_http_get: _omnipython_http_get,
+  /** @export */
+  omnipython_sleep_ms: _omnipython_sleep_ms,
+  /** @export */
+  omnipython_timer_cancel: _omnipython_timer_cancel,
+  /** @export */
+  omnipython_timer_poll: _omnipython_timer_poll,
+  /** @export */
+  omnipython_timer_start: _omnipython_timer_start,
+  /** @export */
   proxy_convert_mp_to_js_then_js_to_js_then_js_to_mp_obj_jsside,
   /** @export */
   proxy_convert_mp_to_js_then_js_to_mp_obj_jsside,
   /** @export */
   proxy_js_free_obj,
-  /** @export */
-  pydevices_audio_clear: _pydevices_audio_clear,
-  /** @export */
-  pydevices_audio_queued: _pydevices_audio_queued,
-  /** @export */
-  pydevices_audio_read: _pydevices_audio_read,
-  /** @export */
-  pydevices_audio_state: _pydevices_audio_state,
-  /** @export */
-  pydevices_audio_write: _pydevices_audio_write,
-  /** @export */
-  pydevices_display_register: _pydevices_display_register,
-  /** @export */
-  pydevices_display_unregister: _pydevices_display_unregister,
-  /** @export */
-  pydevices_event_clear: _pydevices_event_clear,
-  /** @export */
-  pydevices_event_poll: _pydevices_event_poll,
-  /** @export */
-  pydevices_event_set_buffer: _pydevices_event_set_buffer,
-  /** @export */
-  pydevices_host_reset: _pydevices_host_reset,
-  /** @export */
-  pydevices_http_get: _pydevices_http_get,
-  /** @export */
-  pydevices_sleep_ms: _pydevices_sleep_ms,
-  /** @export */
-  pydevices_timer_cancel: _pydevices_timer_cancel,
-  /** @export */
-  pydevices_timer_poll: _pydevices_timer_poll,
-  /** @export */
-  pydevices_timer_start: _pydevices_timer_start,
   /** @export */
   store_attr
 };
