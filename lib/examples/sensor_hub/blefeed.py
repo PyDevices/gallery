@@ -15,7 +15,7 @@ filters on the service; a longer name would only arrive in the scan
 response, and Chrome's chooser then lists "Unknown or Unsupported Device".
 One central at a time; after it leaves, the hub advertises again.
 
-Needs ``bledev`` (from pydevices) and ``aioble`` on the board.
+Needs ``bledev`` (from omnipython) and ``aioble`` on the board.
 """
 
 import asyncio

@@ -25,13 +25,13 @@ port re-enumerate once.
 The MIDI itself is CircuitPython's: ``adafruit_midi`` reads the port that
 ``midiports`` gives it. Install them once with
 ``mip.install("usb-device-midi")`` and
-``mip.install("github:PyDevices/pydevices/midiports")``.
+``mip.install("github:PyDevices/omnipython/midiports")``.
 
 Run it on the Waveshare ESP32-P4-WIFI6-Touch-LCD-4B
 --------------------------------------------------
 ::
 
-    mpremote connect COM4 mip install github:PyDevices/pydevices/midiports
+    mpremote connect COM4 mip install github:PyDevices/omnipython/midiports
     mpftp mkdir -d COM4 /lib/audiolive
     mpftp put -d COM4 lib/examples/audiolive/__init__.py /lib/audiolive/__init__.py
     mpftp run lib/examples/audiolive/rack_midi.py -d COM4 --follow --timeout 300

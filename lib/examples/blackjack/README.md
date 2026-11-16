@@ -1,6 +1,6 @@
 # playing_cards and blackjack
 
-Playing card classes for the PyDevices display stack, and a blackjack game built on them.
+Playing card classes for the OmniPython display stack, and a blackjack game built on them.
 
 Run either one from `lib/` (see [the examples README](../../../README.md#run-one-on-your-computer)):
 

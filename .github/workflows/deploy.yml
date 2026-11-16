@@ -29,8 +29,8 @@ jobs:
       - name: Checkout shared browser URL policy
         uses: actions/checkout@v7
         with:
-          repository: PyDevices/pydevices
-          path: pydevices
+          repository: PyDevices/omnipython
+          path: omnipython
           sparse-checkout: tools/_browser_url.py
           sparse-checkout-cone-mode: false
 

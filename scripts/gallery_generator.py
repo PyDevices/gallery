@@ -43,7 +43,7 @@ Then:
   - Deletes stale ``.site/*.html`` from the old per-demo page generator
 
 Each card links direct MicroPython only (the gallery's one supported runtime)
-with queries from pydevices' shared private URL policy. Hinch GUIs are not listed in headers — ``fetch_ph_gui``
+with queries from omnipython's shared private URL policy. Hinch GUIs are not listed in headers — ``fetch_ph_gui``
 installs them at runtime via color/hardware/touch setup.
 
     python scripts/gallery_generator.py
@@ -69,21 +69,21 @@ if str(_scripts) not in sys.path:
 from personal_examples import PERSONAL_EXAMPLE_DIRS  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-# The sibling pydevices checkout's tools/. Walk up rather than look one level
+# The sibling omnipython checkout's tools/. Walk up rather than look one level
 # up only: from a git worktree under .worktrees/ the sibling is further away.
 _browser_tools = next(
     (
         path
-        for path in [REPO_ROOT / "pydevices" / "tools"]
-        + [parent / "pydevices" / "tools" for parent in REPO_ROOT.parents]
+        for path in [REPO_ROOT / "omnipython" / "tools"]
+        + [parent / "omnipython" / "tools" for parent in REPO_ROOT.parents]
         if (path / "_browser_url.py").is_file()
     ),
     None,
 )
 if _browser_tools is None:
     raise SystemExit(
-        "gallery_generator: no pydevices/tools/_browser_url.py beside this "
-        "checkout or above it; clone PyDevices/pydevices as a sibling"
+        "gallery_generator: no omnipython/tools/_browser_url.py beside this "
+        "checkout or above it; clone PyDevices/omnipython as a sibling"
     )
 sys.path.insert(0, str(_browser_tools))
 from _browser_url import query as browser_query  # noqa: E402
@@ -197,7 +197,7 @@ class Example:
             "manifests": self._manifests_for_query(),
             "deps": self.deps,
         }
-        # The wasm runtime has the PyDevices stack frozen in and its host
+        # The wasm runtime has the OmniPython stack frozen in and its host
         # installs no dependencies, so its links carry none. The Pyodide
         # gallery installs them with micropip from ?deps=, so its links keep
         # them.
@@ -514,7 +514,7 @@ def validate_example_deps(examples: list[Example]) -> None:
 
 # Package deps that are also top-level PyDevices org repos get that repo's
 # real ecosystem tier (see .site/pyscript/site-chrome.js ECOSYSTEM_DATA).
-# appdev and multimer ship inside pydevices' own lib/, so they take its tier.
+# appdev and multimer ship inside omnipython's own lib/, so they take its tier.
 _DEP_TIER = {
     "audiodsp": 2,
     "pygraphics": 2,

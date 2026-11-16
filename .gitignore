@@ -54,7 +54,7 @@ uv.lock
 
 # CI / local sibling checkouts inside this workspace
 graphics/
-pydevices/
+omnipython/
 
 # Extra Python / docs tooling
 *$py.class

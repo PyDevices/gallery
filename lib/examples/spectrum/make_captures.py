@@ -10,7 +10,7 @@ PNG stills and an animated GIF into ``docs/screenshots/``::
 
     python make_captures.py [--micropython PATH] [--out DIR]
 
-Needs Pillow; the PyDevices toolbox Python has it.
+Needs Pillow; the OmniPython toolbox Python has it.
 """
 
 import argparse
@@ -59,7 +59,7 @@ def to_image(buf, w, h):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--micropython", default=os.path.expanduser("~/gh/pydevices/bin/micropython"))
+    ap.add_argument("--micropython", default=os.path.expanduser("~/gh/omnipython/bin/micropython"))
     ap.add_argument("--out", default=os.path.join(REPO, "docs", "screenshots"))
     ap.add_argument("--still-at", type=float, default=2.26, help="seconds into the loop")
     args = ap.parse_args()

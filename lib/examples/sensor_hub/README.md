@@ -12,8 +12,8 @@ take over as the hub later.
 
 ## Run it on a board
 
-The board needs MicroPython with Wi-Fi, a `secrets.py`, and pydevices'
-`wifi.py`: frozen into the firmware, or copied to `/lib` when it isn't ([board bring-up](https://github.com/PyDevices/pydevices/blob/main/docs/guides/bring-up-a-board.md)),
+The board needs MicroPython with Wi-Fi, a `secrets.py`, and omnipython's
+`wifi.py`: frozen into the firmware, or copied to `/lib` when it isn't ([board bring-up](https://github.com/PyDevices/omnipython/blob/main/docs/guides/bring-up-a-board.md)),
 and for the Bluetooth door, `bledev` and `aioble` (`mpftp mip -d COM5 aioble`).
 
 ```bash
@@ -60,7 +60,7 @@ greenhouse temp=21.4 rh=55
 `7d9a0002-…`). Two ready-made publishers:
 
 - [`ble_publish.py`](ble_publish.py) on a PC, through `bledev`. On WSL, run it with the Windows
-  Python, which owns the radio, with pydevices' `lib` on its `PYTHONPATH`.
+  Python, which owns the radio, with omnipython's `lib` on its `PYTHONPATH`.
 - [`ble_publish.html`](ble_publish.html) on a phone, through Web Bluetooth in Chrome. It sends
   the phone's battery level, its tilt and a slider. Web Bluetooth needs
   `https://` or `localhost`, so serve this folder from the PC and forward it:
@@ -87,8 +87,8 @@ pressure, light and motion to a hub every 2 s, and shows them on its screen.
 Its five DotStars are switched off at start.
 
 It runs stock MicroPython (`ESP32_GENERIC_S2`), brought up as in
-[board bring-up](https://github.com/PyDevices/pydevices/blob/main/docs/guides/bring-up-a-board.md)
-with the [`board_configs/busdisplay/spi/funhouse`](https://github.com/PyDevices/pydevices/tree/main/board_configs/busdisplay/spi/funhouse) package. Then:
+[board bring-up](https://github.com/PyDevices/omnipython/blob/main/docs/guides/bring-up-a-board.md)
+with the [`board_configs/busdisplay/spi/funhouse`](https://github.com/PyDevices/omnipython/tree/main/board_configs/busdisplay/spi/funhouse) package. Then:
 
 ```bash
 mpftp mkdir -d COM30 /lib/sensor_hub

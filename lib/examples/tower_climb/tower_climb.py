@@ -735,9 +735,9 @@ def _draw_hud(p, altitude):
 
 def _skip_ui():
     try:
-        import pydevices_test_mode
+        import omnipython_test_mode
 
-        return pydevices_test_mode.ENABLED
+        return omnipython_test_mode.ENABLED
     except ImportError:
         return False
 

@@ -69,10 +69,10 @@ _MCU_PLATFORMS = (
     "zephyr",
 )
 if getattr(sys, "platform", "") not in _MCU_PLATFORMS:
-    env_set("PYDEVICES_WIDTH", _WIDTH)
-    env_set("PYDEVICES_HEIGHT", _HEIGHT)
+    env_set("OMNIPYTHON_WIDTH", _WIDTH)
+    env_set("OMNIPYTHON_HEIGHT", _HEIGHT)
     if _SCALE is not None:
-        env_set("PYDEVICES_SCALE", _SCALE)
+        env_set("OMNIPYTHON_SCALE", _SCALE)
 
 import roku_engine  # noqa: E402
 from roku_engine import (  # noqa: E402

@@ -8,7 +8,7 @@ Consolidates loader install logic for ``micropython.html``, ``pyodide.html``,
 Run only (``import utils.path`` then ``import ps_loader``). MicroPython WASM
 installs with the ``omip`` frozen into the runtime; Pyodide installs every
 library with micropip, and manifests with ``omip``, which comes in the
-``pydevices`` wheel. ``omip`` looks on lib.omnipython.org, then on
+``omnipython`` wheel. ``omip`` looks on lib.omnipython.org, then on
 micropython-lib.
 """
 
@@ -20,11 +20,11 @@ WHEEL_INDEX_URLS = (
     "https://pypi.org/simple/",
 )
 # Browser default board package (display + board_peripherals + audio drivers).
-DESKTOP_BOARD_CONFIG_PACKAGE = "github:PyDevices/pydevices/board_configs/desktop/package.json"
-# Every page's PyDevices libraries, mip and the browser's board_config. The
+DESKTOP_BOARD_CONFIG_PACKAGE = "github:PyDevices/omnipython/board_configs/desktop/package.json"
+# Every page's OmniPython libraries, mip and the browser's board_config. The
 # desktop package's zeroconf has no browser build and pages don't use it, so
 # these two install without their dependencies.
-DESKTOP_WHEELS = ("pydevices", "pydevices-desktop")
+DESKTOP_WHEELS = ("omnipython", "omnipython-desktop")
 # PyPI has no browser build of numpy; Pyodide's own release is the one that exists.
 NUMPY_WHEEL = (
     "https://cdn.jsdelivr.net/pyodide/v314.0.0/full/"
@@ -120,8 +120,8 @@ def set_board_defaults():
     """Set the gallery's browser defaults without importing board_config."""
     from boarddev import env_set
 
-    env_set("PYDEVICES_WIDTH", BOARD_WIDTH)
-    env_set("PYDEVICES_HEIGHT", BOARD_HEIGHT)
+    env_set("OMNIPYTHON_WIDTH", BOARD_WIDTH)
+    env_set("OMNIPYTHON_HEIGHT", BOARD_HEIGHT)
 
 
 def _page_base():
@@ -260,7 +260,7 @@ def _ensure_cwd():
 
 
 def _import_omip():
-    """``omip``: frozen into the MicroPython WASM runtime, in the ``pydevices`` wheel on Pyodide."""
+    """``omip``: frozen into the MicroPython WASM runtime, in the ``omnipython`` wheel on Pyodide."""
     _ensure_cwd()
     import omip
     import utils.path  # noqa: F401
@@ -420,7 +420,7 @@ async def install_pyodide(modules, manifests, wheel_deps, status=None):
     await asyncio.sleep(0)
     micropip = await _ensure_micropip(status)
     if status:
-        status("Installing PyDevices…")
+        status("Installing OmniPython…")
     await micropip.install(list(DESKTOP_WHEELS), deps=False, pre=True)
     # A manifest's relative URLs resolve against the manifest's own folder,
     # as they do on a board.

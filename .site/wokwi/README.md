@@ -1,10 +1,10 @@
 # gallery on Wokwi (ESP32-S3 + ILI9341 touch)
 
-Browser project for [wokwi.com](https://wokwi.com): PyDevices core + `pygraphics` + Wokwi board config + [`testris`](../../lib/examples/testris.py) (a touch + joystick Tetris demo).
+Browser project for [wokwi.com](https://wokwi.com): OmniPython core + `pygraphics` + Wokwi board config + [`testris`](../../lib/examples/testris.py) (a touch + joystick Tetris demo).
 
-**Wokwi reference:** [pydevices/docs/boards/wokwi.md](https://github.com/PyDevices/pydevices/blob/main/docs/boards/wokwi.md)
+**Wokwi reference:** [omnipython/docs/boards/wokwi.md](https://github.com/PyDevices/omnipython/blob/main/docs/boards/wokwi.md)
 
-Board config: [`wokwi_ili9341_ft6x36_esp32s3`](https://github.com/PyDevices/pydevices/tree/main/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3)
+Board config: [`wokwi_ili9341_ft6x36_esp32s3`](https://github.com/PyDevices/omnipython/tree/main/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3)
 
 ## Files
 
@@ -21,12 +21,12 @@ Board config: [`wokwi_ili9341_ft6x36_esp32s3`](https://github.com/PyDevices/pyde
 
 ## Quick try (default)
 
-Use [`main.py`](main.py) as committed. On first boot, `mip` downloads PyDevices core + `pygraphics` from the
-PyDevices MIP index (network required), then runs **testris** — a touch + joystick Tetris demo. You
+Use [`main.py`](main.py) as committed. On first boot, `mip` downloads OmniPython core + `pygraphics` from the
+OmniPython MIP index (network required), then runs **testris** — a touch + joystick Tetris demo. You
 should see the game running — drive it with the on-screen touch keypad.
 
 Only `testris.py` is installed from [`lib/examples/`](../../lib/examples/); the rest of the example catalog is not fetched.
-To try a different example, edit the `mip.install(PYDEVICES_EXAMPLES + ...)` line in `main.py` to
+To try a different example, edit the `mip.install(OMNIPYTHON_EXAMPLES + ...)` line in `main.py` to
 point at another script under [`lib/examples/`](../../lib/examples/) and update the `import testris`
 line at the bottom to match.
 
@@ -43,4 +43,4 @@ line at the bottom to match.
 | Touch I2C SDA | 7 |
 | Touch I2C SCL | 6 |
 
-SPI baudrate **20 MHz**. Matches [`wokwi_ili9341_ft6x36_esp32s3/board_config.py`](https://github.com/PyDevices/pydevices/blob/main/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/board_config.py).
+SPI baudrate **20 MHz**. Matches [`wokwi_ili9341_ft6x36_esp32s3/board_config.py`](https://github.com/PyDevices/omnipython/blob/main/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/board_config.py).

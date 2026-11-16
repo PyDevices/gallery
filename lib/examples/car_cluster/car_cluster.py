@@ -54,10 +54,10 @@ try:
 except (TypeError, ValueError):
     SPEEDUP = 10.0
 
-env_set("PYDEVICES_WIDTH", "800")
-env_set("PYDEVICES_HEIGHT", "480")
-if env_get("PYDEVICES_SCALE") is None:
-    env_set("PYDEVICES_SCALE", "1")
+env_set("OMNIPYTHON_WIDTH", "800")
+env_set("OMNIPYTHON_HEIGHT", "480")
+if env_get("OMNIPYTHON_SCALE") is None:
+    env_set("OMNIPYTHON_SCALE", "1")
 
 import display_driver  # noqa: E402 — wires LVGL into the shared app
 import lvgl as lv  # noqa: E402
