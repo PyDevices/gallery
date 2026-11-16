@@ -97,6 +97,9 @@ BPM_MIN, BPM_MAX, BPM_STEP = 60, 200, 5
 # a note's attack tight.
 TURN_MS = 10
 
+# How often the heap is collected, in milliseconds.
+COLLECT_MS = 2000
+
 BG = lv.color_hex(0x101418)
 FG = lv.color_hex(0xE0E0E0)
 ACCENT = lv.color_hex(0xB00020)
@@ -230,9 +233,12 @@ class DrumMachine:
         self._start_turns()
 
         # Collect little and often: left to itself the heap fills in tens of
-        # seconds of audio and pays one long automatic mark-sweep pause;
-        # collecting while the garbage is small costs ~1ms.
-        self._gc_timer = lv.timer_create(_guarded(self._on_idle_collect), 2000, None)
+        # seconds of audio and pays one long automatic mark-sweep pause.
+        # Even a small collection holds everything up on a board with a large
+        # heap, so while the pattern plays it runs just after a step, with
+        # the whole gap before the next one. While stopped, a timer runs it.
+        self._collect_due_ms = ticks_ms()
+        self._gc_timer = lv.timer_create(_guarded(self._on_idle_collect), COLLECT_MS, None)
 
     # ---------- audio ----------
 
@@ -602,9 +608,21 @@ class DrumMachine:
             if late < step_ms
             else ticks_add(now, step_ms)
         )
+        # The step is out, so a collection that is due has a whole step's gap.
+        if ticks_diff(now, self._collect_due_ms) >= 0:
+            self._collect()
+
+    def _collect(self):
+        gc.collect()
+        # Keep to the schedule, so waiting for a step doesn't stretch it,
+        # but don't make up collections missed while stopped.
+        now = ticks_ms()
+        due = ticks_add(self._collect_due_ms, COLLECT_MS)
+        self._collect_due_ms = due if ticks_diff(due, now) > 0 else ticks_add(now, COLLECT_MS)
 
     def _on_idle_collect(self, t):
-        gc.collect()
+        if not self.playing:
+            self._collect()
 
     def _paint_indicator(self, active):
         # Restyle only the two cells that change: every style write
