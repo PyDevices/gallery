@@ -87,7 +87,7 @@ python scripts/gallery_generator.py
 ```
 
 The first command rewrites `packages/` and `gallery.toml` from what is in
-`lib/`. The second updates the gallery cards in `.site/gallery/index.html` and
+`lib/`. The second updates the gallery cards in `.site/index.html` and
 the file list the site stages, and captures a thumbnail for any example that
 has none. Commit what both produce.
 
@@ -124,18 +124,19 @@ The number after the file is how many seconds to wait before the shot.
 
 ## Try it in a browser
 
-The gallery page loads the MicroPython runtime from the site's `/vendor/`
-folder, so serving `.site/gallery/` alone fails with a failed import. Serve a
-folder that has both:
+The app list is the site root. It loads the MicroPython runtime from the
+site's `/vendor/` folder and the shared stylesheet from `/assets/`, so serving
+`.site/` alone fails with a failed import. Serve a folder that has all three:
 
 ```bash
 mkdir /tmp/gallery-site
+ln -s "$PWD"/.site/* /tmp/gallery-site/
 ln -s /path/to/PyDevices.github.io/vendor /tmp/gallery-site/vendor
-ln -s "$PWD/.site/gallery" /tmp/gallery-site/gallery
+ln -s /path/to/PyDevices.github.io/assets /tmp/gallery-site/assets
 python -m http.server 8000 --directory /tmp/gallery-site
 ```
 
-Open `http://localhost:8000/gallery/micropython.html?modules=piano`, with your
+Open `http://localhost:8000/micropython.html?modules=piano`, with your
 own example's name in place of `piano`. A package example takes
 `?manifests=<name>` instead. Both parameters take a comma-separated list, and
 the first name is the one that runs.
@@ -156,5 +157,5 @@ browsers require one. If your example plays audio, click the canvas first.
 
 - `python scripts/gallery_generator.py --check` passes.
 - You opened the example in a browser and it reached `"ready"` with no errors.
-- The new `packages/`, `gallery.toml`, `.site/gallery/index.html` and thumbnail
+- The new `packages/`, `gallery.toml`, `.site/index.html` and thumbnail
   files are in the commit along with the example.
