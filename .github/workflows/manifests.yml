@@ -31,7 +31,7 @@ on:
 
 jobs:
   validate-pyscript-filesystem-toml:
-    uses: PyDevices/.github/.github/workflows/reusable-validate-pyscript-filesystem-toml.yml@publishing-v6
+    uses: PyDevices/.github/.github/workflows/reusable-validate-pyscript-filesystem-toml.yml@publishing-v26
     with:
       config-path: gallery.toml
       source-mappings: |
@@ -46,8 +46,8 @@ jobs:
       - name: Checkout shared browser URL policy
         uses: actions/checkout@v7
         with:
-          repository: PyDevices/pydevices
-          path: pydevices
+          repository: PyDevices/omnipython
+          path: omnipython
           sparse-checkout: tools/_browser_url.py
           sparse-checkout-cone-mode: false
 

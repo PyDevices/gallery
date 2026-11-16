@@ -41,7 +41,7 @@
     '<a href="https://github.com/PyDevices">GitHub</a>' +
     '<a href="' +
     ROOT +
-    '/pydevices/">Core Stack</a>' +
+    '/omnipython/">Core Stack</a>' +
     '<a href="' +
     ROOT +
     '/displayif/">DisplayIF</a>' +
@@ -86,10 +86,10 @@
       color: "var(--tier-1-amber, #d97706)",
       repos: [
         {
-          id: "pydevices",
-          name: "pydevices",
-          path: "/pydevices/",
-          url: ROOT + "/pydevices/",
+          id: "omnipython",
+          name: "omnipython",
+          path: "/omnipython/",
+          url: ROOT + "/omnipython/",
           tag: "Core HAL",
           desc: "Unified display HAL & device driver abstraction",
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>'
@@ -227,7 +227,7 @@
           path: "/mip",
           url: "https://lib.omnipython.org",
           tag: "Library index",
-          desc: "The package index omip and mip install PyDevices packages from",
+          desc: "The package index omip and mip install OmniPython packages from",
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg>'
         },
         {
@@ -347,7 +347,7 @@
     function openDrawer() {
       sidebar.classList.add('is-open');
       scrim.classList.add('is-open');
-      document.body.classList.add('pydevices-drawer-open');
+      document.body.classList.add('omnipython-drawer-open');
       var activeCard = sidebar.querySelector('.pydevices-nav-card.is-active');
       if (activeCard) {
         activeCard.focus({ preventScroll: true });
@@ -363,7 +363,7 @@
     function closeDrawer() {
       sidebar.classList.remove('is-open');
       scrim.classList.remove('is-open');
-      document.body.classList.remove('pydevices-drawer-open');
+      document.body.classList.remove('omnipython-drawer-open');
     }
 
     if (peekingTab) {
@@ -460,7 +460,7 @@
     if (!document.getElementById("pydevices-nav-sidebar")) {
       document.body.insertAdjacentHTML("afterbegin", buildSidebarHtml());
       setupNavigationEvents();
-      document.body.classList.add("has-pydevices-nav");
+      document.body.classList.add("has-omnipython-nav");
     }
 
     var scriptEl = document.querySelector('script[src*="site-chrome.js"]');

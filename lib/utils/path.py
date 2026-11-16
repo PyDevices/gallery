@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""Portable, idempotent search-path configuration for PyDevices interpreters.
+"""Portable, idempotent search-path configuration for OmniPython interpreters.
 
 Applies the documented interpreter search path when the environment has not
 already supplied it:
@@ -22,7 +22,7 @@ CircuitPython package locations, which is why ``PYTHONPATH`` omits them:
 adding them on CPython puts a MIP tree ahead of ``site-packages`` and shadows
 pip-installed packages with ``.py`` sources meant for another interpreter.
 
-See https://github.com/PyDevices/pydevices/blob/main/docs/install-workflows.md
+See https://github.com/PyDevices/omnipython/blob/main/docs/install-workflows.md
 """
 
 import os

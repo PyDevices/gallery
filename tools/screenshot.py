@@ -92,10 +92,10 @@ def _apply_display_overrides(resolution, scale):
 
     if resolution is not None:
         width, height = resolution
-        env_set("PYDEVICES_WIDTH", width)
-        env_set("PYDEVICES_HEIGHT", height)
+        env_set("OMNIPYTHON_WIDTH", width)
+        env_set("OMNIPYTHON_HEIGHT", height)
     if scale is not None:
-        env_set("PYDEVICES_SCALE", scale)
+        env_set("OMNIPYTHON_SCALE", scale)
 
 
 def _parse_args(argv=None):
@@ -133,7 +133,7 @@ def _parse_args(argv=None):
 def _prepare_paths(repo_root):
     src = repo_root / "lib"
     tools = repo_root / "tools"
-    hw = repo_root.parent / "pydevices"
+    hw = repo_root.parent / "omnipython"
     for path in (
         str(tools),
         str(src),

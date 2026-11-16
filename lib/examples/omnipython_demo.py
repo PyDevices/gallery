@@ -5,7 +5,7 @@
 # gallery: featured
 # deps: pygraphics
 """
-pydevices_demo.py — flagship board_config demo: clicks, rotation, scrolling.
+omnipython_demo.py — flagship board_config demo: clicks, rotation, scrolling.
 
 Setup + callbacks; the app runs itself. Uses only published product modules
 (board_config, graphics, multimer, appdev).

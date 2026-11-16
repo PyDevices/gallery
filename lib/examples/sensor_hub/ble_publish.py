@@ -9,7 +9,7 @@
 
 The hub's Bluetooth door is one writable characteristic (see ``blefeed.py``);
 each write is one reading in the hub's text form, ``node key=value ...``.
-It uses ``bledev`` from pydevices, so the same code runs on a laptop
+It uses ``bledev`` from omnipython, so the same code runs on a laptop
 (``bledev.bleak``, needs bleak) and on a board (``bledev.mpble``). On WSL run
 it with the Windows Python, which owns the radio.
 """

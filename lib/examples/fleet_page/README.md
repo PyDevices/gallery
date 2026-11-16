@@ -41,7 +41,7 @@ hub that reported it.
 ## Changing a board
 
 The page is read-only until you tick **Allow changes**. Each board then gets
-an **Update /lib** row. Name a package from the PyDevices index or
+an **Update /lib** row. Name a package from the OmniPython index or
 micropython-lib, pick the route, and press Install. It asks you to confirm,
 runs `mpftp mip` and restarts `main.py`, and the result goes in the Jobs
 list. Start the server with `--read-only` to take the option away entirely.

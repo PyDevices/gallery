@@ -38,7 +38,7 @@ Run it on the Waveshare ESP32-P4-WIFI6-Touch-LCD-4B
 USB MIDI as in rack_midi.py: ``midiports.usb_device`` beside the board's
 serial port, which re-enumerates once as MIDI joins it, read with
 ``adafruit_midi``. Install them once with ``mip.install("usb-device-midi")``
-and ``mip.install("github:PyDevices/pydevices/midiports")``.
+and ``mip.install("github:PyDevices/omnipython/midiports")``.
 
 What you should see and hear
 ----------------------------

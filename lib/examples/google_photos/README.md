@@ -1,9 +1,9 @@
-# google_photos — Google Photos on a PyDevices display
+# google_photos — Google Photos on an OmniPython display
 
 Pick photos from your phone, browse them as a thumbnail list on the board,
 view them full screen, or run a slideshow. LVGL front end; runs on
 MicroPython, CircuitPython, and CPython wherever a `board_config` and the
-PyDevices LVGL binding are available.
+OmniPython LVGL binding are available.
 
 | List | View | Pairing |
 |:--:|:--:|:--:|
@@ -125,8 +125,8 @@ Google serves JPEG (PNG for PNG originals). LVGL decodes:
 
 | Runtime | JPEG | PNG |
 |---|---|---|
-| CPython (`pydevices-lvgl`) | LVGL's built-in TJPGD | LODEPNG |
-| MicroPython LVGL firmware ([omnipython-lvgl](https://github.com/PyDevices/omnipython-lvgl) + jpegio) | the `jpegio` module (micropython-pydevices; displayif's until 2026-10-06), registered as an LVGL image decoder ([`modules/jpegio`](https://github.com/PyDevices/micropython-pydevices/tree/main/modules/jpegio)) | LODEPNG |
+| CPython (`omnipython-lvgl`) | LVGL's built-in TJPGD | LODEPNG |
+| MicroPython LVGL firmware ([omnipython-lvgl](https://github.com/PyDevices/omnipython-lvgl) + jpegio) | the `jpegio` module (omnipython-builds; displayif's until 2026-10-06), registered as an LVGL image decoder ([`modules/jpegio`](https://github.com/PyDevices/omnipython-builds/tree/main/modules/jpegio)) | LODEPNG |
 | CircuitPython LVGL firmware | CircuitPython's `jpegio` via omnipython-lvgl | LODEPNG |
 
 Without a JPEG decoder the list still works: tiles keep a placeholder and

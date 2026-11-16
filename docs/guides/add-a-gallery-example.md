@@ -78,7 +78,7 @@ docstring.
 
 ## Regenerate
 
-From the repository root, with the [PyDevices](https://github.com/PyDevices/pydevices)
+From the repository root, with the [OmniPython](https://github.com/PyDevices/omnipython)
 repository cloned beside it:
 
 ```bash
@@ -104,7 +104,7 @@ python scripts/gallery_generator.py --check
 
 This writes nothing. It fails when a generated file is stale, when a header is
 wrong or when a dependency is missing, which is the same check CI runs. The
-generator looks for the PyDevices checkout in the folder beside this one and in
+generator looks for the OmniPython checkout in the folder beside this one and in
 every folder above it, so it also works from a git worktree you create under
 `.worktrees/`.
 

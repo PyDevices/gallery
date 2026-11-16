@@ -16,7 +16,7 @@ PAGES = [
     ("PyScript Landing Page", "pyscript/index.html"),
     ("DOM Event Test", "pyscript/dom.html"),
     ("Pyodide Paint", "pyscript/pyodide.html?modules=paint"),
-    ("Compact Pyodide Runner", "pyscript/py.html?manifests=car_cluster&deps=pydevices-lvgl"),
+    ("Compact Pyodide Runner", "pyscript/py.html?manifests=car_cluster&deps=omnipython-lvgl"),
     ("Gallery app list", "index.html"),
     ("MicroPython Paint", "micropython.html?modules=paint"),
     ("Compact MP Runner", "mp.html?manifests=car_cluster"),

@@ -14,7 +14,7 @@ of the screen. Every picture comes from SVG text in this file, drawn by
 right on a small panel and a large one.
 
 Needs: a display, and svgio: on MicroPython, a firmware built with it
-(``--modules all``); on CPython, pydevices-desktop's ``svgio`` and
+(``--modules all``); on CPython, omnipython-desktop's ``svgio`` and
 ``pip install resvg-py pillow``.
 
 Run it:

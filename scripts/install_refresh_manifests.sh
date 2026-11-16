@@ -55,8 +55,8 @@ find_generator_script() {
         echo "../dotgithub/scripts/generate_pyscript_filesystem_toml.py"
     elif [[ -f "$main_root/../dotgithub/scripts/generate_pyscript_filesystem_toml.py" ]]; then
         echo "$main_root/../dotgithub/scripts/generate_pyscript_filesystem_toml.py"
-    elif [[ -f ".pydevices-publishing-tools/scripts/generate_pyscript_filesystem_toml.py" ]]; then
-        echo ".pydevices-publishing-tools/scripts/generate_pyscript_filesystem_toml.py"
+    elif [[ -f ".omnipython-publishing-tools/scripts/generate_pyscript_filesystem_toml.py" ]]; then
+        echo ".omnipython-publishing-tools/scripts/generate_pyscript_filesystem_toml.py"
     else
         echo ""
     fi

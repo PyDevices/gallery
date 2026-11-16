@@ -44,9 +44,9 @@ audioinstruments 0.5.0 and SDL's dummy audio driver.
 # ever fighting real hardware.
 from boarddev import env_set
 
-env_set("PYDEVICES_WIDTH", 720)
-env_set("PYDEVICES_HEIGHT", 480)
-env_set("PYDEVICES_SCALE", 1.0)
+env_set("OMNIPYTHON_WIDTH", 720)
+env_set("OMNIPYTHON_HEIGHT", 480)
+env_set("OMNIPYTHON_SCALE", 1.0)
 
 import gc
 

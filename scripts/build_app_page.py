@@ -11,8 +11,8 @@
 
 An installed copy has to keep working when the rest of the site moves on, so
 each page pins what it runs in ``<app>.lock``: a commit of the apps repo, of
-pydevices when the app takes files from it, and of the site (for the
-WebAssembly runtime). ``--apps``, ``--pydevices`` and ``--site`` take
+omnipython when the app takes files from it, and of the site (for the
+WebAssembly runtime). ``--apps``, ``--omnipython`` and ``--site`` take
 checkouts instead, to try a change before it's pinned. The page's own files
 (``index.html``, ``manifest.json``, ``sw.js`` and its icons) are in
 ``.site/<app>/``.
@@ -30,8 +30,8 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 ORG = "https://github.com/PyDevices/"
 SITE_REPO = "PyDevices.github.io"
-#: Each page's files: what it takes from the apps repo, and from pydevices as
-#: (folder in pydevices, names, folder in the bundle).
+#: Each page's files: what it takes from the apps repo, and from omnipython as
+#: (folder in omnipython, names, folder in the bundle).
 PAGES = {
     "synthstation": {
         "apps": (
@@ -39,15 +39,15 @@ PAGES = {
             "apps/__init__.py", "apps/synthstation/*.py", "apps/synthstation/app.json",
         ),
         # Only the pieces of midiports a browser reads.
-        "pydevices": (("packages/midiports/midiports/", ("__init__.py", "webmidi.py"), "lib/midiports/"),),
+        "omnipython": (("packages/midiports/midiports/", ("__init__.py", "webmidi.py"), "lib/midiports/"),),
     },
     "perch": {
         "apps": ("lib/appkit", "lib/touchkit", "apps/__init__.py", "apps/perch/*.py", "apps/perch/app.json"),
-        "pydevices": (),
+        "omnipython": (),
     },
     "bit_world": {
         "apps": ("apps/bit_world/*.py", "apps/bit_world/app.json"),
-        "pydevices": (),
+        "omnipython": (),
     },
 }
 RUNTIME = ("micropython.mjs", "micropython.wasm")
@@ -69,11 +69,11 @@ def app_files(apps, paths):
     return [path for path in listed if path and not any(skip in "/" + path for skip in SKIPPED_FOLDERS)]
 
 
-def bundle(page, apps, pydevices):
+def bundle(page, apps, omnipython):
     """The bundle's bytes: a length, a JSON list of [path, offset, size], then the files."""
     sources = [(path, apps / path) for path in app_files(apps, page["apps"])]
-    for folder, names, dest in page["pydevices"]:
-        sources += [(dest + name, pydevices / folder / name) for name in names]
+    for folder, names, dest in page["omnipython"]:
+        sources += [(dest + name, omnipython / folder / name) for name in names]
     listing, blob = [], bytearray()
     for path, source in sorted(sources):
         data = source.read_bytes()
@@ -88,7 +88,7 @@ def main():
     ap.add_argument("app", choices=sorted(PAGES), help="the app the page runs")
     ap.add_argument("out", type=Path, help="the page's folder in the assembled site")
     ap.add_argument("--apps", type=Path)
-    ap.add_argument("--pydevices", type=Path)
+    ap.add_argument("--omnipython", type=Path)
     ap.add_argument("--site", type=Path)
     args = ap.parse_args()
 
@@ -97,16 +97,16 @@ def main():
     with tempfile.TemporaryDirectory() as work:
         work = Path(work)
         apps = args.apps or checkout("apps", lock["apps"], work / "apps")
-        pydevices = None
-        if page["pydevices"]:
-            pydevices = args.pydevices or checkout("pydevices", lock["pydevices"], work / "pydevices")
+        omnipython = None
+        if page["omnipython"]:
+            omnipython = args.omnipython or checkout("omnipython", lock["omnipython"], work / "omnipython")
         site = args.site or checkout(SITE_REPO, lock["site"], work / "site")
 
         out = args.out
         source = ROOT / ".site" / args.app
         if out.resolve() != source.resolve():
             shutil.copytree(source, out, dirs_exist_ok=True)
-        (out / (args.app + ".bundle")).write_bytes(bundle(page, apps, pydevices))
+        (out / (args.app + ".bundle")).write_bytes(bundle(page, apps, omnipython))
         for name in RUNTIME:
             shutil.copyfile(site / "vendor" / "micropython" / name, out / name)
 

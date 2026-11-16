@@ -20,7 +20,7 @@ From `lib/`:
 ```bash
 micropython examples/spectrum/spectrum.py
 SPECTRUM_STYLE=segmented micropython examples/spectrum/spectrum.py
-PYDEVICES_WIDTH=320 PYDEVICES_HEIGHT=170 PYDEVICES_SCALE=3 micropython examples/spectrum/spectrum.py
+OMNIPYTHON_WIDTH=320 OMNIPYTHON_HEIGHT=170 OMNIPYTHON_SCALE=3 micropython examples/spectrum/spectrum.py
 ```
 
 On desktop the window opens at 800x480. On a board, the example takes its size

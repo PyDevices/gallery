@@ -16,8 +16,8 @@ import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-# Board configs live in sibling pydevices (fallback: local stub).
-BOARD_ROOT = ROOT.parent / "pydevices" / "board_configs"
+# Board configs live in sibling omnipython (fallback: local stub).
+BOARD_ROOT = ROOT.parent / "omnipython" / "board_configs"
 if not BOARD_ROOT.is_dir():
     BOARD_ROOT = ROOT / "board_configs"
 

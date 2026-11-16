@@ -18,7 +18,7 @@ climbers. Early work focused on:
 - Landing/collision physics stable enough for repeated jumps up procedurally
   placed branches
 - The shared periodic timer via ``appdev.App`` for display refresh
-  (see [write-an-application.md](https://github.com/PyDevices/pydevices/blob/main/docs/guides/write-an-application.md) for the timer/display split)
+  (see [write-an-application.md](https://github.com/PyDevices/omnipython/blob/main/docs/guides/write-an-application.md) for the timer/display split)
 
 Gameplay bugs (flicker, respawn deaths, camera clamp at the crown, bot pathing)
 were fixed iteratively using the trace stream and bot playtests below rather than
@@ -86,7 +86,7 @@ Implemented in gallery’s **PGDisplay** backend, driven from the game via
    `--video` is set.
 2. On every `PGDisplay.show()`, the driver exports the **logical** RGB24
    framebuffer (`_buffer`, 320×480 for this game) through
-   `FFmpegFrameRecorder` in pydevices [`utils/frame_recorder.py`](https://github.com/PyDevices/pydevices/blob/main/utils/frame_recorder.py).
+   `FFmpegFrameRecorder` in omnipython [`utils/frame_recorder.py`](https://github.com/PyDevices/omnipython/blob/main/utils/frame_recorder.py).
 3. ffmpeg encodes raw RGB24 piped on stdin to H.264 MP4.
 
 Properties:
@@ -94,7 +94,7 @@ Properties:
 - One encoded frame per game `show()` — duration matches gameplay.
 - Resolution is the game’s logical size, not the scaled pygame window.
 - Supported by the desktop ``PGDisplay`` and ``SDLDisplay`` backends.
-- Unit tests: pydevices [`tests/test_pgdisplay_frame_recorder.py`](https://github.com/PyDevices/pydevices/blob/main/tests/test_pgdisplay_frame_recorder.py).
+- Unit tests: omnipython [`tests/test_pgdisplay_frame_recorder.py`](https://github.com/PyDevices/omnipython/blob/main/tests/test_pgdisplay_frame_recorder.py).
 
 Typical invocation (what `record_win.sh` runs):
 
@@ -177,7 +177,7 @@ extract only `tower_climb/`:
 - `board_config`, `displaydev`, `appdev`, `pygraphics`, `multimer`
 - `FFmpegFrameRecorder` / `PGDisplay.open_frame_recorder` (recording)
 - [`tools/example_test_manifest.toml`](https://github.com/PyDevices/pydevices-examples/blob/main/tools/example_test_manifest.toml) entry for CI smoke tests
-- pydevices `tests/test_pgdisplay_frame_recorder.py`
+- omnipython `tests/test_pgdisplay_frame_recorder.py`
 
 The example matrix runs via:
 

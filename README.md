@@ -1,6 +1,6 @@
 # Gallery
 
-The gallery is a set of showcase apps for the PyDevices stack: a piano, a
+The gallery is a set of showcase apps for the OmniPython stack: a piano, a
 spectrum analyzer, games, dashboards, a TV remote, a photo viewer and more.
 Each one draws with the same code on a MicroPython-compatible board, a
 CircuitPython-compatible board, a desktop window, a browser tab and an Android
@@ -13,7 +13,7 @@ choose an app and press run. Nothing to install.
 
 ## Run one on your computer
 
-The apps live in `lib/examples`. From `lib/`, with the PyDevices stack
+The apps live in `lib/examples`. From `lib/`, with the OmniPython stack
 installed for your interpreter:
 
 ```bash

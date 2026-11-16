@@ -109,7 +109,7 @@ function renderBoard(b) {
     <div class="src">${b.info_from ? `From ${esc(b.info_from)}, ${ago(b.info_at)}.` : "No details yet. Probe to read them."}</div>
     <div class="update">
       <b>Update /lib</b>
-      <input list="pkgs" placeholder="package, e.g. pydevices" data-pkg>
+      <input list="pkgs" placeholder="package, e.g. omnipython" data-pkg>
       <select data-index>${Object.keys(state.indexes).map(n => `<option>${n}</option>`).join("")}</select>
       <select data-route>${routeOpts}</select>
       <button class="primary" data-update ${busy ? "disabled" : ""}>Install</button>

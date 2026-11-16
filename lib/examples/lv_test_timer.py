@@ -30,8 +30,8 @@ click injection because LVGL owns the host queue.
 
 Parent may set before launch:
 
-* ``PYDEVICES_TIMER_ASYNC`` — desktop sync/async timers (``board_config``)
-* ``PYDEVICES_LV_ROTATION`` — ``0``/``90``/``180``/``270`` applied to
+* ``OMNIPYTHON_TIMER_ASYNC`` — desktop sync/async timers (``board_config``)
+* ``OMNIPYTHON_LV_ROTATION`` — ``0``/``90``/``180``/``270`` applied to
   ``display_drv.rotation`` before ``display_driver`` import
 """
 
@@ -56,7 +56,7 @@ from boarddev import env_get
 import multimer
 
 # Optional logical orientation for LVGL (hw MADCTL/SDL/PG or software rotate).
-_lv_rot = env_get("PYDEVICES_LV_ROTATION")
+_lv_rot = env_get("OMNIPYTHON_LV_ROTATION")
 if _lv_rot is not None and str(_lv_rot).strip() != "":
     try:
         display_drv.rotation = int(str(_lv_rot).strip())
@@ -361,7 +361,7 @@ def build_ui():
             fps_lbl.set_text(_fps_short(across))
 
         # The arc steps at the display's refresh period (33 ms unless the
-        # display or PYDEVICES_REFRESH_MS says otherwise), so it changes every
+        # display or OMNIPYTHON_REFRESH_MS says otherwise), so it changes every
         # frame and the frame rate shown is the display's, not this app's pace.
         # Its angle comes from the clock: one turn a second at any period, in
         # step with the seconds counter, which shows if the two timers drift.

@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 """
-playing_cards.py - A simple playing card library for PyDevices.
+playing_cards.py - A simple playing card library for OmniPython.
 Cards can be rendered to any pygraphics canvas: a displaybuf DisplayBuffer,
 a pygraphics FrameBuffer, or a display driver.
 """

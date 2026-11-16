@@ -98,9 +98,9 @@ class _Loop:
 
 def _test_key_for_test_mode(key=None):
     try:
-        import pydevices_test_mode
+        import omnipython_test_mode
 
-        if pydevices_test_mode.ENABLED:
+        if omnipython_test_mode.ENABLED:
             return key if key is not None else START
     except ImportError:
         pass
@@ -220,9 +220,9 @@ def _build_testris():  # noqa: C901, PLR0915
 
     # Define other constants
     try:
-        import pydevices_test_mode
+        import omnipython_test_mode
 
-        show_splash_screen = not pydevices_test_mode.ENABLED
+        show_splash_screen = not omnipython_test_mode.ENABLED
     except ImportError:
         show_splash_screen = True
 

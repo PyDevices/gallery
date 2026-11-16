@@ -157,7 +157,7 @@ function pythonLiteral(value) {
 }
 
 async function installPackages(mp, plan) {
-    // The PyDevices stack and the desktop board config are frozen into the
+    // The OmniPython stack and the desktop board config are frozen into the
     // runtime, and nothing here installs any of it: ?deps= is not acted on.
     // A runtime built without the stack fails at the example's own import,
     // loudly. What is installed is the example's own code (?manifests=), by
