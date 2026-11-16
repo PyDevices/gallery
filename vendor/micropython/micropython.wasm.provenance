@@ -1,0 +1,218 @@
+{
+  "binary": {
+    "name": "micropython.wasm",
+    "sha256": "a0ef6bd8fbd225045bf6f56db5b573cdd54c17956cd3fd61c2b91942b0590e2d",
+    "size": 9848537
+  },
+  "built_by": "https://github.com/PyDevices/micropython-pydevices/actions/runs/43783009484",
+  "format": 1,
+  "install_only": false,
+  "modules": "all",
+  "overlays": [
+    "0001-micropython-windows-enable-networking-sockets-select-ssl-msvc.patch",
+    "0002-micropython-unix-raise-MICROPY_SCHEDULER_DEPTH-for-desktop-SDL.patch",
+    "0003-micropython-windows-enable-ffi-modffi-libffi.patch",
+    "0004-micropython-webassembly-allow-Asyncify-in-runPythonAsync.patch",
+    "0005-micropython-webassembly-fix-node-hook-ccall-signatures.patch",
+    "0006-micropython-webassembly-support-soft-reinitialization.patch",
+    "0007-micropython-webassembly-inert-jsffi-callbacks-across-reinit.patch",
+    "0008-micropython-webassembly-fix-empty-single-input-lexer-eof-primer.patch",
+    "0009-micropython-esp32s3-add-SPIRAM_OCT_DEBUG-variant.patch",
+    "0010-micropython-esp32-i2s-mck-pin.patch",
+    "0011-micropython-esp32-webrepl-ctrl-c-in-tight-loops.patch",
+    "0012-micropython-unix-variant-configurable-default-heap-size.patch",
+    "0013-micropython-windows-read-piped-stdin-in-the-repl.patch",
+    "0014-micropython-esp32-tinyusb-0.21.patch",
+    "0015-micropython-windows-timing-module-and-idle-console.patch",
+    "0016-micropython-esp32-machine-timer-fire-during-reinit.patch",
+    "0017-micropython-py-makeqstrdefs-incremental-build-header-qstr.patch",
+    "0018-micropython-esp32-drop-missing-usermod-include-dirs.patch",
+    "0019-micropython-tools-makemanifest-c-modules-forward-slashes.patch",
+    "0020-micropython-py-mkrules-qstr-response-file-on-windows.patch",
+    "0021-micropython-tools-makemanifest-mpy-tool-response-file-on-windows.patch",
+    "0022-micropython-py-mkrules-link-response-file-on-windows.patch",
+    "0023-micropython-esp32-nimble-default-eventq-deinit-without-controller.patch",
+    "0024-micropython-shared-tinyusb-cdc-keep-tx-fifo-during-in-transfer.patch",
+    "0025-micropython-shared-tinyusb-usbd-stall-cdc-in-before-clearing-tx-fifo.patch",
+    "0027-micropython-esp32-sdcard-stage-unaligned-buffers-for-multi-sector-dma.patch",
+    "0028-micropython-esp32-i2s-pdm-rx.patch",
+    "0029-micropython-py-mkrules-cmake-short-qstr-include-paths.patch",
+    "0030-micropython-py-mkrules-qstr-arguments-in-a-response-file.patch",
+    "0031-micropython-extmod-machine-usb-device-high-speed-descriptor-speed-and-in-endpoint-check.patch",
+    "0032-micropython-esp32-p4-full-speed-device-phy.patch",
+    "0033-micropython-extmod-machine-usb-device-streaming-endpoints.patch",
+    "0034-micropython-extmod-machine-usb-device-uvc-payloads.patch",
+    "0035-micropython-shared-tinyusb-stream-c-sink.patch",
+    "0036-micropython-shared-tinyusb-uvc-variable-frames.patch",
+    "0037-micropython-shared-tinyusb-ring-c-api.patch",
+    "0038-micropython-lib-oofatfs-utf-8-filenames.patch",
+    "0039-micropython-esp32-otg-phy-handoff-for-host-mode.patch",
+    "0040-micropython-py-mk-search-each-user-c-module-in-its-own-directory-first.patch",
+    "0041-micropython-shared-tinyusb-a-streams-first-arm-is-not-a-drop.patch",
+    "0042-micropython-shared-tinyusb-a-streams-buffer-outlives-the-stream.patch",
+    "0043-micropython-shared-tinyusb-cdc-read-write-space-once.patch",
+    "0044-micropython-esp32-inisetup-new-filesystem-over-stale-flash.patch",
+    "0045-micropython-esp32-modsocket-so-keepalive-and-tcp-keepalive-timers.patch",
+    "0046-micropython-py-runtime-utils-printing-a-callback-error-cannot-escape.patch",
+    "0047-micropython-py-scheduler-no-wait-with-a-callback-ready.patch",
+    "0048-micropython-stm32-link-objects-from-a-response-file.patch",
+    "0049-micropython-esp32-spi-raise-when-a-transfer-cant-be-queued.patch",
+    "0049-micropython-rp2-a-module-may-name-the-btstack-config.patch",
+    "0050-micropython-extmod-btstack-ble-irq-skips-classic-links.patch",
+    "0051-micropython-stm32-h7-i2c-timing-from-the-kernel-clock.patch",
+    "0052-micropython-esp32-sdcard-recover-the-slot-and-retry-a-failed-transfer.patch",
+    "0053-micropython-esp32-sdcard-let-a-board-set-the-sdmmc-pin-drive-strength.patch",
+    "0054-micropython-esp32-sdcard-stop-a-failed-transfer-before-resetting-the-host.patch",
+    "0055-micropython-stm32-sdio-invalidate-the-dcache-after-a-dma-read.patch",
+    "0056-micropython-extmod-websocket-dont-block-a-read-during-a-blocking-write.patch",
+    "0057-micropython-py-scheduler-no-callbacks-while-irqs-are-disabled.patch",
+    "0058-micropython-esp32-sdcard-release-the-ldo-when-the-constructor-fails.patch",
+    "0059-micropython-esp32-usb-networking-turned-on-from-code.patch",
+    "0060-micropython-rp2-usb-networking-turned-on-from-code.patch",
+    "0061-micropython-shared-dhcpserver-find-the-message-type-anywhere.patch",
+    "0062-micropython-shared-dhcpserver-answer-only-on-the-interface-that-owns-its-address.patch",
+    "0063-micropython-shared-runtime-pyexec-say-how-long-the-repl-has-waited.patch",
+    "0064-micropython-extmod-modos-keep-the-input-dupterm-notify-has-no-room-for.patch",
+    "0065-micropython-esp32-soft-reset-clears-dupterm-before-the-heap-sweep.patch",
+    "0066-micropython-py-scheduler-a-ctrl-c-in-a-callback-reaches-the-running-code.patch",
+    "0067-micropython-shared-tinyusb-a-p4-stream-keeps-playing-while-flash-is-written.patch"
+  ],
+  "port": "webassembly",
+  "sources": {
+    "audiocomponents": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "audiodsp": {
+      "describe": "c0ae8fba8194",
+      "dirty": false,
+      "head": "c0ae8fba81946593698a51aae707cb54989f587e"
+    },
+    "audioeffects": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "audioif": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "audioinstruments": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "cameraif": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "castif": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "displayif": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "h264enc": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "iconkit": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "jpegio": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "mdns": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "micropython": {
+      "describe": "bc2010613115"
+    },
+    "micropython-lib": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "micropython-pydevices": {
+      "describe": "0494775",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "omnipython-lib": {
+      "describe": "cd464e2fc1ff",
+      "dirty": false,
+      "head": "cd464e2fc1ff68467cf5a71d69f17612ff9addd1"
+    },
+    "omnipython-lvgl": {
+      "describe": "3e4381e7addd",
+      "dirty": false,
+      "head": "3e4381e7addded2ac48358a1bbd6c74224711cf0"
+    },
+    "palettes": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "pdwidgets": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "pngio": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "ppa": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "pydevices": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "pygraphics": {
+      "describe": "2aaf95af93bb",
+      "dirty": false,
+      "head": "2aaf95af93bb469c315d7c8b3d3252781937d051"
+    },
+    "svgio": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "tsmux": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    },
+    "ulab": {
+      "describe": "15e999747079",
+      "dirty": false,
+      "head": "15e999747079205b2415e71a6aa2840b8f85f9dc"
+    },
+    "usbhost": {
+      "describe": "049477592da1",
+      "dirty": false,
+      "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
+    }
+  },
+  "stamped": "2026-11-16T00:55:41+00:00",
+  "target": "mp-wasm"
+}

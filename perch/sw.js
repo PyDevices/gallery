@@ -2,7 +2,7 @@
 // one set under one version, which the site build writes below. A new version
 // waits until every window of the old one has closed, so nothing running ever
 // loads half of each.
-const VERSION = 'c31b5379c6ffc774';
+const VERSION = '5f0ed2719ef6484b';
 const CACHE = 'perch-' + VERSION;
 const FILES = [
   './',

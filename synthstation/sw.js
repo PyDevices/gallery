@@ -2,7 +2,7 @@
 // one set under one version, which the site build writes below. A new version
 // waits until every window of the old one has closed, so nothing running ever
 // loads half of each.
-const VERSION = '1d7bed22bce68639';
+const VERSION = 'd0db3fb8c044da89';
 const CACHE = 'synthstation-' + VERSION;
 const FILES = [
   './',

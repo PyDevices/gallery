@@ -5,8 +5,8 @@
  *   <div id="pydevices-site-header"></div>
  *   ...
  *   <div id="pydevices-site-footer"></div>
- *   <script src="https://pydevices.github.io/assets/js/site-chrome.js"></script>
- *   <script src="https://pydevices.github.io/assets/js/theme-toggle.js"></script>
+ *   <script src="https://omnipython.org/assets/chrome/site-chrome.js"></script>
+ *   <script src="https://omnipython.org/assets/chrome/theme-toggle.js"></script>
  */
 (function () {
   'use strict';
@@ -22,6 +22,9 @@
     } catch (e) {}
   }
   var LOGO = (ROOT || '') + '/assets/img/logo.svg';
+  // This copy is served from the gallery's own origin, so the nav links go to
+  // the portal by its address; the logo above stays on this origin.
+  ROOT = ROOT || 'https://omnipython.org';
 
   var HEADER =
     '<header class="site-header">' +
@@ -42,12 +45,8 @@
     '<a href="' +
     ROOT +
     '/displayif/">DisplayIF</a>' +
-    '<a href="' +
-    ROOT +
-    '/simulator/">Simulator</a>' +
-    '<a href="' +
-    ROOT +
-    '/gallery/gallery/" class="nav-gallery-link">Gallery</a>' +
+    '<a href="https://workbench.pydevices.com/">Workbench</a>' +
+    '<a href="https://gallery.omnipython.org/" class="nav-gallery-link">Gallery</a>' +
     "</nav>" +
     '<button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Toggle color theme">' +
     '<svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>' +
@@ -108,7 +107,7 @@
           id: "gallery",
           name: "gallery",
           path: "/gallery/",
-          url: ROOT + "/gallery/",
+          url: "https://gallery.omnipython.org/",
           tag: "Showcase",
           desc: "Multi-interpreter demos, benchmarks & PyScript runner",
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/><circle cx="17" cy="15" r="1.5"/></svg>'

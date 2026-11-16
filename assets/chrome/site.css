@@ -1,0 +1,2016 @@
+/*
+ * PyDevices — shared org site chrome
+ *
+ * Design tokens + layout primitives shared by every PyDevices GitHub Pages
+ * site (org root, lvgl-bindings, gallery, and the second-wave module
+ * pages). Keep this file focused on *chrome*: header/nav, hero, buttons,
+ * cards, footer, typography. Project-specific / demo-interpreter styles belong
+ * in a local stylesheet loaded after this one.
+ *
+ * Theme: dark by default; `<html data-theme="light">` switches to the light
+ * palette. Pair with assets/js/theme-toggle.js, which flips the attribute
+ * and persists the choice in localStorage. Pages that render the toggle
+ * button should apply the visitor's stored preference in an inline <head>
+ * script (before this stylesheet paints) to avoid a flash of the wrong
+ * theme — see any page's <head> for the one-line snippet.
+ *
+ * Canonical copy: https://pydevices.github.io/assets/chrome/site.css
+ */
+
+/*
+ * Token contract — read this before changing a colour anywhere in the file.
+ *
+ * 1. Colours that need alpha variants are stored as *channel* tokens:
+ *      --accent-rgb: 196 220 76;        (space-separated R G B, no rgb())
+ *      --accent: rgb(var(--accent-rgb));
+ *    Every translucent use then composes from the same source of truth:
+ *      rgb(var(--accent-rgb) / 0.32)
+ *    The light theme overrides the *-rgb token, never the derived one.
+ * 2. Where the two themes differ only in *how much* tint they use, the alpha
+ *    itself is a token (--tag-tint, --tier-tint, ...) so one rule serves both
+ *    themes instead of a duplicated :root[data-theme="light"] copy.
+ * 3. --dark-* anchors are the dark palette values that the light theme does
+ *    NOT override, because a few surfaces are deliberately dark in both
+ *    themes (code blocks, the Workbench mock). The dark theme's own tokens
+ *    derive from them, so one edit still moves both.
+ *
+ * Below these two blocks there should be no colour literal except neutral
+ * black/white shadow, scrim and hairline composites, which carry no palette.
+ */
+
+:root {
+  /* Always-dark anchors — never overridden by the light theme. */
+  --dark-panel: #12355a;
+  --dark-panel-deep: #0a2440;
+  --dark-ink: #e8f0f8;
+  --dark-good-rgb: 62 207 149;
+  --dark-warn-rgb: 232 179 78;
+  --dark-bad-rgb: 239 92 78;
+
+  /* Channel tokens (R G B) for every colour that needs alpha variants. */
+  --bg-rgb: 11 42 74;
+  --accent-rgb: 196 220 76;
+  --indigo-rgb: 169 196 222;
+  --good-rgb: var(--dark-good-rgb);
+  --warn-rgb: var(--dark-warn-rgb);
+
+  /* Per-theme tint strengths (see contract note 2). */
+  --bg-glow-accent: 0.13;
+  --bg-glow-indigo: 0.1;
+  --tag-tint: 0.1;
+  --tier-tint: 0.08;
+  --nav-active-tint: 0.08;
+
+  --bg: rgb(var(--bg-rgb));
+  --bg-soft: #0e3052;
+  --panel: var(--dark-panel);
+  --panel-2: #17222c;
+  --border: #2a4f76;
+  --border-soft: #1f4267;
+  --ink: var(--dark-ink);
+  --ink-soft: #b4c8dc;
+  --muted: #86a0bb;
+  --accent: rgb(var(--accent-rgb));
+  --accent-soft: #dbe9a0;
+  --accent-strong: #d8f06a;
+  --accent-ink: #0b2a4a;
+  --indigo: rgb(var(--indigo-rgb));
+  --good: rgb(var(--good-rgb));
+  --warn: rgb(var(--warn-rgb));
+  --bad: rgb(var(--dark-bad-rgb));
+  /* Ink for text/glyphs sitting on a saturated fill (accent, tier, GitHub). */
+  --on-accent: #ffffff;
+  /* GitHub's own chrome black, for the "View on GitHub" primary button. */
+  --github-ink: #24292e;
+  /* The unlit device screen behind a hero canvas demo (cool, not warm). */
+  --device-glass: #16304c;
+  --device-glass-deep: #0a1d33;
+  --radius: 26px;
+  --radius-sm: 16px;
+  --radius-pill: 999px;
+  /* A card's corners are each a little different, so it reads as drawn by
+   * hand, not stamped. */
+  --radius-drawn: 28px 22px 30px 20px / 22px 30px 20px 28px;
+  /* The night ground behind art that is dark in both themes. */
+  --stage: var(--dark-panel-deep);
+  --shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+  --shadow-soft: 0 6px 18px rgba(0, 0, 0, 0.3);
+  --hover-border: #3b6390;
+  --font-display: "Nunito", ui-rounded, ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, Menlo, Consolas, monospace;
+
+  /* Tier-specific visual design tokens. --tier-N-deep is the darker companion
+   * the logo-badge gradient fades into; scripts/generate_sites.py and
+   * assets/js/site-chrome.js both read these rather than carrying their own
+   * copies of the hexes. */
+  --tier-1-rgb: 240 160 30;
+  --tier-1-amber: rgb(var(--tier-1-rgb));
+  --tier-1-deep: #c87d0e;
+  --tier-1-bg: rgb(var(--tier-1-rgb) / var(--tier-tint));
+  --tier-1-border: rgb(var(--tier-1-rgb) / 0.4);
+
+  --tier-2-rgb: 18 184 134;
+  --tier-2-emerald: rgb(var(--tier-2-rgb));
+  --tier-2-deep: #0d9268;
+  --tier-2-bg: rgb(var(--tier-2-rgb) / var(--tier-tint));
+  --tier-2-border: rgb(var(--tier-2-rgb) / 0.4);
+
+  --tier-3-rgb: 79 143 245;
+  --tier-3-blue: rgb(var(--tier-3-rgb));
+  --tier-3-deep: #3269d1;
+  --tier-3-bg: rgb(var(--tier-3-rgb) / var(--tier-tint));
+  --tier-3-border: rgb(var(--tier-3-rgb) / 0.4);
+
+  --tier-4-rgb: 146 104 240;
+  --tier-4-purple: rgb(var(--tier-4-rgb));
+  --tier-4-deep: #7449cc;
+  --tier-4-bg: rgb(var(--tier-4-rgb) / var(--tier-tint));
+  --tier-4-border: rgb(var(--tier-4-rgb) / 0.4);
+
+  --tier-5-rgb: 79 136 171;
+  --tier-5-steel: rgb(var(--tier-5-rgb));
+  --tier-5-deep: #376a89;
+  --tier-5-bg: rgb(var(--tier-5-rgb) / var(--tier-tint));
+  --tier-5-border: rgb(var(--tier-5-rgb) / 0.4);
+}
+
+:root[data-theme="light"] {
+  --bg-rgb: 238 243 248;
+  --accent-rgb: 29 79 128;
+  --indigo-rgb: 124 150 0;
+  --good-rgb: 31 143 107;
+  --warn-rgb: 181 121 10;
+
+  --bg-glow-accent: 0.09;
+  --bg-glow-indigo: 0.06;
+  --tag-tint: 0.08;
+  --tier-tint: 0.1;
+  --nav-active-tint: 0.06;
+
+  --bg-soft: #e3ebf3;
+  --panel: #ffffff;
+  --panel-2: #f3f7fb;
+  --border: #cbd9e7;
+  --border-soft: #dce6f0;
+  --ink: #0b2238;
+  --ink-soft: #3e5a76;
+  --muted: #6a819a;
+  --accent-soft: #4a74a0;
+  --accent-strong: #163f68;
+  --accent-ink: #f2f7fc;
+  --bad: #d1382b;
+  --shadow: 0 18px 44px rgba(8, 22, 32, 0.1);
+  --shadow-soft: 0 6px 18px rgba(8, 22, 32, 0.06);
+  --hover-border: #adc3d9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--ink);
+  line-height: 1.6;
+  background:
+    radial-gradient(1100px 560px at 14% -12%, rgb(var(--accent-rgb) / var(--bg-glow-accent)), transparent 60%),
+    radial-gradient(900px 520px at 100% 0%, rgb(var(--indigo-rgb) / var(--bg-glow-indigo)), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+a {
+  color: var(--accent-strong);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code, kbd {
+  font-family: var(--mono);
+  font-size: 0.92em;
+}
+
+code {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.08em 0.4em;
+  color: var(--ink);
+}
+
+kbd {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  padding: 0.1em 0.45em;
+  color: var(--ink);
+}
+
+pre {
+  margin: 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  /* Code blocks stay on the dark palette in both themes -- see the --dark-*
+   * anchors in the token block. The colour belongs on `pre` itself, not only
+   * on `pre code`: a block with no nested <code> would otherwise inherit
+   * --ink, which in the light theme is near-black on this dark ground. */
+  background: var(--dark-panel);
+  color: var(--dark-ink);
+  padding: 14px 16px;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--dark-ink);
+}
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+body.has-pydevices-nav {
+  padding-left: 44px;
+}
+
+code {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+pre code {
+  word-break: normal;
+  overflow-wrap: normal;
+  white-space: pre;
+}
+
+.wrap {
+  width: min(1080px, 100%);
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+/* ---------- Header / nav ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 12px 16px 0;
+}
+
+.site-header .wrap {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 9px 12px 9px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: rgb(var(--bg-rgb) / 0.86);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-soft);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0;
+  color: var(--ink);
+  font-size: 1.22rem;
+  flex-shrink: 0;
+}
+
+.brand:hover {
+  text-decoration: none;
+}
+
+/* The org mark sits free on the header ground rather than in a tile: the
+ * mark carries its own colours in logo.svg itself, so the badge
+ * that used to carry the brand colour is no longer needed here. Platform
+ * icons that need an opaque ground use the PNGs, not this. */
+.brand .logo {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  background: none;
+  box-shadow: none;
+}
+
+.brand .logo img,
+.brand .logo svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.brand .accent {
+  color: var(--accent-strong);
+}
+
+.nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.nav a {
+  color: var(--ink-soft);
+  padding: 6px 13px;
+  border-radius: var(--radius-pill);
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.nav a:hover {
+  color: var(--ink);
+  background: rgb(var(--accent-rgb) / 0.14);
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .nav a:not(.nav-gallery-link) {
+    display: none;
+  }
+  .nav {
+    gap: 8px;
+  }
+  .nav-gallery-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--accent-strong);
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    background: var(--panel);
+    border: 1px solid var(--border);
+  }
+  .nav-gallery-link:hover {
+    background: var(--panel-2);
+    border-color: var(--accent-strong);
+    text-decoration: none;
+  }
+}
+
+/* ---------- Theme toggle ---------- */
+
+.theme-toggle {
+  flex: none;
+  margin-left: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent-strong);
+  color: var(--accent-strong);
+  box-shadow: var(--shadow-soft);
+}
+
+.theme-toggle svg {
+  width: 17px;
+  height: 17px;
+}
+
+.theme-toggle .icon-moon {
+  display: none;
+}
+
+.theme-toggle .icon-sun {
+  display: block;
+}
+
+:root[data-theme="light"] .theme-toggle .icon-sun {
+  display: none;
+}
+
+:root[data-theme="light"] .theme-toggle .icon-moon {
+  display: block;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  padding: 64px 0 34px;
+  text-align: left;
+}
+
+/* Hero with Live Canvas Opposite Hero Badge */
+.hero.has-hero-canvas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(24px, 5vw, 48px);
+}
+
+.hero.has-hero-canvas .hero-main {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.hero-canvas-wrap {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.hero-canvas-circle,
+.hero-canvas-square {
+  width: 240px;
+  height: 240px;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 35% 35%, var(--device-glass) 0%, var(--device-glass-deep) 100%);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 35px rgb(var(--accent-rgb) / 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hero-canvas-circle {
+  border-radius: 50%;
+}
+
+.hero-canvas-square {
+  border-radius: 20px;
+}
+
+.hero-canvas-circle canvas,
+.hero-canvas-square canvas {
+  width: 240px;
+  height: 240px;
+  display: block;
+  image-rendering: pixelated;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.hero-canvas-square canvas {
+  border-radius: 18px;
+}
+
+.hero-canvas-wrap.active .hero-canvas-circle canvas,
+.hero-canvas-wrap.active .hero-canvas-square canvas {
+  opacity: 1;
+}
+
+.hero-canvas-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+.hero-canvas-wrap.active .hero-canvas-loader {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.hero-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgb(var(--accent-rgb) / 0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: hero-spin 0.9s linear infinite;
+}
+
+@keyframes hero-spin {
+  to { transform: rotate(360deg); }
+}
+
+.hero-canvas-status {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  max-width: 180px;
+  text-align: center;
+}
+
+/* The right-hand side of a hero that has a drawing: the live device, if the
+ * page has one, with the drawing under it. */
+.hero.has-hero-stage {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(24px, 5vw, 56px);
+}
+
+.hero.has-hero-stage .hero-main {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.hero-stage {
+  flex: none;
+  width: min(380px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.hero-art {
+  margin: 0;
+  width: 100%;
+  text-align: center;
+}
+
+.hero-art img {
+  display: block;
+  width: 100%;
+  height: auto;
+  animation: hero-art-bob 6s ease-in-out infinite;
+}
+
+@keyframes hero-art-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.hero-art figcaption {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 4px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--panel);
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+}
+
+.hero-art figcaption a {
+  font-weight: 600;
+}
+
+@media (max-width: 860px) {
+  .hero.has-hero-canvas {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+  }
+  .hero-canvas-wrap {
+    align-self: center;
+    margin-bottom: 24px;
+  }
+  /* With a drawing the words come first: the stage is too tall to lead. */
+  .hero.has-hero-stage {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .hero-stage {
+    align-self: center;
+  }
+  .hero-stage .hero-canvas-wrap {
+    margin-bottom: 0;
+  }
+}
+
+.hero-lead {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 4vw, 36px);
+  margin: 0 0 20px;
+}
+
+.hero-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex: none;
+  max-width: 11rem;
+}
+
+.logo-badge {
+  width: 112px;
+  height: 112px;
+  margin: 0;
+  border-radius: 38% 34% 40% 32% / 34% 40% 32% 38%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+  box-shadow: 0 16px 36px rgb(var(--accent-rgb) / 0.32);
+}
+
+.logo-badge img,
+.logo-badge svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Product hero mark — same orange badge as the org logo, but the card icon
+ * (stroke SVG under assets/img/products/) instead of the shared PyDevices mark.
+ * Keeps header branding org-wide while each product page gets its own face. */
+.logo-badge.product-mark {
+  padding: 0;
+}
+
+/* Org hero mark — free-standing, no tile. The portal's own page shows the
+ * PyDevices mark on the ground; product pages keep their tier-coloured
+ * badge above, because that tile is what carries each repo's tier. */
+.logo-badge.logo-badge--free {
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+  width: 96px;
+  height: 96px;
+}
+
+.logo-badge.product-mark img,
+.logo-badge.product-mark > svg {
+  width: 54%;
+  height: 54%;
+}
+
+/* Short API / install excerpts under section heads */
+.snippet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.snippet-card {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-drawn);
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+  padding: 18px 20px;
+  text-align: left;
+}
+
+.snippet-card h3 {
+  margin: 0 0 6px;
+  font-size: 1.02rem;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.snippet-card p {
+  margin: 0 0 12px;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.snippet-card pre {
+  margin: 0;
+}
+
+.hero .eyebrow {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-strong);
+  margin: 0;
+  text-align: center;
+  padding: 5px 14px;
+  border: 1.5px solid currentColor;
+  border-radius: var(--radius-pill);
+}
+
+.hero-lead > h1,
+.hero h1 {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: clamp(1.75rem, 3.4vw, 2.5rem);
+  letter-spacing: -0.005em;
+  line-height: 1.14;
+  color: var(--ink);
+}
+
+.hero h1 + p,
+.hero-lead + p {
+  margin-top: 16px;
+}
+
+.hero p {
+  margin: 0;
+  max-width: 100%;
+  color: var(--ink-soft);
+  font-size: 1.08rem;
+  line-height: 1.55;
+  text-align: left;
+}
+
+.hero p + p {
+  margin-top: 1em;
+}
+
+@media (max-width: 640px) {
+  .hero-lead {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-brand {
+    align-items: flex-start;
+    max-width: none;
+  }
+
+  .hero .eyebrow {
+    text-align: left;
+  }
+}
+
+.callout {
+  margin: 26px auto 0;
+  max-width: 660px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  text-align: left;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.callout svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  color: var(--accent-strong);
+}
+
+/* ---------- Buttons ---------- */
+
+.cta {
+  margin: 30px 0 8px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 24px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 700;
+  border: 1.5px solid var(--border);
+  background: var(--panel);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.16s ease, transform 0.1s ease, box-shadow 0.16s ease;
+}
+
+.btn:hover {
+  border-color: var(--hover-border);
+  box-shadow: var(--shadow-soft);
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.btn.primary:hover {
+  box-shadow: 0 10px 24px rgb(var(--accent-rgb) / 0.28);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* ---------- Section headings ---------- */
+
+.section {
+  padding: 30px 0;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 6px 0 20px;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+
+/* A tier's number, in a round dot of the tier's colour. */
+.tier-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 1.55em;
+  height: 1.55em;
+  margin-right: 0.35em;
+  border-radius: 50%;
+  font-size: 0.82em;
+  font-weight: 600;
+  color: var(--dark-panel-deep);
+  background: var(--accent);
+  vertical-align: 0.06em;
+}
+
+.tier-dot-1 { background: var(--tier-1-amber); }
+.tier-dot-2 { background: var(--tier-2-emerald); }
+.tier-dot-3 { background: var(--tier-3-blue); }
+.tier-dot-4 { background: var(--tier-4-purple); }
+.tier-dot-5 { background: var(--tier-5-steel); }
+
+.section-head .hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* ---------- Cards ---------- */
+
+.cards {
+  flex: 1;
+  padding: 24px 0 60px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-drawn);
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+/* The gem-cut top edge is gone: a card is one soft shape now. The rule stays
+ * so the tier rules below, which colour it, have nothing to draw on. */
+.card::before {
+  content: none;
+}
+
+.card:hover {
+  transform: translateY(-4px) rotate(-0.4deg);
+  border-color: var(--hover-border);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card .icon,
+.card .card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--panel-2);
+  border: 1.5px solid var(--border);
+  color: var(--accent-strong);
+  margin-bottom: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.card .icon svg,
+.card .card-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.card .icon img,
+.card .card-icon img {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  object-fit: cover;
+  display: block;
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 1.22rem;
+  color: var(--ink);
+  letter-spacing: 0;
+}
+
+.card p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.94rem;
+  flex: 1;
+}
+
+.card .go {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--accent-strong);
+}
+
+.card .go svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.16s ease;
+}
+
+.card:hover .go svg {
+  transform: translateX(3px);
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.3em 0.8em;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--ink-soft);
+  background: var(--panel-2);
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0.18em 0.55em;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--ink-soft);
+  background: var(--panel-2);
+}
+
+/* One rule per tag colour for both themes: the hue comes from the theme's
+ * *-rgb channel token and the fill strength from --tag-tint. */
+.tag.async, .tag.featured {
+  color: var(--indigo);
+  border-color: rgb(var(--indigo-rgb) / 0.3);
+  background: rgb(var(--indigo-rgb) / var(--tag-tint));
+}
+
+/* NOT a colour override -- an unmerged twin kept for its selector weight.
+ * gallery's gallery.css loads after this file and restyles
+ * .tag.featured with the same (0,2,0) specificity, so today it wins in the
+ * dark theme and loses to this heavier light-theme selector. Folding these
+ * declarations into the rule above would hand the light theme to gallery.css
+ * and repaint the gallery's featured tags. Delete this only together with
+ * that override. */
+:root[data-theme="light"] .tag.async,
+:root[data-theme="light"] .tag.featured {
+  border-color: rgb(var(--indigo-rgb) / 0.3);
+  background: rgb(var(--indigo-rgb) / var(--tag-tint));
+}
+
+.tag.all, .tag.tool {
+  color: var(--good);
+  border-color: rgb(var(--good-rgb) / 0.3);
+  background: rgb(var(--good-rgb) / var(--tag-tint));
+}
+
+.tag.loops, .tag.warn {
+  color: var(--warn);
+  border-color: rgb(var(--warn-rgb) / 0.3);
+  background: rgb(var(--warn-rgb) / var(--tag-tint));
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* Simple link list */
+.linklist {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.linklist a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  transition: border-color 0.16s ease, color 0.16s ease;
+}
+
+.linklist a:hover {
+  border-color: var(--hover-border);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.linklist svg {
+  width: 17px;
+  height: 17px;
+  color: var(--muted);
+}
+
+/* ---------- Simple content blocks (thin module pages) ---------- */
+
+.prose {
+  color: var(--ink-soft);
+  font-size: 1.02rem;
+}
+
+.prose h2 {
+  color: var(--ink);
+  margin: 0 0 14px;
+}
+
+.install-block {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+  padding: 22px 24px;
+}
+
+.install-block h2 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+/* ---------- Tier-Specific Visual Contrast Card Styles ---------- */
+
+.card-tier-1 {
+  border-color: var(--tier-1-border);
+  background: linear-gradient(180deg, var(--tier-1-bg), var(--panel));
+}
+.card-tier-1::before {
+  background: linear-gradient(90deg, var(--tier-1-amber), transparent 75%);
+  opacity: 0.8;
+}
+.card-tier-1:hover {
+  border-color: var(--tier-1-amber);
+  box-shadow: 0 12px 30px rgb(var(--tier-1-rgb) / 0.15);
+}
+.card-tier-1 .icon, .card-tier-1 .card-icon {
+  color: var(--tier-1-amber);
+  background: rgb(var(--tier-1-rgb) / 0.12);
+  border-color: var(--tier-1-border);
+}
+.tag-tier-1 {
+  color: var(--tier-1-amber);
+  border-color: var(--tier-1-border);
+  background: var(--tier-1-bg);
+}
+
+.card-tier-2 {
+  border-color: var(--tier-2-border);
+  background: linear-gradient(180deg, var(--tier-2-bg), var(--panel));
+}
+.card-tier-2::before {
+  background: linear-gradient(90deg, var(--tier-2-emerald), transparent 75%);
+  opacity: 0.8;
+}
+.card-tier-2:hover {
+  border-color: var(--tier-2-emerald);
+  box-shadow: 0 12px 30px rgb(var(--tier-2-rgb) / 0.15);
+}
+.card-tier-2 .icon, .card-tier-2 .card-icon {
+  color: var(--tier-2-emerald);
+  background: rgb(var(--tier-2-rgb) / 0.12);
+  border-color: var(--tier-2-border);
+}
+.tag-tier-2 {
+  color: var(--tier-2-emerald);
+  border-color: var(--tier-2-border);
+  background: var(--tier-2-bg);
+}
+
+.card-tier-3 {
+  border-color: var(--tier-3-border);
+  background: linear-gradient(180deg, var(--tier-3-bg), var(--panel));
+}
+.card-tier-3::before {
+  background: linear-gradient(90deg, var(--tier-3-blue), transparent 75%);
+  opacity: 0.8;
+}
+.card-tier-3:hover {
+  border-color: var(--tier-3-blue);
+  box-shadow: 0 12px 30px rgb(var(--tier-3-rgb) / 0.15);
+}
+.card-tier-3 .icon, .card-tier-3 .card-icon {
+  color: var(--tier-3-blue);
+  background: rgb(var(--tier-3-rgb) / 0.12);
+  border-color: var(--tier-3-border);
+}
+.tag-tier-3 {
+  color: var(--tier-3-blue);
+  border-color: var(--tier-3-border);
+  background: var(--tier-3-bg);
+}
+
+.card-tier-4 {
+  border-color: var(--tier-4-border);
+  background: linear-gradient(180deg, var(--tier-4-bg), var(--panel));
+}
+.card-tier-4::before {
+  background: linear-gradient(90deg, var(--tier-4-purple), transparent 75%);
+  opacity: 0.8;
+}
+.card-tier-4:hover {
+  border-color: var(--tier-4-purple);
+  box-shadow: 0 12px 30px rgb(var(--tier-4-rgb) / 0.15);
+}
+.card-tier-4 .icon, .card-tier-4 .card-icon {
+  color: var(--tier-4-purple);
+  background: rgb(var(--tier-4-rgb) / 0.12);
+  border-color: var(--tier-4-border);
+}
+.tag-tier-4 {
+  color: var(--tier-4-purple);
+  border-color: var(--tier-4-border);
+  background: var(--tier-4-bg);
+}
+
+.card-tier-5 {
+  border-color: var(--tier-5-border);
+  background: linear-gradient(180deg, var(--tier-5-bg), var(--panel));
+}
+.card-tier-5::before {
+  background: linear-gradient(90deg, var(--tier-5-steel), transparent 75%);
+  opacity: 0.8;
+}
+.card-tier-5:hover {
+  border-color: var(--tier-5-steel);
+  box-shadow: 0 12px 30px rgb(var(--tier-5-rgb) / 0.15);
+}
+.card-tier-5 .icon, .card-tier-5 .card-icon {
+  color: var(--tier-5-steel);
+  background: rgb(var(--tier-5-rgb) / 0.12);
+  border-color: var(--tier-5-border);
+}
+.tag-tier-5 {
+  color: var(--tier-5-steel);
+  border-color: var(--tier-5-border);
+  background: var(--tier-5-bg);
+}
+
+/* Ecosystem Stats Bar */
+.stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
+.stat-pill strong {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.stat-pill .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+.stat-pill .dot.gold { background: var(--tier-1-amber); box-shadow: 0 0 8px var(--tier-1-amber); }
+.stat-pill .dot.green { background: var(--tier-2-emerald); box-shadow: 0 0 8px var(--tier-2-emerald); }
+.stat-pill .dot.blue { background: var(--tier-3-blue); box-shadow: 0 0 8px var(--tier-3-blue); }
+
+/* ---------- Shared Left-Side Navigation Drawer & Docked Sidebar ---------- */
+.pydevices-nav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 85;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.22s ease, visibility 0.22s ease;
+}
+
+.pydevices-nav-scrim.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.pydevices-nav-sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 90;
+  width: 335px;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow);
+  transform: translateX(calc(-100% + 36px));
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s ease;
+  user-select: none;
+}
+
+.pydevices-nav-sidebar.is-open {
+  transform: translateX(0);
+  box-shadow: 12px 0 36px rgba(0, 0, 0, 0.45);
+}
+
+/* 1. Sleek Vertical Peeking Handle (visible when collapsed on screens <= 1400px) */
+.pydevices-nav-peeking-tab {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 36px;
+  background: var(--panel-2);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 20px;
+  gap: 16px;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  animation: peeking-tab-glow 3.6s ease-in-out infinite;
+}
+
+@keyframes peeking-tab-glow {
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: 3px 0 16px rgb(var(--accent-rgb) / 0.22); }
+}
+
+.pydevices-nav-peeking-tab:hover {
+  background: var(--panel);
+  border-color: var(--accent);
+  box-shadow: 2px 0 14px rgb(var(--accent-rgb) / 0.25);
+  animation: none;
+}
+
+.peeking-logo {
+  border-radius: 0;
+  transition: transform 0.2s ease;
+}
+
+.pydevices-nav-peeking-tab:hover .peeking-logo {
+  transform: scale(1.1);
+}
+
+.peeking-title {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  transition: color 0.16s ease;
+}
+
+.pydevices-nav-peeking-tab:hover .peeking-title {
+  color: var(--ink);
+}
+
+.peeking-chevron {
+  width: 14px;
+  height: 14px;
+  color: var(--accent-strong);
+  margin-top: auto;
+  margin-bottom: 24px;
+  animation: pulse-chevron 2s infinite ease-in-out;
+}
+
+@keyframes pulse-chevron {
+  0%, 100% { transform: translateX(0); opacity: 0.6; }
+  50% { transform: translateX(3px); opacity: 1; }
+}
+
+.pydevices-nav-sidebar.is-open .pydevices-nav-peeking-tab {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 2. Full Navigation Inner Panel */
+.pydevices-nav-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.pydevices-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 12px 18px;
+  border-bottom: 1px solid var(--border-soft);
+  flex-shrink: 0;
+}
+
+.pydevices-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.pydevices-nav-brand-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  line-height: 1.1;
+}
+
+.pydevices-nav-brand-sub {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.pydevices-nav-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+.pydevices-nav-close:hover {
+  background: var(--panel-2);
+  color: var(--ink);
+}
+
+/* Search Box */
+.pydevices-nav-search-wrap {
+  position: relative;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  background: var(--bg-soft);
+  flex-shrink: 0;
+}
+
+.pydevices-nav-search {
+  width: 100%;
+  padding: 7px 10px 7px 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  transition: all 0.15s ease;
+}
+
+.pydevices-nav-search:focus {
+  outline: none;
+  border-color: var(--accent-strong);
+  box-shadow: 0 0 0 2px rgb(var(--accent-rgb) / 0.15);
+}
+
+.pydevices-nav-search-icon {
+  position: absolute;
+  left: 26px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+/* Scrollable Body */
+.pydevices-nav-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scrollbar-gutter: stable;
+}
+
+.pydevices-nav-tier-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pydevices-nav-tier-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px 4px 4px;
+}
+
+.pydevices-nav-tier-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--on-accent);
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+}
+
+.pydevices-nav-tier-name {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.pydevices-nav-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pydevices-nav-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  border: 1px solid var(--border-soft);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.14s ease;
+}
+
+.pydevices-nav-card:hover {
+  background: var(--panel-2);
+  border-color: var(--accent);
+  transform: translateX(2px);
+  text-decoration: none;
+}
+
+.pydevices-nav-card.is-active {
+  background: rgb(var(--accent-rgb) / var(--nav-active-tint));
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.nav-card-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: grid;
+  place-items: center;
+}
+
+.nav-card-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.nav-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.nav-card-title {
+  font-family: var(--font-display, var(--font));
+  font-weight: 700;
+  font-size: 0.84rem;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-card-tag {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  background: var(--bg-soft);
+  color: var(--muted);
+  border: 1px solid var(--border-soft);
+}
+
+.pydevices-nav-card.is-active .nav-card-tag {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+
+.nav-card-desc {
+  font-size: 0.73rem;
+  color: var(--muted);
+  line-height: 1.25;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pydevices-nav-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-soft);
+  background: var(--bg-soft);
+  font-size: 0.74rem;
+  color: var(--muted);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.nav-foot-link {
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.nav-foot-link:hover {
+  color: var(--accent-strong);
+}
+
+/* 3. Wide Viewport Docked Behavior (> 1400px) */
+@media (min-width: 1401px) {
+  body.has-pydevices-nav {
+    padding-left: 315px;
+  }
+
+  .pydevices-nav-sidebar {
+    width: 315px;
+    transform: translateX(0) !important;
+    box-shadow: none;
+  }
+
+  .pydevices-nav-peeking-tab {
+    display: none !important;
+  }
+
+  .pydevices-nav-close {
+    display: none !important;
+  }
+
+  .pydevices-nav-scrim {
+    display: none !important;
+  }
+}
+
+body.pydevices-drawer-open {
+  overflow: hidden;
+}
+
+/* Interpreter Matrix Table */
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.matrix-table th, .matrix-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.matrix-table th {
+  background: var(--panel-2);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.matrix-table tr:last-child td {
+  border-bottom: none;
+}
+
+.matrix-table .check {
+  color: var(--good);
+  font-weight: bold;
+}
+
+.matrix-table .dash {
+  color: var(--muted);
+}
+
+/* ---------- Custom Component Layouts (Non-Card Layouts) ---------- */
+
+/* 1. Color Swatch Grid (palettes) */
+.swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.swatch-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.16s ease, border-color 0.16s ease;
+}
+
+.swatch-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--tier-2-emerald);
+}
+
+.swatch-preview {
+  height: 80px;
+  width: 100%;
+  display: flex;
+}
+
+.swatch-bar {
+  flex: 1;
+  height: 100%;
+}
+
+.swatch-info {
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.swatch-name {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.swatch-code {
+  font-family: var(--mono);
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+/* 2. Feature Matrix & Specification Table (pygraphics, displayif, pydevices) */
+.spec-block {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 24px;
+  margin: 20px 0;
+  box-shadow: var(--shadow-soft);
+}
+
+.spec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.spec-item {
+  border-left: 3px solid var(--accent);
+  padding-left: 14px;
+}
+
+.spec-item.tier-1 { border-left-color: var(--tier-1-amber); }
+.spec-item.tier-2 { border-left-color: var(--tier-2-emerald); }
+.spec-item.tier-3 { border-left-color: var(--tier-3-blue); }
+.spec-item.tier-4 { border-left-color: var(--tier-4-purple); }
+.spec-item.tier-5 { border-left-color: var(--tier-5-steel); }
+
+.spec-item h4 {
+  margin: 0 0 6px;
+  font-size: 1.02rem;
+  color: var(--ink);
+}
+
+.spec-item p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+/* 3. Workbench IDE Layout (mpftp) */
+/* The Workbench mock is an editor screenshot: it keeps the dark palette in
+ * both themes, so it draws from the --dark-* anchors, not --panel/--good/... */
+.workbench-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--dark-panel-deep);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin: 24px 0;
+}
+
+.workbench-bar {
+  background: var(--dark-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.workbench-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+}
+.workbench-dot.red { background: rgb(var(--dark-bad-rgb)); }
+.workbench-dot.yellow { background: rgb(var(--dark-warn-rgb)); }
+.workbench-dot.green { background: rgb(var(--dark-good-rgb)); }
+
+.workbench-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+
+@media (max-width: 768px) {
+  .workbench-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.workbench-pane {
+  background: var(--dark-panel-deep);
+  padding: 16px;
+}
+
+.workbench-pane h4 {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: var(--tier-5-steel);
+  font-family: var(--mono);
+  text-transform: uppercase;
+}
+
+/* 4. Code Playground & Snippet Showcase */
+.code-block-wrap {
+  position: relative;
+  margin: 16px 0;
+}
+
+.code-badge {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 0.72rem;
+  font-family: var(--mono);
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  margin-top: 40px;
+  padding: 0 16px 22px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.site-footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 22px;
+  border: 1.5px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: rgb(var(--bg-rgb) / 0.6);
+}
+
+.site-footer .footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.site-footer .footer-brand img {
+  width: 26px;
+  height: 26px;
+}
+
+/* ---------- The page-not-found scene ---------- */
+
+.notfound {
+  padding: 48px 16px 20px;
+}
+
+/* Night in both themes, like a code block: the drawing's lime and white
+ * need a dark ground behind them. */
+.notfound-stage {
+  position: relative;
+  margin: 0 0 34px;
+  padding: 26px 20px 8px;
+  border-radius: var(--radius-drawn);
+  background:
+    radial-gradient(circle at 18% 24%, rgb(var(--dark-good-rgb) / 0.12), transparent 42%),
+    var(--stage);
+  border: 1.5px solid var(--border);
+  text-align: center;
+  overflow: hidden;
+}
+
+.notfound-stage img {
+  width: min(520px, 100%);
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.notfound-stage .notfound-code {
+  position: absolute;
+  left: 26px;
+  top: 14px;
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 9vw, 5rem);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--dark-ink);
+  opacity: 0.16;
+}
+
+.notfound h1 {
+  margin: 0 0 10px;
+  font-size: clamp(1.7rem, 3.4vw, 2.4rem);
+}
+
+.notfound p {
+  color: var(--ink-soft);
+  max-width: 44rem;
+}
+
+.notfound .linklist {
+  margin: 22px 0;
+}
+
+.notfound .linklist a {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  border-radius: var(--radius-sm);
+  border-width: 1.5px;
+}
+
+.notfound .linklist b {
+  color: var(--accent-strong);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.notfound .linklist span {
+  font-size: 0.86rem;
+}
+
+.site-footer a {
+  color: var(--ink-soft);
+}
+
+@media (max-width: 640px) {
+  .nav {
+    gap: 14px;
+    font-size: 0.88rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pydevices-nav-peeking-tab,
+  .peeking-chevron,
+  .hero-art img {
+    animation: none;
+  }
+  .card:hover,
+  .btn:hover {
+    transform: none;
+  }
+}
