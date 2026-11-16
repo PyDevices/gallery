@@ -13,7 +13,7 @@ its own packed column, so a frame copies and sends only the rows that moved.
 
 The layout comes from the display's size, so the same file runs on a desktop
 window, the ESP32-P4 panel (800x480) and the T-Embed (320x170). On desktop it
-opens at 800x480 unless ``PYDEVICES_WIDTH``/``PYDEVICES_HEIGHT`` say otherwise.
+opens at 800x480 unless ``OMNIPYTHON_WIDTH``/``OMNIPYTHON_HEIGHT`` say otherwise.
 Set ``SPECTRUM_STYLE=segmented`` for LED-style bars.
 
 The levels come from audiodsp's pump on a board, whatever it plays
@@ -37,11 +37,11 @@ import sys
 from boarddev import env_get, env_set
 
 # A desktop board_config reads these; a real board's display ignores them.
-if env_get("PYDEVICES_WIDTH") is None:
-    env_set("PYDEVICES_WIDTH", 800)
-    env_set("PYDEVICES_HEIGHT", 480)
-if env_get("PYDEVICES_SCALE") is None:
-    env_set("PYDEVICES_SCALE", 1.0)
+if env_get("OMNIPYTHON_WIDTH") is None:
+    env_set("OMNIPYTHON_WIDTH", 800)
+    env_set("OMNIPYTHON_HEIGHT", 480)
+if env_get("OMNIPYTHON_SCALE") is None:
+    env_set("OMNIPYTHON_SCALE", 1.0)
 
 _here = __file__.replace("\\", "/").rsplit("/", 1)[0] if "/" in __file__ else "."
 if _here not in sys.path:

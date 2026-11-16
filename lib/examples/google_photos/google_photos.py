@@ -7,7 +7,7 @@ google_photos
 ====================================================
 Pick Google Photos on your phone; the board lists, views, and slideshows them.
 
-Google Photos on a PyDevices display: pick photos from your phone, browse
+Google Photos on an OmniPython display: pick photos from your phone, browse
 the list with thumbnails, view them full screen, or run a slideshow.
 
 Launcher for the Google Photos stack:
@@ -64,12 +64,12 @@ _MCU_PLATFORMS = (
     "zephyr",
 )
 if getattr(sys, "platform", "") not in _MCU_PLATFORMS:
-    # None leaves the environment alone, so PYDEVICES_WIDTH / _HEIGHT set by
+    # None leaves the environment alone, so OMNIPYTHON_WIDTH / _HEIGHT set by
     # the caller (or tools/screenshot.py --resolution) still apply.
     for _name, _value in (
-        ("PYDEVICES_WIDTH", _WIDTH),
-        ("PYDEVICES_HEIGHT", _HEIGHT),
-        ("PYDEVICES_SCALE", _SCALE),
+        ("OMNIPYTHON_WIDTH", _WIDTH),
+        ("OMNIPYTHON_HEIGHT", _HEIGHT),
+        ("OMNIPYTHON_SCALE", _SCALE),
     ):
         if _value is not None:
             env_set(_name, _value)
@@ -140,7 +140,7 @@ def _launched_with_m(_hostloop):
     """``-m`` / ``-c`` launch, even where the OS command line is unreadable.
 
     ``_hostloop.batch()`` reads the real command line. On micropython.exe that
-    read fails (pydevices <= 0.5.0 decodes it with a UTF-16 codec MicroPython
+    read fails (omnipython <= 0.5.0 decodes it with a UTF-16 codec MicroPython
     doesn't have), so a ``-m`` launch looked like a script run and the process
     returned after ~2 s (#142). MicroPython's own tell is ``sys.argv``: ``-m
     pkg`` leaves ``["pkg"]``, a script leaves its ``.py`` path, a REPL ``[]``

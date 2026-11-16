@@ -5,7 +5,7 @@
  *   <div id="pydevices-site-header"></div>
  *   ...
  *   <div id="pydevices-site-footer"></div>
- *   <script src="https://pydevices.github.io/assets/chrome/site-chrome.js"></script>
+ *   <script src="https://omnipython.org/assets/chrome/site-chrome.js"></script>
  *
  * That one script is the whole of it -- the theme toggle is built in below.
  */
@@ -41,16 +41,12 @@
     '<a href="https://github.com/PyDevices">GitHub</a>' +
     '<a href="' +
     ROOT +
-    '/pydevices/">Core Stack</a>' +
+    '/omnipython/">Core Stack</a>' +
     '<a href="' +
     ROOT +
-    '/micropython-pydevices/">Firmware</a>' +
-    '<a href="' +
-    ROOT +
-    '/workbench/">Workbench</a>' +
-    '<a href="' +
-    ROOT +
-    '/gallery/gallery/" class="nav-gallery-link">Gallery</a>' +
+    '/omnipython-builds/">Firmware</a>' +
+    '<a href="https://workbench.pydevices.com/">Workbench</a>' +
+    '<a href="https://gallery.omnipython.org/" class="nav-gallery-link">Gallery</a>' +
     "</nav>" +
     '<button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Toggle color theme">' +
     '<svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v1.5M12 20v1.5M5.3 5.3l1.1 1.1M17.6 17.6l1.1 1.1M2.5 12H4M20 12h1.5M5.3 18.7l1.1-1.1M17.6 6.4l1.1-1.1"/></svg>' +
@@ -97,10 +93,10 @@
       color: "var(--tier-1-amber, #f59e0b)",
       repos: [
         {
-          id: "pydevices",
-          name: "pydevices",
-          path: "/pydevices/",
-          url: ROOT + "/pydevices/",
+          id: "omnipython",
+          name: "omnipython",
+          path: "/omnipython/",
+          url: ROOT + "/omnipython/",
           tag: "Core HAL",
           desc: "Unified display HAL & device driver abstraction",
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="19" height="13" rx="4"/><path d="M12 16.5v3.5M8 20.5h8"/><circle cx="12" cy="10" r="2.8"/><circle cx="12.6" cy="9.6" r="1.1" fill="var(--accent, currentColor)" stroke="none"/></svg>'
@@ -136,7 +132,7 @@
           id: "gallery",
           name: "gallery",
           path: "/gallery/",
-          url: ROOT + "/gallery/",
+          url: "https://gallery.omnipython.org/",
           tag: "Showcase",
           desc: "Multi-interpreter demos, benchmarks & PyScript runner",
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M4.5 16.5c3-4.5 5.5-4.5 7.5-1.5 2-2.5 4.5-2.5 7.5.5"/><circle cx="15.2" cy="8.8" r="1.9" fill="var(--accent, currentColor)" stroke="none"/></svg>'
@@ -224,19 +220,19 @@
       color: "var(--tier-5-steel, #06b6d4)",
       repos: [
         {
-          id: "mpftp",
-          name: "mpftp",
-          path: "/mpftp/",
-          url: ROOT + "/mpftp/",
+          id: "mcuctl",
+          name: "mcuctl",
+          path: "/mcuctl/",
+          url: ROOT + "/mcuctl/",
           tag: "IDE Extension",
           desc: "Editor, CLI, and agent tools for MCU boards",
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="12" rx="3.5"/><path d="M9 7.5h6M9 11h3.5"/><path d="M12 15v3c0 3.2-5 3.2-5 .2 0-2 3-2 3-.2" stroke="var(--accent, currentColor)"/></svg>'
         },
         {
-          id: "micropython-pydevices",
-          name: "micropython-pydevices",
-          path: "/micropython-pydevices/",
-          url: ROOT + "/micropython-pydevices/",
+          id: "omnipython-builds",
+          name: "omnipython-builds",
+          path: "/omnipython-builds/",
+          url: ROOT + "/omnipython-builds/",
           tag: "Runtime Overlay",
           desc: "Patch queue, presets, boards & variants for MicroPython",
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="6.5" width="11" height="11" rx="3"/><path d="M9.8 3v3.5M14.2 3v3.5M9.8 17.5V21M14.2 17.5V21M3 9.8h3.5M3 14.2h3.5M17.5 9.8H21M17.5 14.2H21"/><circle cx="12" cy="12" r="1.7" fill="var(--accent, currentColor)" stroke="none"/></svg>'
@@ -245,7 +241,7 @@
           id: "workbench",
           name: "workbench",
           path: "/workbench/",
-          url: ROOT + "/workbench/",
+          url: "https://workbench.pydevices.com/",
           tag: "Browser IDE",
           desc: "MicroPython IDE with a built-in device simulator",
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="4.5"/><path d="M9.8 9.5L7.3 12l2.5 2.5M14.2 9.5l2.5 2.5-2.5 2.5" stroke="var(--accent, currentColor)"/></svg>'
@@ -266,45 +262,45 @@
   function buildSidebarHtml() {
     var curPath = window.location.pathname;
 
-    var html = '<div class="pydevices-nav-scrim" id="pydevices-nav-scrim"></div>';
-    html += '<aside class="pydevices-nav-sidebar" id="pydevices-nav-sidebar" aria-label="PyDevices Ecosystem Navigation">';
+    var html = '<div class="omnipython-nav-scrim" id="omnipython-nav-scrim"></div>';
+    html += '<aside class="omnipython-nav-sidebar" id="omnipython-nav-sidebar" aria-label="PyDevices Ecosystem Navigation">';
 
     // 1. Peeking Handle (visible on screens <= 1400px when collapsed)
-    html += '<div class="pydevices-nav-peeking-tab" id="pydevices-nav-peeking-tab" title="Click to browse PyDevices Ecosystem">';
+    html += '<div class="omnipython-nav-peeking-tab" id="omnipython-nav-peeking-tab" title="Click to browse PyDevices Ecosystem">';
     html += '  <img src="' + LOGO_SMALL + '" alt="" class="peeking-logo" width="22" height="22">';
     html += '  <span class="peeking-title">ECOSYSTEM</span>';
     html += '  <svg class="peeking-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6l6 6-6 6" stroke-width="2.5"/></svg>';
     html += '</div>';
 
     // 2. Full Navigation Panel
-    html += '<div class="pydevices-nav-panel">';
-    html += '  <div class="pydevices-nav-header">';
-    html += '    <a class="pydevices-nav-brand" href="' + ROOT + '/">';
+    html += '<div class="omnipython-nav-panel">';
+    html += '  <div class="omnipython-nav-header">';
+    html += '    <a class="omnipython-nav-brand" href="' + ROOT + '/">';
     html += '      <img src="' + LOGO_SMALL + '" alt="PyDevices" width="28" height="28">';
     html += '      <div>';
-    html += '        <div class="pydevices-nav-brand-title">PyDevices</div>';
-    html += '        <div class="pydevices-nav-brand-sub">Ecosystem Navigator</div>';
+    html += '        <div class="omnipython-nav-brand-title">PyDevices</div>';
+    html += '        <div class="omnipython-nav-brand-sub">Ecosystem Navigator</div>';
     html += '      </div>';
     html += '    </a>';
-    html += '    <button type="button" class="pydevices-nav-close" id="pydevices-nav-close" aria-label="Close navigation">&times;</button>';
+    html += '    <button type="button" class="omnipython-nav-close" id="omnipython-nav-close" aria-label="Close navigation">&times;</button>';
     html += '  </div>';
 
     // Search Filter Input
-    html += '  <div class="pydevices-nav-search-wrap">';
-    html += '    <svg class="pydevices-nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.8" cy="10.8" r="7.3"/><path d="M16.2 16.2L20.5 20.5"/><circle cx="12" cy="9.6" r="2.2" fill="var(--accent, currentColor)" stroke="none"/></svg>';
-    html += '    <input type="text" class="pydevices-nav-search" id="pydevices-nav-search" placeholder="Filter..." autocomplete="off">';
+    html += '  <div class="omnipython-nav-search-wrap">';
+    html += '    <svg class="omnipython-nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.8" cy="10.8" r="7.3"/><path d="M16.2 16.2L20.5 20.5"/><circle cx="12" cy="9.6" r="2.2" fill="var(--accent, currentColor)" stroke="none"/></svg>';
+    html += '    <input type="text" class="omnipython-nav-search" id="omnipython-nav-search" placeholder="Filter..." autocomplete="off">';
     html += '  </div>';
 
     // Scrollable Body with Tiers & Cards
-    html += '  <div class="pydevices-nav-body" id="pydevices-nav-body">';
+    html += '  <div class="omnipython-nav-body" id="omnipython-nav-body">';
     for (var t = 0; t < ECOSYSTEM_DATA.length; t++) {
       var tierObj = ECOSYSTEM_DATA[t];
-      html += '    <div class="pydevices-nav-tier-group" data-tier="' + tierObj.tier + '">';
-      html += '      <div class="pydevices-nav-tier-head">';
-      html += '        <span class="pydevices-nav-tier-pill" style="background:' + tierObj.color + '">T' + tierObj.tier + '</span>';
-      html += '        <span class="pydevices-nav-tier-name">' + tierObj.name + '</span>';
+      html += '    <div class="omnipython-nav-tier-group" data-tier="' + tierObj.tier + '">';
+      html += '      <div class="omnipython-nav-tier-head">';
+      html += '        <span class="omnipython-nav-tier-pill" style="background:' + tierObj.color + '">T' + tierObj.tier + '</span>';
+      html += '        <span class="omnipython-nav-tier-name">' + tierObj.name + '</span>';
       html += '      </div>';
-      html += '      <div class="pydevices-nav-cards">';
+      html += '      <div class="omnipython-nav-cards">';
 
       for (var r = 0; r < tierObj.repos.length; r++) {
         var repo = tierObj.repos[r];
@@ -316,7 +312,7 @@
           isCurrent = true;
         }
 
-        html += '        <a class="pydevices-nav-card' + (isCurrent ? ' is-active' : '') + '" href="' + repo.url + '" data-name="' + repo.name.toLowerCase() + '" data-tag="' + repo.tag.toLowerCase() + '" data-desc="' + repo.desc.toLowerCase() + '">';
+        html += '        <a class="omnipython-nav-card' + (isCurrent ? ' is-active' : '') + '" href="' + repo.url + '" data-name="' + repo.name.toLowerCase() + '" data-tag="' + repo.tag.toLowerCase() + '" data-desc="' + repo.desc.toLowerCase() + '">';
         html += '          <div class="nav-card-icon" style="color:' + tierObj.color + '">' + repo.icon + '</div>';
         html += '          <div class="nav-card-content">';
         html += '            <div class="nav-card-title-row">';
@@ -334,8 +330,8 @@
     html += '  </div>';
 
     // Footer Links
-    html += '  <div class="pydevices-nav-footer">';
-    html += '    <a href="' + ROOT + '/gallery/gallery/" class="nav-foot-link">Interactive Gallery</a> &middot; ';
+    html += '  <div class="omnipython-nav-footer">';
+    html += '    <a href="https://gallery.omnipython.org/" class="nav-foot-link">Interactive Gallery</a> &middot; ';
     html += '    <a href="https://lib.omnipython.org" class="nav-foot-link">Package Index</a> &middot; ';
     html += '    <a href="https://github.com/PyDevices" class="nav-foot-link">GitHub</a>';
     html += '  </div>';
@@ -347,24 +343,24 @@
   }
 
   function setupNavigationEvents() {
-    var sidebar = document.getElementById('pydevices-nav-sidebar');
-    var scrim = document.getElementById('pydevices-nav-scrim');
-    var peekingTab = document.getElementById('pydevices-nav-peeking-tab');
-    var closeBtn = document.getElementById('pydevices-nav-close');
-    var searchInput = document.getElementById('pydevices-nav-search');
+    var sidebar = document.getElementById('omnipython-nav-sidebar');
+    var scrim = document.getElementById('omnipython-nav-scrim');
+    var peekingTab = document.getElementById('omnipython-nav-peeking-tab');
+    var closeBtn = document.getElementById('omnipython-nav-close');
+    var searchInput = document.getElementById('omnipython-nav-search');
 
     if (!sidebar || !scrim) return;
 
     function openDrawer() {
       sidebar.classList.add('is-open');
       scrim.classList.add('is-open');
-      document.body.classList.add('pydevices-drawer-open');
-      var activeCard = sidebar.querySelector('.pydevices-nav-card.is-active');
+      document.body.classList.add('omnipython-drawer-open');
+      var activeCard = sidebar.querySelector('.omnipython-nav-card.is-active');
       if (activeCard) {
         activeCard.focus({ preventScroll: true });
         activeCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       } else {
-        var firstCard = sidebar.querySelector('.pydevices-nav-card');
+        var firstCard = sidebar.querySelector('.omnipython-nav-card');
         if (firstCard) {
           firstCard.focus({ preventScroll: true });
         }
@@ -374,7 +370,7 @@
     function closeDrawer() {
       sidebar.classList.remove('is-open');
       scrim.classList.remove('is-open');
-      document.body.classList.remove('pydevices-drawer-open');
+      document.body.classList.remove('omnipython-drawer-open');
     }
 
     if (peekingTab) {
@@ -403,10 +399,10 @@
     if (searchInput) {
       searchInput.addEventListener('input', function (e) {
         var query = e.target.value.toLowerCase().trim();
-        var tierGroups = sidebar.querySelectorAll('.pydevices-nav-tier-group');
+        var tierGroups = sidebar.querySelectorAll('.omnipython-nav-tier-group');
 
         tierGroups.forEach(function (group) {
-          var cards = group.querySelectorAll('.pydevices-nav-card');
+          var cards = group.querySelectorAll('.omnipython-nav-card');
           var visibleInGroup = 0;
 
           cards.forEach(function (card) {
@@ -449,7 +445,7 @@
         root.removeAttribute("data-theme");
       }
       try {
-        localStorage.setItem("pydevices-theme", next);
+        localStorage.setItem("omnipython-theme", next);
       } catch (e) {}
     });
   }
@@ -468,10 +464,10 @@
     setupThemeToggle();
 
     // Inject Left-Side Navigation Drawer
-    if (!document.getElementById("pydevices-nav-sidebar")) {
+    if (!document.getElementById("omnipython-nav-sidebar")) {
       document.body.insertAdjacentHTML("afterbegin", buildSidebarHtml());
       setupNavigationEvents();
-      document.body.classList.add("has-pydevices-nav");
+      document.body.classList.add("has-omnipython-nav");
     }
 
     var scriptEl = document.querySelector('script[src*="site-chrome.js"]');

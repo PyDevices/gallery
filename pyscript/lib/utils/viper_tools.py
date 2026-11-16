@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: MIT
 
 """
-Viper tools for PyDevices
-=========================
-This module contains Viper functions for PyDevices. These functions are consolidated here to
+Viper tools for OmniPython
+==========================
+This module contains Viper functions for OmniPython. These functions are consolidated here to
 allow publishing of the main module without the Viper code.
 """
 

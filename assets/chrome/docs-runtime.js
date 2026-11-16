@@ -1,8 +1,8 @@
 /** Reusable direct MicroPython runner for first-party Read the Docs embeds. */
 (function () {
-  const RUNTIME_URL = "https://PyDevices.github.io/vendor/micropython/micropython.mjs";
+  const RUNTIME_URL = "https://omnipython.org/vendor/micropython/micropython.mjs";
   const state = { phase: "idle", errors: [], mp: null, activeOutput: null };
-  window.__pydevicesDocsRuntime = state;
+  window.__omnipythonDocsRuntime = state;
 
   function setAll(demos, text) {
     demos.forEach((demo) => {
@@ -20,7 +20,7 @@
       stderr: (line) => { if (state.activeOutput) state.activeOutput.textContent += `${line}\n`; },
       heapsize: 16 * 1024 * 1024
     });
-    // The PyDevices stack and the desktop board_config are frozen into the
+    // The OmniPython stack and the desktop board_config are frozen into the
     // runtime; nothing is installed. A demo's import fails loudly on a
     // runtime built without them.
     await state.mp.runPythonAsync(`
@@ -29,7 +29,7 @@ if "/" not in sys.path: sys.path.insert(0, "/")
 os.chdir("/")
 `);
     state.phase = "ready"; setAll(demos, "Ready");
-    window.dispatchEvent(new CustomEvent("pydevices-docs-ready"));
+    window.dispatchEvent(new CustomEvent("omnipython-docs-ready"));
     return state.mp;
   }
 
@@ -50,7 +50,7 @@ os.chdir("/")
       const canvasId = JSON.stringify(canvas.id);
       await mp.runPythonAsync(`
 from boarddev import env_set
-env_set("PYDEVICES_CANVAS_ID", ${canvasId})
+env_set("OMNIPYTHON_CANVAS_ID", ${canvasId})
 CANVAS_ID = ${canvasId}
 _source = ${source}
 exec(compile(_source, "<docs-demo>", "exec"), {"__name__": "__main__", "CANVAS_ID": CANVAS_ID})
@@ -62,7 +62,7 @@ exec(compile(_source, "<docs-demo>", "exec"), {"__name__": "__main__", "CANVAS_I
       if (output) output.textContent += `${detail}\n`;
       if (status) status.textContent = "Error";
       console.error("Direct documentation demo failed:", error);
-      window.dispatchEvent(new CustomEvent("pydevices-docs-failed", { detail }));
+      window.dispatchEvent(new CustomEvent("omnipython-docs-failed", { detail }));
     } finally {
       state.activeOutput = null;
       if (button) button.disabled = false;
@@ -70,7 +70,7 @@ exec(compile(_source, "<docs-demo>", "exec"), {"__name__": "__main__", "CANVAS_I
   }
 
   function init() {
-    const demos = [...document.querySelectorAll(".pydevices-live-demo")];
+    const demos = [...document.querySelectorAll(".omnipython-live-demo")];
     demos.forEach((demo, index) => {
       const canvas = demo.querySelector("canvas");
       const editor = demo.querySelector(".code-editor");

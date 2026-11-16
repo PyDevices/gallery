@@ -2,7 +2,7 @@
 // one set under one version, which the site build writes below. A new version
 // waits until every window of the old one has closed, so nothing running ever
 // loads half of each.
-const VERSION = '77c8d6ee59e9145a';
+const VERSION = '2c401591e0717057';
 const CACHE = 'bit_world-' + VERSION;
 const FILES = [
   './',

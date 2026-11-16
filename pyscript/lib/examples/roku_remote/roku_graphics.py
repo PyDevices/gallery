@@ -13,7 +13,7 @@ One of three interchangeable Roku front ends (``roku_graphics``,
 and is what ``roku_remote`` launches.
 
 Shares `roku_engine.RokuEngine` for ECP over the LAN (SSDP discover +
-HTTP keypress / apps / queries). Uses only three core PyDevices packages
+HTTP keypress / apps / queries). Uses only three core OmniPython packages
 (``pygraphics``, ``displaydev`` via ``board_config``, ``appdev``, ``multimer``).
 
 Geometry scales from a 320x480 reference up through tall phone portraits.

@@ -15,7 +15,7 @@ writes it in the built-in font, where letter shapes would fill in.
 
 Needs: a display. svgio is optional and picks the method: on MicroPython it
 is in firmware built with ``--modules all``; on CPython it comes with
-pydevices-desktop (``pip install resvg-py pillow``). Both methods are part
+omnipython-desktop (``pip install resvg-py pillow``). Both methods are part
 of the example, and the printed line says which one ran.
 
 Run it:

@@ -8,12 +8,12 @@
  * snippet at the very top of <head>, before any stylesheet, so a returning
  * light-theme visitor doesn't see a flash of dark on load:
  *
- *   <script>try{if(localStorage.getItem('pydevices-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}</script>
+ *   <script>try{if(localStorage.getItem('omnipython-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}</script>
  *
- * Canonical copy: https://pydevices.github.io/assets/js/theme-toggle.js
+ * Canonical copy: https://omnipython.org/assets/js/theme-toggle.js
  */
 (function () {
-  var STORAGE_KEY = "pydevices-theme";
+  var STORAGE_KEY = "omnipython-theme";
   var root = document.documentElement;
 
   function currentTheme() {

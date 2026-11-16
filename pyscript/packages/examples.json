@@ -57,6 +57,10 @@
       "github:PyDevices/gallery/lib/examples/lv_test_timer.py"
     ],
     [
+      "omnipython_demo.py",
+      "github:PyDevices/gallery/lib/examples/omnipython_demo.py"
+    ],
+    [
       "paint.py",
       "github:PyDevices/gallery/lib/examples/paint.py"
     ],
@@ -67,10 +71,6 @@
     [
       "pixel_sim_demos.py",
       "github:PyDevices/gallery/lib/examples/pixel_sim_demos.py"
-    ],
-    [
-      "pydevices_demo.py",
-      "github:PyDevices/gallery/lib/examples/pydevices_demo.py"
     ],
     [
       "scroll_touch_test.py",

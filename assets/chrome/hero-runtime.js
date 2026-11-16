@@ -1,11 +1,11 @@
-/** Direct MicroPython host for generated PyDevices hero applications. */
+/** Direct MicroPython host for generated OmniPython hero applications. */
 (function () {
   const state = { phase: "idle", heroes: [], errors: [] };
-  window.__pydevicesHeroes = state;
+  window.__omnipythonHeroes = state;
 
   // Browsers require a user gesture before unlocking Web Audio. Most heroes
   // never touch audio and this is a no-op for them; the one that does (the
-  // pydevices signal generator) just needs this armed so its first click
+  // omnipython signal generator) just needs this armed so its first click
   // both unlocks audio and toggles the tone in the same gesture.
   let audioGestureArmed = false;
   function armAudioGesture() {
@@ -14,7 +14,7 @@
     // A gesture while the page is still loading finds no runtime to unlock, so
     // the listeners stay until one works.
     const tryEnable = () => {
-      globalThis.Module?.pydevicesBridge?.enableAudio(false)?.then(() => {
+      globalThis.Module?.omnipythonBridge?.enableAudio(false)?.then(() => {
         document.removeEventListener("pointerdown", tryEnable);
         document.removeEventListener("keydown", tryEnable);
       }).catch(() => {});
@@ -49,25 +49,25 @@
 import os, sys
 if "/" not in sys.path: sys.path.insert(0, "/")
 os.chdir("/")
-# The PyDevices stack and the desktop board_config are frozen into the
+# The OmniPython stack and the desktop board_config are frozen into the
 # runtime; nothing is installed. A runtime without them fails right here.
 from boarddev import env_set
-env_set("PYDEVICES_CANVAS_ID", ${JSON.stringify(canvasId)})
-env_set("PYDEVICES_WIDTH", ${JSON.stringify(String(canvasWidth))})
-env_set("PYDEVICES_HEIGHT", ${JSON.stringify(String(canvasHeight))})
-env_set("PYDEVICES_TZ_OFFSET_MIN", ${JSON.stringify(String(new Date().getTimezoneOffset()))})
+env_set("OMNIPYTHON_CANVAS_ID", ${JSON.stringify(canvasId)})
+env_set("OMNIPYTHON_WIDTH", ${JSON.stringify(String(canvasWidth))})
+env_set("OMNIPYTHON_HEIGHT", ${JSON.stringify(String(canvasHeight))})
+env_set("OMNIPYTHON_TZ_OFFSET_MIN", ${JSON.stringify(String(new Date().getTimezoneOffset()))})
 __import__(${JSON.stringify(appName)})
 `);
       record.phase = "ready"; record.mp = mp;
       container.classList.add("active");
       if (status) status.remove();
       state.phase = state.heroes.every((hero) => hero.phase === "ready") ? "ready" : "loading";
-      window.dispatchEvent(new CustomEvent("pydevices-heroes-ready", { detail: record }));
+      window.dispatchEvent(new CustomEvent("omnipython-heroes-ready", { detail: record }));
     } catch (error) {
       record.phase = "failed"; record.error = String(error && (error.stack || error));
       state.errors.push(record.error); state.phase = "failed";
       setStatus("Live preview offline"); console.error("Direct hero failed:", error);
-      window.dispatchEvent(new CustomEvent("pydevices-heroes-failed", { detail: record }));
+      window.dispatchEvent(new CustomEvent("omnipython-heroes-failed", { detail: record }));
     }
   }
   function start() { document.querySelectorAll("[data-hero-canvas]").forEach(launch); }

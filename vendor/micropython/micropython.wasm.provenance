@@ -4,7 +4,7 @@
     "sha256": "a0ef6bd8fbd225045bf6f56db5b573cdd54c17956cd3fd61c2b91942b0590e2d",
     "size": 9848537
   },
-  "built_by": "https://github.com/PyDevices/micropython-pydevices/actions/runs/43783009484",
+  "built_by": "https://github.com/PyDevices/omnipython-builds/actions/runs/43783009484",
   "format": 1,
   "install_only": false,
   "modules": "all",
@@ -147,7 +147,7 @@
       "dirty": false,
       "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
     },
-    "micropython-pydevices": {
+    "omnipython-builds": {
       "describe": "0494775",
       "dirty": false,
       "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
@@ -182,7 +182,7 @@
       "dirty": false,
       "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"
     },
-    "pydevices": {
+    "omnipython": {
       "describe": "049477592da1",
       "dirty": false,
       "head": "049477592da15d4efbe4c2b1fc11e1edeb888856"

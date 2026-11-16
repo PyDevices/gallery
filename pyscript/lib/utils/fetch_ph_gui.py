@@ -629,7 +629,7 @@ def fetch_ph_gui(which, apply_patches=True):
     call again with patches enabled.
 
     Installs with the firmware's ``mip`` on MicroPython, and with ``omip``
-    (in the ``pydevices`` package) on CPython, Pyodide and CircuitPython.
+    (in the ``omnipython`` package) on CPython, Pyodide and CircuitPython.
     """
     global _IN_FETCH
 

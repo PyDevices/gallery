@@ -53,9 +53,9 @@ GRID_W = display_drv.width
 GRID_H = display_drv.height
 
 try:
-    import pydevices_test_mode  # type: ignore[import-not-found]
+    import omnipython_test_mode  # type: ignore[import-not-found]
 
-    _TEST_DURATION_S = pydevices_test_mode.DURATION_S if pydevices_test_mode.ENABLED else None
+    _TEST_DURATION_S = omnipython_test_mode.DURATION_S if omnipython_test_mode.ENABLED else None
 except ImportError:
     _TEST_DURATION_S = None
 

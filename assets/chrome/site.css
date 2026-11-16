@@ -14,7 +14,7 @@
  * script (before this stylesheet paints) to avoid a flash of the wrong
  * theme — see any page's <head> for the one-line snippet.
  *
- * Canonical copy: https://pydevices.github.io/assets/chrome/site.css
+ * Canonical copy: https://omnipython.org/assets/chrome/site.css
  */
 
 /*
@@ -251,7 +251,7 @@ html, body {
   box-sizing: border-box;
 }
 
-body.has-pydevices-nav {
+body.has-omnipython-nav {
   padding-left: 44px;
 }
 
@@ -1285,7 +1285,7 @@ pre code {
 .stat-pill .dot.blue { background: var(--tier-3-blue); box-shadow: 0 0 8px var(--tier-3-blue); }
 
 /* ---------- Shared Left-Side Navigation Drawer & Docked Sidebar ---------- */
-.pydevices-nav-scrim {
+.omnipython-nav-scrim {
   position: fixed;
   inset: 0;
   z-index: 85;
@@ -1297,13 +1297,13 @@ pre code {
   transition: opacity 0.22s ease, visibility 0.22s ease;
 }
 
-.pydevices-nav-scrim.is-open {
+.omnipython-nav-scrim.is-open {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
 }
 
-.pydevices-nav-sidebar {
+.omnipython-nav-sidebar {
   position: fixed;
   top: 0;
   bottom: 0;
@@ -1320,13 +1320,13 @@ pre code {
   user-select: none;
 }
 
-.pydevices-nav-sidebar.is-open {
+.omnipython-nav-sidebar.is-open {
   transform: translateX(0);
   box-shadow: 12px 0 36px rgba(0, 0, 0, 0.45);
 }
 
 /* 1. Sleek Vertical Peeking Handle (visible when collapsed on screens <= 1400px) */
-.pydevices-nav-peeking-tab {
+.omnipython-nav-peeking-tab {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -1351,7 +1351,7 @@ pre code {
   50% { box-shadow: 3px 0 16px rgb(var(--accent-rgb) / 0.22); }
 }
 
-.pydevices-nav-peeking-tab:hover {
+.omnipython-nav-peeking-tab:hover {
   background: var(--panel);
   border-color: var(--accent);
   box-shadow: 2px 0 14px rgb(var(--accent-rgb) / 0.25);
@@ -1363,7 +1363,7 @@ pre code {
   transition: transform 0.2s ease;
 }
 
-.pydevices-nav-peeking-tab:hover .peeking-logo {
+.omnipython-nav-peeking-tab:hover .peeking-logo {
   transform: scale(1.1);
 }
 
@@ -1379,7 +1379,7 @@ pre code {
   transition: color 0.16s ease;
 }
 
-.pydevices-nav-peeking-tab:hover .peeking-title {
+.omnipython-nav-peeking-tab:hover .peeking-title {
   color: var(--ink);
 }
 
@@ -1397,13 +1397,13 @@ pre code {
   50% { transform: translateX(3px); opacity: 1; }
 }
 
-.pydevices-nav-sidebar.is-open .pydevices-nav-peeking-tab {
+.omnipython-nav-sidebar.is-open .omnipython-nav-peeking-tab {
   opacity: 0;
   pointer-events: none;
 }
 
 /* 2. Full Navigation Inner Panel */
-.pydevices-nav-panel {
+.omnipython-nav-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -1412,7 +1412,7 @@ pre code {
   background: var(--bg);
 }
 
-.pydevices-nav-header {
+.omnipython-nav-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1421,7 +1421,7 @@ pre code {
   flex-shrink: 0;
 }
 
-.pydevices-nav-brand {
+.omnipython-nav-brand {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1429,20 +1429,20 @@ pre code {
   color: var(--ink);
 }
 
-.pydevices-nav-brand-title {
+.omnipython-nav-brand-title {
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 1.05rem;
   line-height: 1.1;
 }
 
-.pydevices-nav-brand-sub {
+.omnipython-nav-brand-sub {
   font-size: 0.75rem;
   color: var(--muted);
   font-weight: 500;
 }
 
-.pydevices-nav-close {
+.omnipython-nav-close {
   background: none;
   border: none;
   color: var(--muted);
@@ -1454,13 +1454,13 @@ pre code {
   transition: all 0.15s ease;
 }
 
-.pydevices-nav-close:hover {
+.omnipython-nav-close:hover {
   background: var(--panel-2);
   color: var(--ink);
 }
 
 /* Search Box */
-.pydevices-nav-search-wrap {
+.omnipython-nav-search-wrap {
   position: relative;
   padding: 10px 16px;
   border-bottom: 1px solid var(--border-soft);
@@ -1468,7 +1468,7 @@ pre code {
   flex-shrink: 0;
 }
 
-.pydevices-nav-search {
+.omnipython-nav-search {
   width: 100%;
   padding: 7px 10px 7px 32px;
   border-radius: var(--radius-sm);
@@ -1480,13 +1480,13 @@ pre code {
   transition: all 0.15s ease;
 }
 
-.pydevices-nav-search:focus {
+.omnipython-nav-search:focus {
   outline: none;
   border-color: var(--accent-strong);
   box-shadow: 0 0 0 2px rgb(var(--accent-rgb) / 0.15);
 }
 
-.pydevices-nav-search-icon {
+.omnipython-nav-search-icon {
   position: absolute;
   left: 26px;
   top: 50%;
@@ -1498,7 +1498,7 @@ pre code {
 }
 
 /* Scrollable Body */
-.pydevices-nav-body {
+.omnipython-nav-body {
   flex: 1;
   overflow-y: auto;
   padding: 14px 14px;
@@ -1508,20 +1508,20 @@ pre code {
   scrollbar-gutter: stable;
 }
 
-.pydevices-nav-tier-group {
+.omnipython-nav-tier-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.pydevices-nav-tier-head {
+.omnipython-nav-tier-head {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 2px 4px 4px 4px;
 }
 
-.pydevices-nav-tier-pill {
+.omnipython-nav-tier-pill {
   font-size: 0.65rem;
   font-weight: 700;
   color: var(--on-accent);
@@ -1530,7 +1530,7 @@ pre code {
   text-transform: uppercase;
 }
 
-.pydevices-nav-tier-name {
+.omnipython-nav-tier-name {
   font-size: 0.76rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -1538,13 +1538,13 @@ pre code {
   color: var(--muted);
 }
 
-.pydevices-nav-cards {
+.omnipython-nav-cards {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.pydevices-nav-card {
+.omnipython-nav-card {
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -1557,14 +1557,14 @@ pre code {
   transition: all 0.14s ease;
 }
 
-.pydevices-nav-card:hover {
+.omnipython-nav-card:hover {
   background: var(--panel-2);
   border-color: var(--accent);
   transform: translateX(2px);
   text-decoration: none;
 }
 
-.pydevices-nav-card.is-active {
+.omnipython-nav-card.is-active {
   background: rgb(var(--accent-rgb) / var(--nav-active-tint));
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent);
@@ -1618,7 +1618,7 @@ pre code {
   border: 1px solid var(--border-soft);
 }
 
-.pydevices-nav-card.is-active .nav-card-tag {
+.omnipython-nav-card.is-active .nav-card-tag {
   background: var(--accent);
   color: var(--on-accent);
   border-color: var(--accent);
@@ -1634,7 +1634,7 @@ pre code {
   text-overflow: ellipsis;
 }
 
-.pydevices-nav-footer {
+.omnipython-nav-footer {
   padding: 10px 16px;
   border-top: 1px solid var(--border-soft);
   background: var(--bg-soft);
@@ -1655,30 +1655,30 @@ pre code {
 
 /* 3. Wide Viewport Docked Behavior (> 1400px) */
 @media (min-width: 1401px) {
-  body.has-pydevices-nav {
+  body.has-omnipython-nav {
     padding-left: 315px;
   }
 
-  .pydevices-nav-sidebar {
+  .omnipython-nav-sidebar {
     width: 315px;
     transform: translateX(0) !important;
     box-shadow: none;
   }
 
-  .pydevices-nav-peeking-tab {
+  .omnipython-nav-peeking-tab {
     display: none !important;
   }
 
-  .pydevices-nav-close {
+  .omnipython-nav-close {
     display: none !important;
   }
 
-  .pydevices-nav-scrim {
+  .omnipython-nav-scrim {
     display: none !important;
   }
 }
 
-body.pydevices-drawer-open {
+body.omnipython-drawer-open {
   overflow: hidden;
 }
 
@@ -1772,7 +1772,7 @@ body.pydevices-drawer-open {
   font-size: 0.78rem;
 }
 
-/* 2. Feature Matrix & Specification Table (pygraphics, displayif, pydevices) */
+/* 2. Feature Matrix & Specification Table (pygraphics, displayif, omnipython) */
 .spec-block {
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1811,7 +1811,7 @@ body.pydevices-drawer-open {
   color: var(--ink-soft);
 }
 
-/* 3. Workbench IDE Layout (mpftp) */
+/* 3. Workbench IDE Layout (mcuctl) */
 /* The Workbench mock is an editor screenshot: it keeps the dark palette in
  * both themes, so it draws from the --dark-* anchors, not --panel/--good/... */
 .workbench-panel {
@@ -2004,7 +2004,7 @@ body.pydevices-drawer-open {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pydevices-nav-peeking-tab,
+  .omnipython-nav-peeking-tab,
   .peeking-chevron,
   .hero-art img {
     animation: none;
