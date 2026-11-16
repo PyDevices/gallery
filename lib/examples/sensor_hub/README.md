@@ -101,7 +101,7 @@ mpftp put -d COM30 lib/examples/sensor_hub/funhouse_main.py /main.py
 Set `HUB` and `NODE` at the top of `/main.py`, then reset it with
 `machine.reset()`. On the FunHouse, `mpftp hard-reset` leaves the S2 in ROM
 download mode behind a dead COM port (see
-[mpftp#71](https://github.com/PyDevices/mpftp/issues/71)).
+[mpftp#71](https://github.com/PyDevices/mcuctl/issues/71)).
 
 It posts over HTTP because the P4's house app serves the hub on port 80 only.
 The series are `temp`, `humidity`, `light` and `motion`, which the house panel
