@@ -98,7 +98,7 @@ import display_driver
   await new Promise((resolve) => { $('start').onclick = resolve; });
 
   // Sound needs a touch or a key on this page, and a browser may take it back.
-  const bridge = globalThis.Module.pydevicesBridge;
+  const bridge = globalThis.Module.omnipythonBridge;
   const enable = () => bridge.enableAudio(false).catch(() => {});
   await enable();
   document.addEventListener('pointerdown', enable);
