@@ -4394,6 +4394,7 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
   timerDeliveries:[],
   audioContext:null,
   audioEnabled:false,
+  audioUnlock:null,
   microphoneEnabled:false,
   audioEnd:0,
   audioSources:new Set,
@@ -4430,7 +4431,56 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
           return written*channels*width;
       };
 
-  var _pydevices_audio_state = (input) => input ? +pydevices_state.microphoneEnabled : +pydevices_state.audioEnabled;
+  
+  
+  var pydevices_disarm_audio_unlock = () => {
+          const state = pydevices_state;
+          if (!state.audioUnlock) return;
+          for (const name of state.audioUnlock.names) document.removeEventListener(name, state.audioUnlock.handler, true);
+          state.audioUnlock = null;
+      };
+  
+  var pydevices_enable_audio = async (microphone=false) => {
+          const state = pydevices_state;
+          const AudioContext = globalThis.AudioContext || globalThis.webkitAudioContext;
+          if (!AudioContext) throw new Error('Web Audio is unavailable');
+          state.audioContext ||= new AudioContext();
+          await state.audioContext.resume();
+          state.audioEnabled = state.audioContext.state === 'running';
+          if (microphone) {
+              state.mediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
+              state.mediaNode = state.audioContext.createMediaStreamSource(state.mediaStream);
+              state.processor = state.audioContext.createScriptProcessor(1024, 2, 2);
+              state.processor.onaudioprocess = (event) => {
+                  const channels = [];
+                  for (let c = 0; c < event.inputBuffer.numberOfChannels; c++) channels.push(new Float32Array(event.inputBuffer.getChannelData(c)));
+                  state.inputFrames.push({channels, rate:event.inputBuffer.sampleRate, offset:0});
+                  if (state.inputFrames.length > 64) state.inputFrames.shift();
+              };
+              state.mediaNode.connect(state.processor);
+              state.processor.connect(state.audioContext.destination);
+              state.microphoneEnabled = true;
+          }
+          return {audio:state.audioEnabled, microphone:state.microphoneEnabled};
+      };
+  var pydevices_arm_audio_unlock = () => {
+          const state = pydevices_state;
+          if (state.audioUnlock || typeof document === 'undefined') return;
+          const names = ['pointerdown', 'pointerup', 'keydown'];
+          const handler = () => {
+              if (state.audioEnabled) { pydevices_disarm_audio_unlock(); return; }
+              pydevices_enable_audio(false).then(
+                  () => { if (state.audioEnabled) pydevices_disarm_audio_unlock(); },
+                  () => {});
+          };
+          state.audioUnlock = {names, handler};
+          for (const name of names) document.addEventListener(name, handler, true);
+      };
+  var _pydevices_audio_state = (input) => {
+          if (input) return +pydevices_state.microphoneEnabled;
+          if (!pydevices_state.audioEnabled) pydevices_arm_audio_unlock();
+          return +pydevices_state.audioEnabled;
+      };
 
   
   var pydevices_decode_pcm = (bytes, frames, channels, bits, signed, bigEndian) => {
@@ -4649,6 +4699,8 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
           canvas.__pydevicesListeners = null;
           canvas.__pydevicesInputInstalled = false;
       };
+  
+  
   var pydevices_export_host = () => {
           if (Module.pydevicesBridge) return;
           Module.pydevicesBridge = {
@@ -4685,6 +4737,7 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
                       try { source.stop(); } catch (_) { /* already finished */ }
                   }
                   state.audioSources.clear();
+                  pydevices_disarm_audio_unlock();
                   state.audioQueuedBytes = 0;
                   state.inputFrames.length = 0;
                   if (state.processor) { try { state.processor.disconnect(); } catch (_) {} }
@@ -4700,29 +4753,7 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
                   }
                   state.audioEnabled = false;
               },
-              enableAudio: async (microphone=false) => {
-                  const state = pydevices_state;
-                  const AudioContext = globalThis.AudioContext || globalThis.webkitAudioContext;
-                  if (!AudioContext) throw new Error('Web Audio is unavailable');
-                  state.audioContext ||= new AudioContext();
-                  await state.audioContext.resume();
-                  state.audioEnabled = state.audioContext.state === 'running';
-                  if (microphone) {
-                      state.mediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
-                      state.mediaNode = state.audioContext.createMediaStreamSource(state.mediaStream);
-                      state.processor = state.audioContext.createScriptProcessor(1024, 2, 2);
-                      state.processor.onaudioprocess = (event) => {
-                          const channels = [];
-                          for (let c = 0; c < event.inputBuffer.numberOfChannels; c++) channels.push(new Float32Array(event.inputBuffer.getChannelData(c)));
-                          state.inputFrames.push({channels, rate:event.inputBuffer.sampleRate, offset:0});
-                          if (state.inputFrames.length > 64) state.inputFrames.shift();
-                      };
-                      state.mediaNode.connect(state.processor);
-                      state.processor.connect(state.audioContext.destination);
-                      state.microphoneEnabled = true;
-                  }
-                  return {audio:state.audioEnabled, microphone:state.microphoneEnabled};
-              },
+              enableAudio: (microphone=false) => pydevices_enable_audio(microphone),
               permissions: () => ({audio:pydevices_state.audioEnabled, microphone:pydevices_state.microphoneEnabled}),
               stats: () => ({
                   events:Array.from(pydevices_state.displays.values()).reduce((n,d)=>n+d.events.length,0),
@@ -5808,6 +5839,9 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'pydevices_rgba',
   'pydevices_paint',
   'pydevices_export_host',
+  'pydevices_enable_audio',
+  'pydevices_disarm_audio_unlock',
+  'pydevices_arm_audio_unlock',
   'pydevices_decode_pcm',
   'pydevices_encode_sample',
 ];
