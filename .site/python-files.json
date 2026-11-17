@@ -11,6 +11,7 @@
   "calc_lvgl.py",
   "calc_widgets.py",
   "car_cluster/__init__.py",
+  "car_cluster/art.py",
   "car_cluster/car_cluster.py",
   "car_cluster/cluster.py",
   "car_cluster/ring.py",
