@@ -366,9 +366,9 @@ async def _pyemscripten_wheel_url(spec):
     except Exception as exc:
         print("wheel metadata fetch failed:", name, exc)
         return None
-    # The JSON API's "urls" are the newest final release's files, and the
-    # current releases are pre-releases, so scan every release and take the
-    # most recently uploaded wasm wheels.
+    # The JSON API's "urls" list only the newest final release's files, and
+    # pages install pre-releases too, so scan every release and take the most
+    # recently uploaded wasm wheels.
     found = []
     releases = data.get("releases") or {}
     for files in releases.values():
