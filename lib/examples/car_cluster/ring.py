@@ -3,24 +3,26 @@
 # SPDX-License-Identifier: MIT
 """A neon ring gauge: the two big dials of the cluster.
 
-The ring is drawn once, as art, on a canvas: a dim track, the full colour
-sweep of the gauge as many short arc segments whose colours slide from one
-stop to the next, a tick ring outside it and a faint inner ring. The live
-value then needs only cheap moves each frame:
+The ring is drawn once, as vector art (see ``art.py``): a dim track, the full
+colour sweep of the gauge as stroked arcs whose gradients run on from one stop
+to the next, a soft radial bloom inside it, a tick ring outside it and a
+faint inner ring. The live value then needs only cheap moves each frame:
 
 * a *cover* arc, the colour of the empty track, hides the sweep beyond the
   value, so the sweep appears to grow and shrink;
-* a wide, blurred arc under the canvas glows along the lit part;
+* a wide, blurred arc under the art glows along the lit part;
 * a bright cap sits on the leading edge.
 
-Nothing here is an LVGL arc wearing its default look. The arcs are used for
-what they are cheap at (an angle that changes every frame) and the canvas for
-what the arc widget can't do (a colour gradient along the sweep).
+The arcs are used for what they are cheap at (an angle that changes every
+frame) and the vector picture for what the arc widget can't do (a colour
+gradient along the sweep, and radial gradients).
 """
 
 import math
 
 import lvgl as lv
+
+from art import Picture, face_svg, ring_svg
 
 _CIRCLE = getattr(lv, "RADIUS_CIRCLE", 0x7FFF)
 
@@ -135,21 +137,20 @@ class Ring:
         if hasattr(self.glow, "set_style_blur_radius"):
             self.glow.set_style_blur_radius(max(6, size // 22), 0)
 
-        # The art: track, colour sweep, ticks, inner ring.
-        self.canvas = lv.canvas(self.obj)
-        self.canvas.set_size(size, size)
-        self.canvas.center()
-        plain(self.canvas)
-        self._buf = lv.draw_buf_create(size, size, lv.COLOR_FORMAT.ARGB8888, 0)
-        self.canvas.set_draw_buf(self._buf)
-        self.canvas.fill_bg(_color(0x000000), lv.OPA.TRANSP)
-        # Ticks sit at round values: one every ``minor`` units, a longer one
-        # every ``major``. Left unset, the dial gets ten major divisions.
+        # The art: track, bloom, colour sweep, ticks, hairline, as one vector
+        # picture drawn once. Ticks sit at round values: one every ``minor``
+        # units, a longer one every ``major``. Left unset, the dial gets ten
+        # major divisions.
         if minor is None:
             minor = self.vmax / 50.0
         if major is None:
             major = self.vmax / 10.0
-        self._paint(track, minor, major)
+        self.art = Picture(
+            self.obj,
+            ring_svg(size, stops, gradient_at, track, start, sweep, self.width, self.radius, (minor, major, self.vmax)),
+            size,
+            size,
+        )
 
         # The cover: the empty part of the track, painted over the sweep.
         self.cover = lv.arc(self.obj)
@@ -174,13 +175,8 @@ class Ring:
         self.face.center()
         plain(self.face)
         self.face.set_style_radius(_CIRCLE, 0)
-        self.face.set_style_bg_color(_color(0x0B1530), 0)
-        self.face.set_style_bg_grad_color(_color(bg), 0)
-        self.face.set_style_bg_grad_dir(lv.GRAD_DIR.VER, 0)
-        self.face.set_style_bg_opa(lv.OPA.COVER, 0)
-        self.face.set_style_border_width(1, 0)
-        self.face.set_style_border_color(_color(self.stops[0][1]), 0)
-        self.face.set_style_border_opa(60, 0)
+        self.face.set_style_bg_opa(lv.OPA.TRANSP, 0)
+        self.face_art = Picture(self.face, face_svg(face, self.stops[0][1], 0x16264F, bg), face, face)
 
         # The cap on the leading edge of the sweep.
         cap = self.width + 6
@@ -221,73 +217,6 @@ class Ring:
         self.caption.align(lv.ALIGN.BOTTOM_MID, 0, -max(2, size // 40))
 
         self.set_value(0)
-
-    # -- art ----------------------------------------------------------------
-
-    def _paint(self, track, minor, major):
-        layer = lv.layer_t()
-        self.canvas.init_layer(layer)
-        cx, cy, r = self.cx, self.cy, self.radius
-
-        arc = lv.draw_arc_dsc_t()
-        arc.init()
-        arc.center = lv.point_t({"x": cx, "y": cy})
-        arc.rounded = False
-
-        # Dim track under everything.
-        arc.color = _color(track)
-        arc.width = self.width + 2
-        arc.radius = r + arc.width // 2
-        arc.opa = lv.OPA.COVER
-        arc.start_angle = self.start
-        arc.end_angle = self.start + self.sweep
-        lv.draw_arc(layer, arc)
-
-        # The colour sweep: short segments, each a step along the gradient.
-        # Segments overlap by a hair so the joins don't show.
-        steps = max(24, self.sweep // 3)
-        arc.width = self.width
-        arc.radius = r + self.width // 2
-        for i in range(steps):
-            t0 = i / steps
-            t1 = (i + 1) / steps
-            arc.color = _color(gradient_at(self.stops, (t0 + t1) / 2))
-            arc.start_angle = self.start + self.sweep * t0
-            arc.end_angle = self.start + self.sweep * t1 + 0.6
-            lv.draw_arc(layer, arc)
-
-        # A hairline on the inside edge of the sweep.
-        arc.color = _color(0xFFFFFF)
-        arc.width = 1
-        arc.radius = r - self.width // 2 - 1
-        arc.opa = 60
-        arc.start_angle = self.start
-        arc.end_angle = self.start + self.sweep
-        lv.draw_arc(layer, arc)
-
-        # Tick ring outside the sweep.
-        line = lv.draw_line_dsc_t()
-        line.init()
-        line.round_start = True
-        line.round_end = True
-        r_out = self.size // 2 - 2
-        ticks = int(round(self.vmax / minor))
-        per_major = max(1, int(round(major / minor)))
-        for i in range(ticks + 1):
-            t = i / ticks
-            a = math.radians(self.start + self.sweep * t)
-            is_major = i % per_major == 0
-            length = max(8, self.size // 24) if is_major else max(4, self.size // 48)
-            line.width = 3 if is_major else 2
-            line.color = _color(gradient_at(self.stops, t))
-            line.opa = 230 if is_major else 110
-            line.p1 = lv.point_precise_t({"x": cx + math.cos(a) * r_out, "y": cy + math.sin(a) * r_out})
-            line.p2 = lv.point_precise_t(
-                {"x": cx + math.cos(a) * (r_out - length), "y": cy + math.sin(a) * (r_out - length)}
-            )
-            lv.draw_line(layer, line)
-
-        self.canvas.finish_layer(layer)
 
     # -- live ---------------------------------------------------------------
 
