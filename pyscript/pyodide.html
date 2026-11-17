@@ -63,7 +63,7 @@
             <code>?modules=<em>name</em></code> and/or
             <code>?manifests=<em>name</em></code>
             (same declared manifests as the <a href="../micropython.html">direct MicroPython host</a>).
-            Also supports <code>?deps=</code> (micropip from TestPyPI / PyPI).
+            Also supports <code>?deps=</code> (micropip from PyPI).
             Whichever of modules/manifests comes first supplies the import entry.
         </p>
 
@@ -106,7 +106,7 @@
                         <li><code>?modules=</code> — comma-separated top-level module stems (no <code>.py</code>).</li>
                         <li><code>?manifests=</code> — comma-separated MIP manifest names; each installs <code>packages/&lt;name&gt;.json</code> (same files as the MicroPython gallery).</li>
                         <li>Both may appear; whichever param comes <em>first</em> in the URL supplies the import entry point.</li>
-                        <li><code>?deps=</code> — comma-separated PyPI / TestPyPI project names (or direct <code>.whl</code> URLs) installed via micropip.</li>
+                        <li><code>?deps=</code> — comma-separated PyPI project names (or direct <code>.whl</code> URLs) installed via micropip.</li>
                         <li>The selected entry installs and starts automatically.</li>
                     </ul>
                 </div>
