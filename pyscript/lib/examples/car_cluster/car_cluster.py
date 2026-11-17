@@ -22,10 +22,16 @@ real twenty. Keys:
   Left / Right  hold that turn indicator on; press again to cancel
   Enter         pause and resume the drive
 
-The dials are art drawn once on a canvas (a colour sweep made of many short
-arc segments, a tick ring, a hairline) with three cheap moving parts over it
+The dials and the dash hood are vector art, drawn once by ``svgio`` when the
+screen is built (see ``art.py``): a colour sweep whose gradients run round the
+dial, radial gradients for the face and a bloom inside the ring, a tick ring,
+and smooth curves for the hood. Three cheap moving parts sit over each dial
 (see ``ring.py``). Everything is sized from the screen, so it also fits a
 smaller landscape display, though it is drawn for 800x480.
+
+Needs: a display, LVGL, and ``svgio``: on MicroPython, a firmware built with
+it (``--modules all``); on CPython, ``pip install resvg-py pillow``; under
+Pyodide it draws on the browser's canvas with nothing to install.
 """
 
 import sys

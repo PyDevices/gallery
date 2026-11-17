@@ -169,6 +169,10 @@
       "github:PyDevices/gallery/lib/examples/car_cluster/__init__.py"
     ],
     [
+      "car_cluster/art.py",
+      "github:PyDevices/gallery/lib/examples/car_cluster/art.py"
+    ],
+    [
       "car_cluster/car_cluster.py",
       "github:PyDevices/gallery/lib/examples/car_cluster/car_cluster.py"
     ],

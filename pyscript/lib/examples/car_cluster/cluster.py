@@ -5,6 +5,7 @@
 
 import lvgl as lv
 
+from art import Picture, hexcolor, hood_svg
 from ring import Ring, _color, plain, scaled_font
 
 _CIRCLE = getattr(lv, "RADIUS_CIRCLE", 0x7FFF)
@@ -23,40 +24,17 @@ GEARS = ("P", "R", "N", "D", "S")
 
 
 def _hood(parent, w, y, h, curves):
-    """Faint lines curving like a dash hood, on a strip canvas ``w`` by ``h``.
+    """Faint curves like a dash hood, as vector art on a strip ``w`` by ``h``.
 
     Each curve is ``(crest_y, drop, opa, width)``: highest at the centre, and
-    ``drop`` pixels lower at the edges. Drawn as short straight pieces, which
-    is far cheaper than an arc the size of several screens.
+    ``drop`` pixels lower at the edges.
     """
-    strip = lv.canvas(parent)
+    shifted = tuple((crest - y, drop, opa, width) for crest, drop, opa, width in curves)
+    strip = lv.obj(parent)
     strip.set_size(w, h)
     strip.set_pos(0, y)
     plain(strip)
-    buf = lv.draw_buf_create(w, h, lv.COLOR_FORMAT.ARGB8888, 0)
-    strip.set_draw_buf(buf)
-    strip.fill_bg(_color(0x000000), lv.OPA.TRANSP)
-    layer = lv.layer_t()
-    strip.init_layer(layer)
-    line = lv.draw_line_dsc_t()
-    line.init()
-    line.color = _color(CYAN)
-    pieces = 32
-    half = w / 2.0
-    for crest, drop, opa, width in curves:
-        line.opa = opa
-        line.width = width
-        prev = None
-        for i in range(pieces + 1):
-            x = w * i / pieces
-            cy = crest - y + drop * ((x - half) / half) ** 2
-            if prev is not None:
-                line.p1 = lv.point_precise_t({"x": prev[0], "y": prev[1]})
-                line.p2 = lv.point_precise_t({"x": x, "y": cy})
-                lv.draw_line(layer, line)
-            prev = (x, cy)
-    strip.finish_layer(layer)
-    return strip, buf
+    return Picture(strip, hood_svg(w, h, shifted, hexcolor(CYAN)), w, h)
 
 
 class Road:

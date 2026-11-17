@@ -26,6 +26,7 @@
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/calc_lvgl.py" = "/examples/calc_lvgl.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/calc_widgets.py" = "/examples/calc_widgets.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/car_cluster/__init__.py" = "/examples/car_cluster/__init__.py"
+"https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/car_cluster/art.py" = "/examples/car_cluster/art.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/car_cluster/car_cluster.py" = "/examples/car_cluster/car_cluster.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/car_cluster/cluster.py" = "/examples/car_cluster/cluster.py"
 "https://raw.githubusercontent.com/PyDevices/gallery/main/lib/examples/car_cluster/ring.py" = "/examples/car_cluster/ring.py"
