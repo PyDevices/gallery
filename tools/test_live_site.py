@@ -47,6 +47,15 @@ async def run_live_tests():
             lambda req: network_failures.append(f"{req.url} -> {req.failure}"),
         )
 
+        # requestfailed only fires for transport errors; a 404 is a completed
+        # response, so record those too or a missing file reads as clean.
+        page.on(
+            "response",
+            lambda resp: network_failures.append(f"{resp.url} -> HTTP {resp.status}")
+            if resp.status >= 400
+            else None,
+        )
+
         results = []
 
         for title, rel_path in PAGES:
