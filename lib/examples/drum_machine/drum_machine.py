@@ -24,6 +24,10 @@ firing them all at once. A second timer gives the instrument its turns: on
 MicroPython a note, a knob or a new voice only reaches the sound when
 ``inst.fill()`` runs, so it runs every ``TURN_MS``.
 
+Every hit ends with a note off ``HIT_GATE_MS`` later, as a MIDI drum part
+does. The drums are one-shot, so the note off doesn't shorten the sound; it
+lowers the pad's gate, so the next hit on that pad is a fresh strike.
+
 Designed on a 720x720 touch panel and laid out for 720x480 here, which fits a
 browser window; other resolutions lay out proportionally.
 
@@ -34,8 +38,9 @@ index="https://lib.omnipython.org")`` on a board, pip on a computer).
 
 Run it: ``import drum_machine``, then press PLAY.
 
-Tested on: unix MicroPython 1.30 (preview) and desktop CPython 3.12, with
-audioinstruments 0.5.0 and SDL's dummy audio driver.
+Tested on: the gallery's WebAssembly page in Edge, with audioinstruments
+0.5.3.dev1, and desktop CPython 3.12, with audioinstruments 0.5.2 and SDL's
+dummy audio driver.
 """
 
 # Desktop resolution override, before board_config is imported: the desktop
@@ -96,6 +101,11 @@ BPM_MIN, BPM_MAX, BPM_STEP = 60, 200, 5
 # How often the instrument gets its turn, in milliseconds. Ten to twenty keeps
 # a note's attack tight.
 TURN_MS = 10
+
+# How long each hit is held before its note off, in milliseconds. It stays
+# under the shortest step (75 ms at BPM_MAX), and a step releases anything
+# still held before it strikes, so a hit never outlasts its step.
+HIT_GATE_MS = 50
 
 # How often the heap is collected, in milliseconds.
 COLLECT_MS = 2000
@@ -208,6 +218,8 @@ class DrumMachine:
         self.audio_started = False
         self._audio_retry_ms = 0
         self.step = 0
+        self._held = []          # pitches struck and not yet released
+        self._release_ms = None  # when they are released
         self.panel = None
         self.panel_scr = None
         self.seq_scr = None
@@ -332,6 +344,7 @@ class DrumMachine:
 
     def _load_machine_locked(self, name):
         if self.inst is not None:
+            self._release_hits()
             self.inst.all_notes_off()
             if self.audio_started:
                 self.audio_out.stop()
@@ -348,9 +361,23 @@ class DrumMachine:
 
     def _fire_step(self, step):
         """Play a step NOW."""
+        self._release_hits()
         for row, pitch in enumerate(self.row_pitches):
             if step in self.pattern[row]:
-                self.inst.note_on(pitch, velocity=127)
+                self._strike(pitch)
+
+    def _strike(self, pitch):
+        """Strike one pad; its note off follows ``HIT_GATE_MS`` later."""
+        self.inst.note_on(pitch, velocity=127)
+        self._held.append(pitch)
+        self._release_ms = ticks_add(ticks_ms(), HIT_GATE_MS)
+
+    def _release_hits(self):
+        """Send the note off for every hit still held."""
+        held, self._held = self._held, []
+        self._release_ms = None
+        for pitch in held:
+            self.inst.note_off(pitch)
 
     # ---------- UI ----------
 
@@ -537,7 +564,7 @@ class DrumMachine:
             self.btnm.set_button_ctrl(idx, lv.buttonmatrix.CTRL.CHECKED)
             # Immediate feedback while stopped: audition the hit.
             if not self.playing:
-                self.inst.note_on(self.row_pitches[row], velocity=127)
+                self._strike(self.row_pitches[row])
         else:
             self.pattern[row].discard(step)
             self.btnm.clear_button_ctrl(idx, lv.buttonmatrix.CTRL.CHECKED)
@@ -551,6 +578,7 @@ class DrumMachine:
             self.step = 0
             self._next_step_ms = None
         else:
+            self._release_hits()
             self.inst.all_notes_off()
             self._paint_indicator(-1)
 
@@ -590,6 +618,8 @@ class DrumMachine:
                 self._start_audio()
         if self._turn_timer is None:
             self.service()
+        if self._release_ms is not None and ticks_diff(ticks_ms(), self._release_ms) >= 0:
+            self._release_hits()
         if not self.playing:
             self._next_step_ms = None
             return
