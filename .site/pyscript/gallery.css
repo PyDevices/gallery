@@ -198,3 +198,24 @@
     min-height: 0;
   }
 }
+
+/* An app card is one big link on its title; the library links sit above it. */
+.card .card-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.card .card-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.card .built-with {
+  flex: 0 0 auto;
+}
+
+.card .built-with a {
+  position: relative;
+  z-index: 1;
+}
