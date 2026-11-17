@@ -5,18 +5,20 @@
 """Test PyScript HTML shells against the live deployed GitHub Pages site."""
 
 import asyncio
+import os
 import sys
 
 from playwright.async_api import async_playwright
 
-SITE_BASE_URL = "https://gallery.omnipython.org"
+# Set SITE_BASE_URL to probe a local build, for example http://localhost:8000.
+SITE_BASE_URL = os.environ.get("SITE_BASE_URL", "https://gallery.omnipython.org")
 
 # (title, relative path from SITE_BASE_URL)
 PAGES = [
     ("PyScript Landing Page", "pyscript/index.html"),
     ("DOM Event Test", "pyscript/dom.html"),
     ("Pyodide Paint", "pyscript/pyodide.html?modules=paint"),
-    ("Compact Pyodide Runner", "pyscript/py.html?modules=analog_clock_lvgl&deps=omnipython-lvgl"),
+    ("Compact Pyodide Runner", "pyscript/py.html?manifests=car_cluster&deps=omnipython-lvgl"),
     ("Gallery app list", "index.html"),
     ("MicroPython Paint", "micropython.html?modules=paint"),
     ("Compact MP Runner", "mp.html?manifests=car_cluster"),

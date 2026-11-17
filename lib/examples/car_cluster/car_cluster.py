@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-# gallery: newwindow, no-pyodide
+# gallery: newwindow
 # deps: lvgl
 """
 car_cluster
@@ -30,7 +30,8 @@ and smooth curves for the hood. Three cheap moving parts sit over each dial
 smaller landscape display, though it is drawn for 800x480.
 
 Needs: a display, LVGL, and ``svgio``: on MicroPython, a firmware built with
-it (``--modules all``); on CPython, ``pip install resvg-py pillow``.
+it (``--modules all``); on CPython, ``pip install resvg-py pillow``; under
+Pyodide it draws on the browser's canvas with nothing to install.
 """
 
 import sys
