@@ -223,7 +223,7 @@
           id: "mcuctl",
           name: "mcuctl",
           path: "/mcuctl/",
-          url: ROOT + "/mcuctl/",
+          url: "https://pydevices.com/mcuctl/",
           tag: "IDE Extension",
           desc: "Editor, CLI, and agent tools for MCU boards",
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="12" rx="3.5"/><path d="M9 7.5h6M9 11h3.5"/><path d="M12 15v3c0 3.2-5 3.2-5 .2 0-2 3-2 3-.2" stroke="var(--accent, currentColor)"/></svg>'
@@ -250,7 +250,7 @@
           id: "mpvst",
           name: "mpvst",
           path: "/mpvst/",
-          url: ROOT + "/mpvst/",
+          url: "https://pydevices.com/mpvst/",
           tag: "VST3 Plug-in",
           desc: "The instrument and effect library inside your DAW",
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17.5V6.3q0-.8.8-1l9-1.8q1.2-.2 1.2 1V15.5"/><g stroke="var(--accent, currentColor)"><circle cx="6.3" cy="17.5" r="2.7"/><circle cx="18.3" cy="15.5" r="2.7"/></g></svg>'
