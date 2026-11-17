@@ -35,7 +35,10 @@ class Picture:
         self._data = bytearray(w * h * 3)
         planes = memoryview(self._data)
         decoder.decode(planes[: w * h * 2], planes[w * h * 2 :])
-        decoder.close()
+        # Firmware from before svgio kept its working memory outside the heap
+        # has no close(): there the collector frees the decoder.
+        if hasattr(decoder, "close"):
+            decoder.close()
 
         dsc = lv.image_dsc_t()
         dsc.header.magic = lv.IMAGE_HEADER_MAGIC
