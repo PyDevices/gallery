@@ -2,13 +2,14 @@
 // one set under one version, which the site build writes below. A new version
 // waits until every window of the old one has closed, so nothing running ever
 // loads half of each.
-const VERSION = '981f2a0f7c95f818';
+const VERSION = '083ef67299d24a62';
 const CACHE = 'synthstation-' + VERSION;
 const FILES = [
   './',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  './icon-maskable-512.png',
   './micropython.mjs',
   './micropython.wasm',
   './synthstation.bundle',
