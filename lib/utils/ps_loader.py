@@ -15,10 +15,7 @@ micropython-lib.
 # Install modules and manifests into cwd so ``import name`` / ``import pkg`` work
 # with ``/`` (or ``.``) on ``sys.path`` — same as desktop ``cd lib``.
 MANIFEST_MIP_TARGET = "."
-WHEEL_INDEX_URLS = (
-    "https://test.pypi.org/simple/",
-    "https://pypi.org/simple/",
-)
+WHEEL_INDEX_URLS = ("https://pypi.org/simple/",)
 # Browser default board package (display + board_peripherals + audio drivers).
 DESKTOP_BOARD_CONFIG_PACKAGE = "github:PyDevices/omnipython/board_configs/desktop/package.json"
 # Every page's OmniPython libraries, mip and the browser's board_config. The
@@ -32,7 +29,7 @@ NUMPY_WHEEL = (
 )
 WHEELS_NEEDING_NUMPY = frozenset({"omnipython-audioinstruments"})
 # JSON API (not simple) — used to pin pyemscripten wasm wheels by direct URL.
-WHEEL_JSON_URL = "https://test.pypi.org/pypi/{package_name}/json"
+WHEEL_JSON_URL = "https://pypi.org/pypi/{package_name}/json"
 BOARD_WIDTH = 320
 BOARD_HEIGHT = 480
 
@@ -344,7 +341,7 @@ async def _ensure_micropip(status):
 
 
 async def _pyemscripten_wheel_url(spec):
-    """Return TestPyPI URL for a ``pyemscripten_*_wasm32`` wheel, or None.
+    """Return the PyPI URL for a ``pyemscripten_*_wasm32`` wheel, or None.
 
     Micropip can only load pure-Python or pyemscripten wheels. Resolving the
     wasm file to a direct ``.whl`` URL avoids stale IndexedDB / simple-index
@@ -369,23 +366,23 @@ async def _pyemscripten_wheel_url(spec):
     except Exception as exc:
         print("wheel metadata fetch failed:", name, exc)
         return None
-    candidates = []
-    for entry in data.get("urls") or ():
-        filename = str(entry.get("filename") or "")
-        file_url = entry.get("url")
-        if file_url and "pyemscripten_" in filename and filename.endswith("_wasm32.whl"):
-            candidates.append(str(file_url))
-    if not candidates:
-        # Latest release may lag; scan all versions for a wasm wheel.
-        releases = data.get("releases") or {}
-        for files in releases.values():
-            for entry in files or ():
-                filename = str(entry.get("filename") or "")
-                file_url = entry.get("url")
-                if file_url and "pyemscripten_" in filename and filename.endswith("_wasm32.whl"):
-                    candidates.append(str(file_url))
-    if not candidates:
+    # The JSON API's "urls" are the newest final release's files, and the
+    # current releases are pre-releases, so scan every release and take the
+    # most recently uploaded wasm wheels.
+    found = []
+    releases = data.get("releases") or {}
+    for files in releases.values():
+        for entry in files or ():
+            filename = str(entry.get("filename") or "")
+            file_url = entry.get("url")
+            if entry.get("yanked"):
+                continue
+            if file_url and "pyemscripten_" in filename and filename.endswith("_wasm32.whl"):
+                found.append((str(entry.get("upload_time_iso_8601") or ""), str(file_url)))
+    if not found:
         return None
+    found.sort(reverse=True)
+    candidates = [file_url for _, file_url in found]
     # Prefer the ABI gallery vendors (pyemscripten_2026_0).
     for preferred in candidates:
         if "pyemscripten_2026_0_wasm32" in preferred:
