@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 # deps: pygraphics
-"""Draw the OmniPython mark, centred, at the size the screen needs.
+"""Draw the OmniPython mark at the size the screen needs.
 
 The mark is Huey the chameleon's head above the name. Its shapes are kept
 once, as circles and SVG paths, and drawn one of two ways. With ``svgio``
@@ -11,7 +11,9 @@ they become an SVG document that svgio draws with smooth edges. Without it,
 the same paths are flattened to polygons and filled with pygraphics, so the
 mark still appears on firmware that has no SVG renderer. The name is drawn
 letter shapes, not a font; only the polygon method on a very small screen
-writes it in the built-in font, where letter shapes would fill in.
+writes it in the built-in font, where letter shapes would fill in. The mark
+is centred, except on a square screen: that may be a round one, whose edge
+would cut off the ends of the name, so the mark sits higher there.
 
 Needs: a display. svgio is optional and picks the method: on MicroPython it
 is in firmware built with ``--modules all``; on CPython it comes with
@@ -48,6 +50,7 @@ SHOW_NAME = True  # False draws the head alone
 SMALLEST_LETTERS = 12  # pixels; polygons can't draw letters shorter than this
 GROUND = 0x0B2A4A
 FILL = 90  # per cent of the screen the mark may take
+LIFT = 10  # per cent of a square screen's height to move the mark up
 
 # The head, back to front. Each row is a colour, a line width (0 fills the
 # shape) and the shape: a circle's centre and radius, or an SVG path.
@@ -277,6 +280,10 @@ pygraphics.fill(display_drv, ground)
 mark_width = min(width, height * box_width // box_height) * FILL // 100
 mark_height = (mark_width * box_height + box_width // 2) // box_width
 
+# The driver can't say whether a square screen is round, so every square one
+# gets the height that keeps the name inside a circle.
+lift = height * LIFT // 100 if SHOW_NAME and width == height else 0
+
 if svgio:
     # Join the parts into one SVG document and ask for it that many pixels wide.
     mark = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d">' % (box_width, box_height)
@@ -290,12 +297,12 @@ if svgio:
     tile = pygraphics.FrameBuffer(bytearray(mark_width * mark_height * 2), mark_width, mark_height, pygraphics.RGB565)
     tile.fill(ground)
     decoder.decode(tile.buffer)
-    pygraphics.blit_rect(display_drv, tile.buffer, (width - mark_width) // 2, (height - mark_height) // 2, mark_width, mark_height)
+    pygraphics.blit_rect(display_drv, tile.buffer, (width - mark_width) // 2, (height - mark_height) // 2 - lift, mark_width, mark_height)
     method = "svgio"
 else:
     # Scale each part from the mark's box to the screen and fill its shapes.
     scale = mark_width / box_width
-    left, top = (width - mark_width) // 2, (height - mark_height) // 2
+    left, top = (width - mark_width) // 2, (height - mark_height) // 2 - lift
     small = SHOW_NAME and CAPITAL * NAME_SCALE * scale < SMALLEST_LETTERS
     for shapes, scale_x, scale_y, move_x, move_y in parts[:1] if small else parts:
         draw_polygons(shapes, scale_x * scale, scale_y * scale, left + move_x * scale, top + move_y * scale)
