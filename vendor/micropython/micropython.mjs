@@ -4381,7 +4381,9 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
   var _mp_js_random_u32 = () =>
           globalThis.crypto.getRandomValues(new Uint32Array(1))[0];
 
-  var _mp_js_ticks_ms = () => Date.now() - MP_JS_EPOCH;
+  var _mp_js_ticks_ms = () => (performance.now() - MP_JS_EPOCH) | 0;
+
+  var _mp_js_ticks_us = () => ((performance.now() - MP_JS_EPOCH) * 1000) | 0;
 
   var _mp_js_time_ms = () => Date.now();
 
@@ -5210,13 +5212,28 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
 
   var _omnipython_sleep_ms = (ms) => Asyncify.handleSleep((wakeUp) => setTimeout(wakeUp, Math.max(0, ms)));
 
-  var _omnipython_timer_cancel = (id) => { const t=omnipython_state.timers.get(id); if (t) { t.periodic ? clearInterval(t.handle) : clearTimeout(t.handle); omnipython_state.timers.delete(id); } };
+  
+  var omnipython_drop_fired = (id) => {
+          const fired = omnipython_state.firedTimers;
+          for (let i = fired.length - 1; i >= 0; i--) if (fired[i] === id) fired.splice(i, 1);
+      };
+  var _omnipython_timer_cancel = (id) => { const t=omnipython_state.timers.get(id); if (t) { t.periodic ? clearInterval(t.handle) : clearTimeout(t.handle); omnipython_state.timers.delete(id); } omnipython_drop_fired(id); };
 
-  var _omnipython_timer_poll = () => omnipython_state.firedTimers.length ? omnipython_state.firedTimers.shift() : -1;
+  var _omnipython_timer_poll = () => {
+          const state = omnipython_state;
+          if (!state.firedTimers.length) return -1;
+          const id = state.firedTimers.shift();
+          state.timerDeliveries.push({id, at:performance.now()});
+          if (state.timerDeliveries.length > 512) state.timerDeliveries.shift();
+          return id;
+      };
 
+  
   var _omnipython_timer_start = (id, delay, periodic) => {
           const state = omnipython_state;
-          const old = state.timers.get(id); if (old) clearTimeout(old.handle);
+          const old = state.timers.get(id); if (old) old.periodic ? clearInterval(old.handle) : clearTimeout(old.handle);
+          // A restart drops the old timer's firings that are still queued.
+          omnipython_drop_fired(id);
           const fire = () => {
               state.timerFirings.push({id, at:performance.now()});
               if (state.timerFirings.length > 512) state.timerFirings.shift();
@@ -5379,7 +5396,7 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
   FS.preloadFile = FS_preloadFile;
   FS.staticInit();;
 if (globalThis.crypto === undefined) { globalThis.crypto = require('crypto'); };
-var MP_JS_EPOCH = Date.now();
+var MP_JS_EPOCH = performance.now();
 // End JS library code
 
 // include: postlibrary.js
@@ -5839,6 +5856,7 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'omnipython_rgba',
   'omnipython_paint',
   'omnipython_export_host',
+  'omnipython_drop_fired',
   'omnipython_enable_audio',
   'omnipython_disarm_audio_unlock',
   'omnipython_arm_audio_unlock',
@@ -5955,6 +5973,10 @@ var dynCall_di = makeInvalidEarlyAccess('dynCall_di');
 var dynCall_iiji = makeInvalidEarlyAccess('dynCall_iiji');
 var dynCall_vid = makeInvalidEarlyAccess('dynCall_vid');
 var dynCall_dd = makeInvalidEarlyAccess('dynCall_dd');
+var dynCall_viiffiiii = makeInvalidEarlyAccess('dynCall_viiffiiii');
+var dynCall_viifffffffi = makeInvalidEarlyAccess('dynCall_viifffffffi');
+var dynCall_viifffffffffi = makeInvalidEarlyAccess('dynCall_viifffffffffi');
+var dynCall_viiiffff = makeInvalidEarlyAccess('dynCall_viiiffff');
 var dynCall_ddd = makeInvalidEarlyAccess('dynCall_ddd');
 var dynCall_jiji = makeInvalidEarlyAccess('dynCall_jiji');
 var dynCall_iidiiiii = makeInvalidEarlyAccess('dynCall_iidiiiii');
@@ -6032,6 +6054,10 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['dynCall_iiji'] != 'undefined', 'missing Wasm export: dynCall_iiji');
   assert(typeof wasmExports['dynCall_vid'] != 'undefined', 'missing Wasm export: dynCall_vid');
   assert(typeof wasmExports['dynCall_dd'] != 'undefined', 'missing Wasm export: dynCall_dd');
+  assert(typeof wasmExports['dynCall_viiffiiii'] != 'undefined', 'missing Wasm export: dynCall_viiffiiii');
+  assert(typeof wasmExports['dynCall_viifffffffi'] != 'undefined', 'missing Wasm export: dynCall_viifffffffi');
+  assert(typeof wasmExports['dynCall_viifffffffffi'] != 'undefined', 'missing Wasm export: dynCall_viifffffffffi');
+  assert(typeof wasmExports['dynCall_viiiffff'] != 'undefined', 'missing Wasm export: dynCall_viiiffff');
   assert(typeof wasmExports['dynCall_ddd'] != 'undefined', 'missing Wasm export: dynCall_ddd');
   assert(typeof wasmExports['dynCall_jiji'] != 'undefined', 'missing Wasm export: dynCall_jiji');
   assert(typeof wasmExports['dynCall_iidiiiii'] != 'undefined', 'missing Wasm export: dynCall_iidiiiii');
@@ -6105,6 +6131,10 @@ function assignWasmExports(wasmExports) {
   dynCall_iiji = dynCalls['iiji'] = createExportWrapper('dynCall_iiji', 4);
   dynCall_vid = dynCalls['vid'] = createExportWrapper('dynCall_vid', 3);
   dynCall_dd = dynCalls['dd'] = createExportWrapper('dynCall_dd', 2);
+  dynCall_viiffiiii = dynCalls['viiffiiii'] = createExportWrapper('dynCall_viiffiiii', 9);
+  dynCall_viifffffffi = dynCalls['viifffffffi'] = createExportWrapper('dynCall_viifffffffi', 11);
+  dynCall_viifffffffffi = dynCalls['viifffffffffi'] = createExportWrapper('dynCall_viifffffffffi', 13);
+  dynCall_viiiffff = dynCalls['viiiffff'] = createExportWrapper('dynCall_viiiffff', 8);
   dynCall_ddd = dynCalls['ddd'] = createExportWrapper('dynCall_ddd', 3);
   dynCall_jiji = dynCalls['jiji'] = createExportWrapper('dynCall_jiji', 4);
   dynCall_iidiiiii = dynCalls['iidiiiii'] = createExportWrapper('dynCall_iidiiiii', 8);
@@ -6202,7 +6232,15 @@ var wasmImports = {
   /** @export */
   invoke_vii,
   /** @export */
+  invoke_viifffffffffi,
+  /** @export */
+  invoke_viifffffffi,
+  /** @export */
+  invoke_viiffiiii,
+  /** @export */
   invoke_viii,
+  /** @export */
+  invoke_viiiffff,
   /** @export */
   invoke_viiii,
   /** @export */
@@ -6237,6 +6275,8 @@ var wasmImports = {
   mp_js_random_u32: _mp_js_random_u32,
   /** @export */
   mp_js_ticks_ms: _mp_js_ticks_ms,
+  /** @export */
+  mp_js_ticks_us: _mp_js_ticks_us,
   /** @export */
   mp_js_time_ms: _mp_js_time_ms,
   /** @export */
@@ -6384,6 +6424,50 @@ function invoke_viiiiii(index,a1,a2,a3,a4,a5,a6) {
   var sp = stackSave();
   try {
     dynCall_viiiiii(index,a1,a2,a3,a4,a5,a6);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_viiffiiii(index,a1,a2,a3,a4,a5,a6,a7,a8) {
+  var sp = stackSave();
+  try {
+    dynCall_viiffiiii(index,a1,a2,a3,a4,a5,a6,a7,a8);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_viifffffffi(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) {
+  var sp = stackSave();
+  try {
+    dynCall_viifffffffi(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_viifffffffffi(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12) {
+  var sp = stackSave();
+  try {
+    dynCall_viifffffffffi(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_viiiffff(index,a1,a2,a3,a4,a5,a6,a7) {
+  var sp = stackSave();
+  try {
+    dynCall_viiiffff(index,a1,a2,a3,a4,a5,a6,a7);
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;
