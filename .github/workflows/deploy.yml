@@ -7,8 +7,6 @@ on:
     paths:
       - '.site/**'
       - '.github/workflows/deploy.yml'
-      - '*.lock'
-      - 'scripts/build_app_page.py'
       - 'lib/**'
       - 'packages/**'
       - 'gallery.toml'
@@ -79,9 +77,6 @@ jobs:
           cp -r portal/assets _site/assets
           mkdir -p _site/vendor
           cp -r portal/vendor/micropython _site/vendor/micropython
-          python scripts/build_app_page.py synthstation _site/synthstation
-          python scripts/build_app_page.py bit_world _site/bit_world
-          python scripts/build_app_page.py perch _site/perch
           touch _site/.nojekyll
 
       - name: Deploy to gh-pages
